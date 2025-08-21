@@ -44,6 +44,26 @@
 
     fullscreenBtn.addEventListener('click', toggleFullscreen);
 
+    // Fonction pour obtenir un point aléatoire dans un rayon donné
+    function getRandomPoint(lat, lng, radius) {
+        const y0 = lat;
+        const x0 = lng;
+        // Conversion de mètres en degrés
+        const rd = radius / 111300; 
+
+        const u = Math.random();
+        const v = Math.random();
+        const w = rd * Math.sqrt(u);
+        const t = 2 * Math.PI * v;
+        const x = w * Math.cos(t);
+        const y = w * Math.sin(t);
+
+        return {
+            lat: y + y0,
+            lng: x + x0
+        };
+    }
+
     function calculateDistance(lat1, lon1, lat2, lon2) {
         const R = 6371e3;
         const φ1 = lat1 * Math.PI / 180;
@@ -74,6 +94,12 @@
         const { latitude, longitude } = position.coords;
         const latLng = L.latLng(latitude, longitude);
 
+        // Calculer la nouvelle position aléatoire pour le donjon
+        const randomPos = getRandomPoint(latitude, longitude, 10);
+        
+        // Mettre à jour la position du donjon du tutoriel
+        tutorialDungeon.location = { lat: randomPos.lat, lng: randomPos.lng };
+
         if (!playerMarker) {
             const playerIcon = L.divIcon({
                 className: 'player-icon',
@@ -84,9 +110,8 @@
             playerMarker = L.marker(latLng, { icon: playerIcon }).addTo(map)
                 .bindPopup("Vous êtes ici").openPopup();
             
-            // Créer le marqueur du donjon du tutoriel
-            tutorialDungeon.marker = L.marker(latLng).addTo(map);
-            tutorialDungeon.location = { lat: latLng.lat, lng: latLng.lng };
+            // Créer le marqueur du donjon du tutoriel à sa nouvelle position aléatoire
+            tutorialDungeon.marker = L.marker(L.latLng(randomPos.lat, randomPos.lng)).addTo(map);
             tutorialDungeon.marker.bindPopup(`<h3>${tutorialDungeon.name}</h3>`).openPopup();
             
             map.setView(latLng, 13);
@@ -95,8 +120,7 @@
             playerMarker.setLatLng(latLng);
             
             // Mettre à jour la position du marqueur du donjon du tutoriel
-            tutorialDungeon.marker.setLatLng(latLng);
-            tutorialDungeon.location = { lat: latLng.lat, lng: latLng.lng };
+            tutorialDungeon.marker.setLatLng(L.latLng(randomPos.lat, randomPos.lng));
         }
         updateDungeonMarkers(latLng);
     }
@@ -111,7 +135,7 @@
         const playerLatLng = playerMarker ? playerMarker.getLatLng() : null;
 
         dungeons.forEach(dungeon => {
-            if (dungeon.id === tutorialDungeon.id) return; // Ne pas redessiner le donjon du tutoriel
+            if (dungeon.id === tutorialDungeon.id) return;
             
             const distance = playerLatLng ? calculateDistance(playerLatLng.lat, playerLatLng.lng, dungeon.location.lat, dungeon.location.lng) : null;
             const distanceFormatted = distance !== null ? `${distance.toFixed(0)} m` : 'Calcul de la distance...';
