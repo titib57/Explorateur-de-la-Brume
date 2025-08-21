@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quêtes - Mon RPG Web</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header class="game-header">
+        <h1>Mon RPG</h1>
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a id="world-map-link" href="world_map.html">Carte du monde</a>
+           <a href="skill_tree.html">Arbre de compétences</a>
+            <a href="stats.html">Statistiques</a>
+            <a href="inventory.html">Inventaire</a>
+            <a href="quests.html">Quêtes</a>
+        </nav>
+    </header>
+
+    <main class="game-container">
+        <h2>Quêtes</h2>
+        <div id="quest-list">
+        </div>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/quests.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!loadCharacter()) {
+                window.location.href = 'character_creation.html';
+                return;
+            }
+            updateQuestsUI();
+        });
+    </script>
+</body>
+</html>

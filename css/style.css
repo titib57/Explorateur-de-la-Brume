@@ -1,0 +1,440 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@400;700&display=swap');
+
+/* === Variables de Couleurs & Typographie === */
+:root {
+    --bg-color-dark: #100f1c;
+    --bg-color-medium: #1b1a29;
+    --text-color-light: #f5f5f5;
+    --text-color-accent: #d4af37;
+    --border-color: #3f3e53;
+
+    --accent-color-blue: #007acc;
+    --accent-color-green: #27ae60;
+    --accent-color-red: #e74c3c;
+    --accent-color-purple: #9b59b6;
+    --accent-color-yellow: #f1c40f;
+
+    --fantasy-font: 'Cinzel', serif;
+    --main-font: 'Inter', sans-serif;
+}
+
+/* === Styles Généraux & de Base === */
+body {
+    font-family: var(--main-font);
+    background: var(--bg-color-dark);
+    color: var(--text-color-light);
+    user-select: none;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.game-header {
+    background-color: var(--bg-color-medium);
+    padding: 20px;
+    text-align: center;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.game-header h1 {
+    font-family: var(--fantasy-font);
+    color: var(--text-color-accent);
+    margin: 0;
+    font-size: 2.5rem;
+}
+
+.game-header nav {
+    margin-top: 10px;
+}
+
+.game-header nav a {
+    color: var(--text-color-light);
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.game-header nav a:hover {
+    color: var(--text-color-accent);
+}
+
+.game-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: var(--bg-color-medium);
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--border-color);
+}
+
+.game-container h2 {
+    font-family: var(--fantasy-font);
+    text-align: center;
+    color: var(--text-color-accent);
+    margin-top: 0;
+}
+
+.action-buttons {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.btn-primary, .btn-flee, .btn-ability, .btn-stat, .tab-button {
+    font-family: var(--main-font);
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+}
+
+.btn-primary {
+    background-color: var(--accent-color-blue);
+    color: var(--text-color-light);
+}
+
+.btn-primary:hover {
+    background-color: #005a9c;
+    transform: translateY(-2px);
+}
+
+.btn-flee {
+    background-color: var(--accent-color-red);
+    color: var(--text-color-light);
+}
+
+.btn-flee:hover {
+    background-color: #a62a2a;
+    transform: translateY(-2px);
+}
+
+/* Styles pour les barres de progression */
+.progress-bar-container {
+    background-color: #333;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    height: 15px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.progress-bar {
+    height: 100%;
+    transition: width 0.5s ease-in-out; /* AJOUT de la transition pour l'animation */
+}
+
+.hp-bar {
+    background-color: var(--accent-color-green);
+}
+
+.mana-bar {
+    background-color: var(--accent-color-blue);
+}
+
+.xp-bar {
+    background-color: var(--accent-color-purple);
+}
+
+/* Styles de la page de combat (battle.html) */
+#combat-info {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    text-align: center;
+}
+
+#player-stats, #monster-stats {
+    flex-basis: 45%;
+    background-color: var(--bg-color-dark);
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+}
+
+#combat-info h3 {
+    margin-top: 0;
+    font-family: var(--fantasy-font);
+    color: var(--text-color-accent);
+}
+
+.combat-actions {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.tab-button {
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-light);
+    border: 2px solid var(--border-color);
+}
+
+.tab-button.active {
+    background-color: var(--accent-color-blue);
+    border-color: var(--accent-color-blue);
+}
+
+.tab-content {
+    border: 2px solid var(--border-color);
+    padding: 20px;
+    border-radius: 8px;
+    background-color: var(--bg-color-dark);
+}
+
+.btn-ability {
+    background-color: var(--accent-color-purple);
+    color: white;
+    margin: 5px;
+}
+
+.btn-ability:hover {
+    background-color: #7b439c;
+    transform: translateY(-2px);
+}
+
+/* NOUVEAUX STYLES POUR LE JOURNAL DE COMBAT */
+.combat-log {
+    background-color: var(--bg-color-dark);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 20px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: var(--main-font);
+    font-size: 0.9em;
+}
+
+.combat-log p {
+    margin: 5px 0;
+    line-height: 1.2;
+}
+
+.combat-log .log-player {
+    color: var(--text-color-accent);
+}
+
+.combat-log .log-monster {
+    color: var(--accent-color-red);
+}
+
+/* Styles de l'arbre de compétences (skill_tree.html) */
+#skill-tree-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+}
+
+.skill-node {
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    background-color: #333;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.skill-node img {
+    width: 60px;
+    height: 60px;
+}
+
+.skill-node p {
+    margin-top: 5px;
+    font-size: 0.8rem;
+}
+
+.skill-node.unlocked, .class-node.unlocked {
+    border-color: var(--accent-color-green);
+    background-color: #1e3a24;
+    cursor: default;
+}
+
+.skill-node.available, .class-node.available {
+    border-color: var(--accent-color-blue);
+}
+
+.skill-node.locked, .class-node.locked {
+    background-color: #1e1e1e;
+    border-color: #cc3333;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+}
+
+.skill-node:not(.unlocked):hover, .class-node:not(.unlocked):hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* Styles pour la page de statistiques (stats.html) */
+#stats-allocation .stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.btn-stat {
+    width: 30px;
+    height: 30px;
+    background-color: var(--accent-color-blue);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.btn-stat[data-action="minus"] {
+    background-color: var(--accent-color-red);
+}
+
+#current-stats, #stats-allocation {
+    background-color: var(--bg-color-dark);
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border: 2px solid var(--border-color);
+}
+
+#current-stats h3, #stats-allocation h3 {
+    font-family: var(--fantasy-font);
+    color: var(--text-color-accent);
+}
+
+/* Styles pour la carte du monde */
+.map-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+}
+
+#map.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+}
+
+#toggle-fullscreen-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1001;
+}
+
+/* Styles pour le menu contextuel (non utilisé actuellement mais bonne pratique) */
+.leaflet-popup-content-wrapper {
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-light);
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+.leaflet-popup-tip {
+    background-color: var(--bg-color-dark);
+}
+.leaflet-popup-content {
+    padding: 10px;
+}
+
+/* Style de la page d'inventaire */
+#inventory-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#inventory-tabs .tab-button.active {
+    background-color: var(--accent-color-blue);
+    color: white;
+}
+
+.inventory-items-list li {
+    background-color: var(--bg-color-dark);
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+/* Styles pour les notifications */
+#notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+}
+
+.notification {
+    padding: 15px 25px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    color: var(--text-color-light);
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.5s ease-out, fadeOut 0.5s ease-in 4.5s;
+}
+
+.notification.info {
+    background-color: var(--accent-color-blue);
+}
+
+.notification.success {
+    background-color: var(--accent-color-green);
+}
+
+.notification.warning {
+    background-color: var(--accent-color-yellow);
+}
+
+.notification.error {
+    background-color: var(--accent-color-red);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-20px); }
+}

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistiques du personnage - Mon RPG Web</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header class="game-header">
+        <h1>Mon RPG</h1>
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a id="world-map-link" href="world_map.html">Carte du monde</a>
+            <a href="skill_tree.html">Arbre de compétences</a>
+            <a href="stats.html">Statistiques</a>
+            <a href="inventory.html">Inventaire</a>
+            <a href="quests.html">Quêtes</a>
+        </nav>
+    </header>
+
+    <main class="game-container">
+        <h2>Statistiques du personnage</h2>
+        
+        <div id="character-info">
+            <p>Nom: <span id="char-name-display"></span></p>
+            <p>Classe: <span id="char-class-display"></span></p>
+            <p>Niveau: <span id="char-level-display"></span></p>
+            <p>Âge: <span id="char-age-display"></span> ans</p>
+            <p>Taille: <span id="char-height-display"></span> cm</p>
+            <p>Poids: <span id="char-weight-display"></span> kg</p>
+            <p>Morphologie: <span id="char-morphology-display"></span></p>
+        </div>
+
+        <div id="stats-allocation">
+            <h3>Points de statistiques disponibles : <span id="stat-points">0</span></h3>
+            <div class="stat-item">
+                <label>Force: <span id="strength-display"></span></label>
+                <button class="btn-stat" data-stat="strength" data-action="minus">-</button>
+                <button class="btn-stat" data-stat="strength" data-action="add">+</button>
+            </div>
+            <div class="stat-item">
+                <label>Intelligence: <span id="intelligence-display"></span></label>
+                <button class="btn-stat" data-stat="intelligence" data-action="minus">-</button>
+                <button class="btn-stat" data-stat="intelligence" data-action="add">+</button>
+            </div>
+            <div class="stat-item">
+                <label>Vitesse: <span id="speed-display"></span></label>
+                <button class="btn-stat" data-stat="speed" data-action="minus">-</button>
+                <button class="btn-stat" data-stat="speed" data-action="add">+</button>
+            </div>
+            <div class="stat-item">
+                <label>Dextérité: <span id="dexterity-display"></span></label>
+                <button class="btn-stat" data-stat="dexterity" data-action="minus">-</button>
+                <button class="btn-stat" data-stat="dexterity" data-action="add">+</button>
+            </div>
+            <button id="save-stats-btn" class="btn-primary">Sauvegarder les statistiques</button>
+        </div>
+
+        <div id="current-stats">
+            <h3>Statistiques calculées</h3>
+            <p>Points de vie max : <span id="max-hp-display"></span></p>
+            <p>Mana max : <span id="max-mana-display"></span></p>
+            <p>Dégâts d'attaque : <span id="attack-damage-display"></span></p>
+            <p>Défense : <span id="defense-display"></span></p>
+        </div>
+
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/game.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!loadCharacter()) {
+                window.location.href = 'character_creation.html';
+                return;
+            }
+
+            let stats = { ...player.stats }; // Copie des stats pour la modification
+            let initialStats = { ...player.stats };
+            let statPoints = player.statPoints;
+
+            function updateUI() {
+                // Mettre à jour les informations du personnage
+                document.getElementById('char-name-display').textContent = player.name;
+                document.getElementById('char-class-display').textContent = player.class;
+                document.getElementById('char-level-display').textContent = player.level;
+                document.getElementById('char-age-display').textContent = player.age;
+                document.getElementById('char-height-display').textContent = player.height;
+                document.getElementById('char-weight-display').textContent = player.weight;
+                document.getElementById('char-morphology-display').textContent = player.morphology;
+
+                // Mettre à jour les statistiques de base
+                document.getElementById('stat-points').textContent = statPoints;
+                document.getElementById('strength-display').textContent = stats.strength;
+                document.getElementById('intelligence-display').textContent = stats.intelligence;
+                document.getElementById('speed-display').textContent = stats.speed;
+                document.getElementById('dexterity-display').textContent = stats.dexterity;
+
+                // Mettre à jour les statistiques calculées
+                const tempPlayer = { ...player, stats: stats };
+                recalculateDerivedStats(tempPlayer);
+                document.getElementById('max-hp-display').textContent = tempPlayer.maxHp;
+                document.getElementById('max-mana-display').textContent = tempPlayer.maxMana;
+                document.getElementById('attack-damage-display').textContent = tempPlayer.attackDamage;
+                document.getElementById('defense-display').textContent = tempPlayer.defense;
+            }
+            
+            document.querySelectorAll('.btn-stat').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const stat = event.target.dataset.stat;
+                    const action = event.target.dataset.action;
+                    
+                    if (action === 'add' && statPoints > 0) {
+                        stats[stat]++;
+                        statPoints--;
+                    } else if (action === 'minus' && stats[stat] > initialStats[stat]) { 
+                        stats[stat]--;
+                        statPoints++;
+                    }
+                    updateUI();
+                });
+            });
+
+document.getElementById('save-stats-btn').addEventListener('click', () => {
+    player.stats = stats;
+    player.statPoints = statPoints;
+    recalculateDerivedStats();
+    saveCharacter(player);
+    showNotification("Statistiques sauvegardées !", 'success');
+    setTimeout(() => {
+        window.location.href = 'world_map.html';
+    }, 2000);
+});
+
+            updateUI();
+        });
+    </script>
+</body>
+</html>

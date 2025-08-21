@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arbre de compétences - Mon RPG Web</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Styles spécifiques à l'arbre de compétences */
+        #skill-tree-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+        }
+        .skill-node {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            background-color: #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .skill-node img {
+            width: 60px;
+            height: 60px;
+        }
+        .skill-node p {
+            margin-top: 5px;
+            font-size: 0.8rem;
+        }
+        .skill-node.unlocked {
+            border-color: #27ae60;
+        }
+        .skill-node.available:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+        }
+        .skill-node.locked {
+            background-color: #1e1e1e;
+            border-color: #cc3333;
+            cursor: not-allowed;
+            filter: grayscale(100%);
+        }
+        /* Ajoutez des styles pour les lignes de connexion si vous le souhaitez */
+    </style>
+</head>
+<body>
+    <header class="game-header">
+        <h1>Mon RPG</h1>
+        <nav>
+            <a href="index.html">Accueil</a>
+             <a id="world-map-link" href="world_map.html">Carte du monde</a>
+            <a href="skill_tree.html">Arbre de compétences</a>
+            <a href="stats.html">Statistiques</a>
+            <a href="inventory.html">Inventaire</a>
+            <a href="quests.html">Quêtes</a>
+        </nav>
+    </header>
+
+    <main class="game-container">
+        <h2>Arbre de compétences</h2>
+        <p>Points de compétence : <span id="skill-points">0</span></p>
+        <div id="skill-tree-container">
+            </div>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/skills.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!loadCharacter()) {
+                window.location.href = 'character_creation.html';
+                return;
+            }
+            updateSkillTreeUI();
+        });
+    </script>
+</body>
+</html>

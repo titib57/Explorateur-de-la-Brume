@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon RPG Web</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header class="game-header">
+        <h1>Mon RPG</h1>
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a id="create-char-link" href="character_creation.html">Créer un personnage</a>
+            <a id="world-map-link" href="world_map.html">Carte du monde</a>
+        
+            <a href="skill_tree.html">Arbre de compétences</a>
+            <a href="stats.html">Statistiques</a>
+            <a href="inventory.html">Inventaire</a>
+            <a href="quests.html">Quêtes</a>
+        </nav>
+    </header>
+
+    <main class="game-container">
+        <h2>Bienvenue, aventurier !</h2>
+        <p>
+            Bienvenue dans le monde de la Brume. Créez votre personnage et partez à l'aventure !
+        </p>
+        <div class="action-buttons">
+            <a id="start-adventure-btn" href="character_creation.html" class="btn-primary">Commencer l'aventure</a>
+            <button id="delete-char-btn" class="btn-flee">Supprimer le personnage</button>
+        </div>
+    </main>
+
+    <script src="js/game.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const hasCharacter = localStorage.getItem('playerCharacter') !== null;
+            const createCharLink = document.getElementById('create-char-link');
+            const startBtn = document.getElementById('start-adventure-btn');
+            const deleteBtn = document.getElementById('delete-char-btn');
+            const navLinks = document.querySelectorAll('nav a:not(#create-char-link)');
+            
+            if (hasCharacter) {
+                 createCharLink.style.display = 'none';
+                 startBtn.style.display = 'none';
+                 deleteBtn.style.display = 'block';
+                 navLinks.forEach(link => link.style.display = 'inline');
+            } else {
+                 navLinks.forEach(link => {
+                     if (link.id !== 'create-char-link') {
+                         link.style.display = 'none';
+                     }
+                 });
+                 deleteBtn.style.display = 'none';
+            }
+
+            deleteBtn.addEventListener('click', () => {
+                if (confirm("Êtes-vous sûr de vouloir supprimer votre personnage ?")) {
+                    localStorage.removeItem('playerCharacter');
+                    window.location.reload();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

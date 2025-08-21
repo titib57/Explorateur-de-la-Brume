@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arbre des classes - Mon RPG Web</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .class-node {
+            border: 2px solid #555;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 8px;
+            background-color: #222;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .class-node.unlocked {
+            border-color: #27ae60;
+            background-color: #1e3a24;
+            cursor: default;
+        }
+        .class-node.available {
+            border-color: #3498db;
+        }
+        .class-node.locked {
+            border-color: #e74c3c;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .class-node:not(.unlocked):hover {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="game-header">
+        <h1>Mon RPG</h1>
+        <nav>
+            <a href="index.html">Accueil</a>
+           <a id="world-map-link" href="world_map.html">Carte du monde</a>
+
+            <a href="skill_tree.html">Arbre de compétences</a>
+            <a href="stats.html">Statistiques</a>
+            <a href="inventory.html">Inventaire</a>
+            <a href="quests.html">Quêtes</a>
+        </nav>
+    </header>
+
+    <main class="game-container">
+        <h2>Arbre des classes</h2>
+        <p>Points de compétence : <span id="skill-points">0</span></p>
+        <div id="class-tree-container" class="skill-tree-container">
+            </div>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/class_tree.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (loadCharacter()) {
+                updateClassTreeUI();
+            }
+        });
+    </script>
+</body>
+</html>

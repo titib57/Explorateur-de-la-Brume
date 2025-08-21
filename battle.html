@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combat - Mon RPG Web</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header class="game-header">
+        <h1>Mon RPG</h1>
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a id="create-char-link" href="character_creation.html">Créer un personnage</a>
+            <a id="world-map-link" href="world_map.html">Carte du monde</a>
+            <a href="battle.html">Combat</a>
+            <a href="skill_tree.html">Arbre de compétences</a>
+            <a href="stats.html">Statistiques</a>
+            <a href="inventory.html">Inventaire</a>
+            <a href="quests.html">Quêtes</a>
+        </nav>
+    </header>
+
+    <main class="game-container">
+        <h2>Combat</h2>
+        <div id="combat-info">
+            <div id="player-stats">
+                <h3></h3>
+                <p>PV: <span id="player-hp"></span> / <span id="player-max-hp"></span></p>
+                <div class="progress-bar-container">
+                    <div id="player-hp-bar" class="progress-bar hp-bar"></div>
+                </div>
+                <p>Mana: <span id="player-mana"></span> / <span id="player-max-mana"></span></p>
+                <div class="progress-bar-container">
+                    <div id="player-mana-bar" class="progress-bar mana-bar"></div>
+                </div>
+                <p>Arme: <span id="equipped-weapon"></span></p>
+                <p>Armure: <span id="equipped-armor"></span></p>
+            </div>
+            
+            <div id="monster-stats">
+                <h3></h3>
+                <p>PV: <span id="monster-hp"></span></p>
+                <div class="progress-bar-container">
+                    <div id="monster-hp-bar" class="progress-bar hp-bar"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="showActions('attack-tab', event)">Attaquer</button>
+                <button class="tab-button" onclick="showActions('abilities-tab', event)">Capacités</button>
+                <button class="tab-button" onclick="showActions('inventory-tab', event)">Consommables</button>
+            </div>
+            
+            <div class="action-tabs-container">
+                <div id="attack-tab" class="action-tab">
+                    <button id="basic-attack-btn" onclick="performBasicAttack()" class="btn-primary">Attaque de base</button>
+                </div>
+                <div id="abilities-tab" class="action-tab" style="display:none;">
+                    <ul id="abilities-list"></ul>
+                </div>
+                <div id="inventory-tab" class="action-tab" style="display:none;">
+                    <ul id="consumable-list"></ul>
+                </div>
+            </div>
+            
+            <button onclick="flee()" class="btn-flee">Fuir</button>
+        </div>
+    </main>
+    
+    <script src="js/data.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/skills.js"></script>
+    <script src="js/inventory.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            startBattle();
+        });
+        
+        function showActions(tabId, event) {
+            document.querySelectorAll('.action-tab').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            document.getElementById(tabId).style.display = 'block';
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            if (tabId === 'abilities-tab') {
+                updateAbilitiesUI();
+            } else if (tabId === 'inventory-tab') {
+                updateConsumablesUI();
+            }
+        }
+    </script>
+</body>
+</html>
