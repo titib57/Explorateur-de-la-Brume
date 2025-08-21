@@ -4,10 +4,10 @@ function updateQuestsUI() {
     const questList = document.getElementById('quest-list');
     questList.innerHTML = '';
 
-    if (Object.keys(player.quests).length === 0) {
-        player.quests = { ...questsData };
-        saveCharacter(player);
-    }
+   if (Object.keys(player.quests).length === 0) {
+    player.quests['premiers_pas'] = { ...questsData.premiers_pas };
+    saveCharacter(player);
+}
 
     for (const questId in player.quests) {
         const quest = player.quests[questId];
@@ -52,6 +52,10 @@ function claimQuestReward(questId) {
         }
         
         quest.rewardClaimed = true;
+if (quest.nextQuestId && questsData[quest.nextQuestId]) {
+    player.quests[quest.nextQuestId] = { ...questsData[quest.nextQuestId] };
+    showNotification(`Nouvelle quête débloquée : ${questsData[quest.nextQuestId].name} !`, 'info');
+}
         saveCharacter(player);
         showNotification(`Récompense de quête reçue !`, 'success');
         updateQuestsUI();

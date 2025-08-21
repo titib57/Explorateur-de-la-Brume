@@ -243,26 +243,104 @@ const skillTreeData = {
 };
 
 const questsData = {
-    'premier_pas': {
-        id: 'premier_pas',
+    'premiers_pas': {
+        id: 'premiers_pas',
         name: 'Premiers pas',
-        description: 'Vaincre 3 gobelins pour prouver votre valeur.',
+        description: 'Parlez au garde de la ville, il vous demandera de vaincre un mannequin d\'entraînement pour commencer.',
         objective: {
             type: 'kill_monster',
-            target: 'gobelin',
-            required: 3,
+            target: 'Mannequin',
+            required: 1,
             current: 0
         },
         reward: {
             xp: 50,
             gold: 20,
-            item: 'potion_de_vie_basique'
+            item: 'potion_de_soin'
         },
-        completed: false,
-        rewardClaimed: false
+        nextQuestId: 'lart_devoluer' // ID de la prochaine quête à débloquer
+    },
+    'lart_devoluer': {
+        id: 'lart_devoluer',
+        name: 'L\'art d\'évoluer',
+        description: 'Vainquez les monstres et augmentez votre niveau à 2.',
+        objective: {
+            type: 'reach_level',
+            target: 2,
+            required: 1,
+            current: 0
+        },
+        reward: {
+            xp: 100,
+            gold: 50
+        },
+        nextQuestId: 'une_nouvelle_competence'
+    },
+    'une_nouvelle_competence': {
+        id: 'une_nouvelle_competence',
+        name: 'Une nouvelle compétence',
+        description: 'Utilisez vos points de compétence pour débloquer une nouvelle capacité dans l\'arbre de compétences.',
+        objective: {
+            type: 'unlock_skill',
+            target: 'any',
+            required: 1,
+            current: 0
+        },
+        reward: {
+            xp: 150,
+            gold: 75
+        },
+        nextQuestId: 'le_remede_miracle'
+    },
+    'le_remede_miracle': {
+        id: 'le_remede_miracle',
+        name: 'Le remède miracle',
+        description: 'Utilisez la potion de soin que vous avez trouvée pour vous soigner.',
+        objective: {
+            type: 'use_item',
+            target: 'potion_de_soin',
+            required: 1,
+            current: 0
+        },
+        reward: {
+            xp: 100,
+            gold: 50
+        },
+        nextQuestId: 'vers_une_nouvelle_voie'
+    },
+    'vers_une_nouvelle_voie': {
+        id: 'vers_une_nouvelle_voie',
+        name: 'Vers une nouvelle voie',
+        description: 'Atteignez le niveau 5 pour avoir accès au choix de classe.',
+        objective: {
+            type: 'reach_level',
+            target: 5,
+            required: 1,
+            current: 0
+        },
+        reward: {
+            xp: 250,
+            gold: 100
+        },
+        nextQuestId: 'choisir_sa_voie'
+    },
+    'choisir_sa_voie': {
+        id: 'choisir_sa_voie',
+        name: 'Choisir sa voie',
+        description: 'Choisissez une nouvelle classe dans l\'arbre des classes pour terminer le tutoriel.',
+        objective: {
+            type: 'unlock_class',
+            target: 'any',
+            required: 1,
+            current: 0
+        },
+        reward: {
+            xp: 500,
+            gold: 250
+        },
+        nextQuestId: null
     }
 };
-
 const locationTypes = {
     'foret': {
         name: 'Forêt mystérieuse',
