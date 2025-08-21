@@ -168,19 +168,19 @@
         const overpassQuery = `
             [out:json];
             (
-              node["historic"="castle"](around:100, ${lat}, ${lng});
-              node["historic"="ruins"](around:100, ${lat}, ${lng});
-              node["historic"="fort"](around:100, ${lat}, ${lng});
-              node["historic"="archaeological_site"](around:100, ${lat}, ${lng});
-              node["historic"="monument"](around:100, ${lat}, ${lng});
-              node["historic"="chateau"](around:100, ${lat}, ${lng});
-              node["historic"="tour"](around:100, ${lat}, ${lng});
-              node["historic"="cimetiere"](around:100, ${lat}, ${lng});
-              node["historic"="eglise"](around:100, ${lat}, ${lng});
-              node["historic"="cathedrale"](around:100, ${lat}, ${lng});
-              node["historic"="memorial"](around:100, ${lat}, ${lng});
-              node["historic"="stele"](around:100, ${lat}, ${lng});
-              node["historic"="statue"](around:100, ${lat}, ${lng});
+              node["historic"="castle"](around:1000, ${lat}, ${lng});
+              node["historic"="ruins"](around:1000, ${lat}, ${lng});
+              node["historic"="fort"](around:1000, ${lat}, ${lng});
+              node["historic"="archaeological_site"](around:1000, ${lat}, ${lng});
+              node["historic"="monument"](around:1000, ${lat}, ${lng});
+              node["historic"="chateau"](around:1000, ${lat}, ${lng});
+              node["historic"="tour"](around:1000, ${lat}, ${lng});
+              node["historic"="cimetiere"](around:1000, ${lat}, ${lng});
+              node["historic"="eglise"](around:1000, ${lat}, ${lng});
+              node["historic"="cathedrale"](around:1000, ${lat}, ${lng});
+              node["historic"="memorial"](around:1000, ${lat}, ${lng});
+              node["historic"="stele"](around:1000, ${lat}, ${lng});
+              node["historic"="statue"](around:1000, ${lat}, ${lng});
             );
             out body;
             >;
