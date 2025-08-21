@@ -1,37 +1,18 @@
-﻿// Fichier : js/data.js
-
-// Définition des types et de leurs relations de force et de faiblesse
-const typeEffectiveness = {
-    fire: {
-        weakAgainst: ['water'],
-        strongAgainst: ['nature']
-    },
-    water: {
-        weakAgainst: ['nature'],
-        strongAgainst: ['fire']
-    },
-    nature: {
-        weakAgainst: ['fire'],
-        strongAgainst: ['water']
-    }
-};
-
-const abilitiesData = {
+﻿const abilitiesData = {
     guerrier: [
-        // Ajout d'un type à chaque attaque de base
-        { id: "puissant_coup", name: "Coup puissant", damage: 20, cost: 5, type: 'fire' },
-        { id: "charge", name: "Charge", damage: 30, cost: 10, type: 'fire' }
+        { id: "puissant_coup", name: "Coup puissant", damage: 20, cost: 5, type: 'damage' },
+        { id: "charge", name: "Charge", damage: 30, cost: 10, type: 'damage' }
     ],
     mage: [
-        { id: "boule_de_feu", name: "Boule de feu", damage: 25, cost: 10, type: 'fire' },
-        { id: "eclair", name: "Éclair", damage: 35, cost: 15, type: 'water' }
+        { id: "boule_de_feu", name: "Boule de feu", damage: 25, cost: 10, type: 'damage' },
+        { id: "eclair", name: "Éclair", damage: 35, cost: 15, type: 'damage' }
     ],
     voleur: [
-        { id: "attaque_sournoise", name: "Attaque sournoise", damage: 22, cost: 8, type: 'nature' },
-        { id: "jet_de_dague", name: "Jet de dague", damage: 18, cost: 5, type: 'nature' }
+        { id: "attaque_sournoise", name: "Attaque sournoise", damage: 22, cost: 8, type: 'damage' },
+        { id: "jet_de_dague", name: "Jet de dague", damage: 18, cost: 5, type: 'damage' }
     ],
     explorateur: [
-        { id: "fist_attack", name: "Coup de poing", damage: 5, cost: 0, type: 'basic' }
+        { id: "fist_attack", name: "Coup de poing", damage: 5, cost: 0, type: 'damage' }
     ]
 };
 
@@ -49,7 +30,7 @@ const classBases = {
     },
     'mage': {
         name: "Mage",
-        description: "Un lanceur de sorts puissant spécialisé dans la magie élémentaire.",
+        description: "Un lanceur de sorts puissant qui maîtrise les éléments.",
         stats: {
             strength: 1,
             intelligence: 5,
@@ -60,262 +41,162 @@ const classBases = {
     },
     'voleur': {
         name: "Voleur",
-        description: "Un guerrier agile et rapide qui excelle dans l'art du combat sournois.",
+        description: "Un expert en furtivité et en attaques rapides.",
         stats: {
             strength: 2,
             intelligence: 2,
-            speed: 5,
-            dexterity: 3
+            speed: 4,
+            dexterity: 4
         },
         skillTree: "voleur"
     },
     'explorateur': {
         name: "Explorateur",
-        description: "Un aventurier polyvalent sans spécialisation particulière.",
+        description: "Un aventurier courageux qui débute dans le monde.",
         stats: {
-            strength: 2,
-            intelligence: 2,
-            speed: 2,
-            dexterity: 2
-        }
+            strength: 1,
+            intelligence: 1,
+            speed: 1,
+            dexterity: 1
+        },
+        skillTree: "explorateur"
     }
 };
 
 const itemsData = {
     weapons: {
-        'epee_en_fer': {
-            id: 'epee_en_fer',
-            name: 'Épée en Fer',
-            type: 'weapon',
-            damage: 15,
-            price: 50,
-            description: 'Une épée de fer basique, utile pour commencer.',
-            prerequisites: {
-                class: ['guerrier']
-            }
+        'epee_rouillee': {
+            id: 'epee_rouillee',
+            name: 'Épée rouillée',
+            damage: 5,
+            type: 'weapon'
         },
-        'arc_en_bois': {
-            id: 'arc_en_bois',
-            name: 'Arc en Bois',
-            type: 'weapon',
-            damage: 10,
-            price: 40,
-            description: 'Un arc simple, parfait pour les débutants.',
-            prerequisites: {
-                class: ['voleur', 'explorateur']
-            }
+        'arc_simple': {
+            id: 'arc_simple',
+            name: 'Arc simple',
+            damage: 4,
+            type: 'weapon'
         },
-        'baton_en_chene': {
-            id: 'baton_en_chene',
-            name: 'Bâton en Chêne',
-            type: 'weapon',
-            damage: 8,
-            price: 35,
-            description: 'Un bâton magique, souvent utilisé par les mages.',
-            prerequisites: {
-                class: ['mage']
-            }
+        'baton_en_bois': {
+            id: 'baton_en_bois',
+            name: 'Bâton en bois',
+            damage: 3,
+            type: 'weapon'
+        },
+        'dague_simple': {
+            id: 'dague_simple',
+            name: 'Dague simple',
+            damage: 3,
+            type: 'weapon'
         }
     },
     armors: {
-        'armure_de_cuir': {
-            id: 'armure_de_cuir',
-            name: 'Armure de Cuir',
-            type: 'armor',
-            defense: 10,
-            price: 60,
-            description: 'Une armure légère et flexible.',
-            prerequisites: {
-                class: ['guerrier', 'voleur', 'explorateur']
-            }
+        'tunique_de_lin': {
+            id: 'tunique_de_lin',
+            name: 'Tunique de lin',
+            defense: 2,
+            type: 'armor'
         },
-        'toge_de_lin': {
-            id: 'toge_de_lin',
-            name: 'Toge de Lin',
-            type: 'armor',
+        'plastron_en_cuir': {
+            id: 'plastron_en_cuir',
+            name: 'Plastron en cuir',
             defense: 5,
-            price: 20,
-            description: 'Une toge simple qui offre une protection minimale.',
-            prerequisites: {
-                class: ['mage']
-            }
+            type: 'armor'
         }
     },
     consumables: {
-        'potion_de_vie': {
-            id: 'potion_de_vie',
-            name: 'Potion de Vie',
-            type: 'consumable',
-            effect: { hp: 50 },
-            price: 25,
-            description: 'Une potion qui restaure 50 points de vie.'
-        },
-        'potion_de_mana': {
-            id: 'potion_de_mana',
-            name: 'Potion de Mana',
-            type: 'consumable',
-            effect: { mana: 30 },
-            price: 15,
-            description: 'Restaure 30 points de mana.'
-        },
-        // Nouvel objet pour la quête du Sphinx
-        'sablier': {
-            id: 'sablier',
-            name: 'Sablier ancien',
-            type: 'quest_item',
-            description: 'Un sablier rempli de sable doré, symbole du temps et de la sagesse. Utile pour certaines énigmes.'
+        'potion_de_vie_basique': {
+            id: 'potion_de_vie_basique',
+            name: 'Potion de vie basique',
+            effect: { hp: 30 },
+            type: 'consumable'
         }
-    }
-};
-
-const dungeonsData = {
- tutorial_dungeon: {
-        id: 'tutorial_dungeon',
-        name: 'Le Passage des Ruines',
-        location: { lat: 48.8584, lng: 2.2945 }, // Coordonnées près de l'emplacement du joueur
-        minigame: 'ruins',
-        boss: 'goblin_tutoriel',
-    },
-    'goblin_cave': {
-        name: 'Grotte des Gobelins',
-        monster: 'gobelin',
-        minigame: 'ruins',
-        difficulty: 'facile',
-        boss: 'gobelin_champion',
-        location: { lat: 48.8584, lon: 2.2945 } // Tour Eiffel, Paris
-    },
-    'haunted_castle': {
-        name: 'Château Hanté',
-        monster: 'fantome',
-        minigame: 'castle', // C'est ici que l'énigme du Sphinx est activée
-        difficulty: 'moyen',
-        boss: 'fantome_de_pharaon',
-        location: { lat: 48.8573, lon: 2.3045 } // Grand Palais, Paris
     }
 };
 
 const monstersData = {
- goblin_tutoriel: {
-        id: 'goblin_tutoriel',
-        name: 'Petit gobelin',
-        description: 'Un gobelin faible, idéal pour un premier combat.',
-        stats: {
-            hp: 20,
-            mana: 5,
-            attack: 5,
-            defense: 2,
-            speed: 8
-        },
-        loot: {
-            xp: 20,
-            gold: 5,
-    },
     'gobelin': {
-        id: 'gobelin',
         name: 'Gobelin',
-        hp: 50,
-        maxHp: 50,
-        attackDamage: 15,
-        xpReward: 10,
-        goldReward: 5,
-        type: 'nature'
+        maxHp: 30,
+        hp: 30,
+        attackDamage: 8,
+        xpReward: 25,
+        goldReward: 5
     },
-    'gobelin_champion': {
-        id: 'gobelin_champion',
-        name: 'Champion Gobelin',
-        hp: 120,
-        maxHp: 120,
-        attackDamage: 25,
-        xpReward: 50,
-        goldReward: 30,
-        type: 'nature'
+    'loup': {
+        name: 'Loup',
+        maxHp: 40,
+        hp: 40,
+        attackDamage: 10,
+        xpReward: 35,
+        goldReward: 8
     },
-    'fantome': {
-        id: 'fantome',
-        name: 'Fantôme',
-        hp: 80,
+    'chef_gobelin': {
+        name: 'Chef Gobelin',
         maxHp: 80,
-        attackDamage: 20,
-        xpReward: 20,
-        goldReward: 10,
-        type: 'water'
-    },
-    // Nouveau monstre pour la première étape
-    'golem_de_sable': {
-        id: 'golem_de_sable',
-        name: 'Golem de Sable',
-        hp: 75,
-        maxHp: 75,
-        attackDamage: 22,
-        xpReward: 30,
-        goldReward: 15,
-        type: 'nature'
-    },
-    // Nouveau monstre pour la deuxième étape
-    'fantome_de_pharaon': {
-        id: 'fantome_de_pharaon',
-        name: 'Fantôme de Pharaon',
-        hp: 150,
-        maxHp: 150,
-        attackDamage: 30,
-        xpReward: 75,
-        goldReward: 50,
-        type: 'fire'
-    },
+        hp: 80,
+        attackDamage: 15,
+        xpReward: 100,
+        goldReward: 25
+    }
+};
+
+const skillsData = {
+    'fist_attack': {
+        id: 'fist_attack',
+        name: 'Coup de poing',
+        description: 'Une attaque de base avec le poing.',
+        manaCost: 0,
+        damage: 5
+    }
 };
 
 const skillTreeData = {
     'guerrier': {
         name: "Arbre de compétences du guerrier",
         skills: {
-            'coup_puissant': {
-                id: 'coup_puissant',
-                name: 'Coup puissant',
-                description: 'Un coup violent qui inflige des dégâts supplémentaires.',
+            'frappe_puissante': {
+                id: 'frappe_puissante',
+                name: 'Frappe puissante',
+                description: 'Une attaque qui inflige des dégâts massifs.',
                 cost: 1,
                 prerequisites: [],
-                damage: 20,
-                manaCost: 10,
-                type: 'ability',
-                elementalType: 'fire'
+                damage: 50,
+                manaCost: 20,
+                type: 'ability'
             },
-            'charge': {
-                id: 'charge',
-                name: 'Charge',
-                description: 'Charge l\\'ennemi, étourdissant et infligeant des dégâts.',
+            'peau_de_fer': {
+                id: 'peau_de_fer',
+                name: 'Peau de fer',
+                description: 'Augmente la défense de 5 de manière permanente.',
                 cost: 1,
-                prerequisites: ['coup_puissant'],
-                damage: 30,
-                manaCost: 15,
-                type: 'ability',
-                elementalType: 'fire'
+                prerequisites: ['frappe_puissante'],
+                effect: { defense: 5 },
+                type: 'passive'
             }
         }
     },
     'mage': {
         name: "Arbre de compétences du mage",
         skills: {
-            'boule_de_feu': {
-                id: 'boule_de_feu',
-                name: 'Boule de feu',
-                description: 'Lance une boule de feu qui inflige des dégâts magiques.',
+            'eclair_de_foudre': {
+                id: 'eclair_de_foudre',
+                name: 'Éclair de foudre',
+                description: 'Un puissant éclair qui frappe la cible.',
                 cost: 1,
                 prerequisites: [],
-                damage: 25,
-                manaCost: 10,
-                type: 'ability',
-                elementalType: 'fire'
+                damage: 60,
+                manaCost: 20,
+                type: 'ability'
             },
-            'eclair': {
-                id: 'eclair',
-                name: 'Éclair',
-                description: 'Frappe l\\'ennemi avec un éclair puissant.',
+            'bouclier_arcanique': {
+                id: 'bouclier_arcanique',
+                name: 'Bouclier Arcanique',
+                description: 'Augmente le mana max de 10 de manière permanente.',
                 cost: 1,
-                prerequisites: ['boule_de_feu'],
-                damage: 35,
-                manaCost: 15,
-                type: 'ability',
-                elementalType: 'water'
+                prerequisites: ['eclair_de_foudre'],
+                effect: { maxMana: 10 },
+                type: 'passive'
             }
         }
     },
@@ -325,13 +206,12 @@ const skillTreeData = {
             'attaque_rapide': {
                 id: 'attaque_rapide',
                 name: 'Attaque rapide',
-                description: 'Une attaque rapide qui a une chance d\\'attaquer deux fois.',
+                description: 'Une attaque rapide qui a une chance d\'attaquer deux fois.',
                 cost: 1,
                 prerequisites: [],
                 damage: 25,
                 manaCost: 10,
-                type: 'ability',
-                elementalType: 'nature'
+                type: 'ability'
             },
             'agilite_superieure': {
                 id: 'agilite_superieure',
@@ -364,8 +244,9 @@ const questsData = {
         reward: {
             xp: 50,
             gold: 20,
-            item: 'potion_de_vie'
+            item: 'potion_de_vie_basique'
         },
+        completed: false,
         rewardClaimed: false
     }
 };
