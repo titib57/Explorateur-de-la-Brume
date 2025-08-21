@@ -33,30 +33,37 @@ function useItem(itemId) {
             }
             player.inventory.splice(itemIndex, 1);
             saveCharacter(player);
-            // La logique de combat doit être mise à jour après l'utilisation
-            updateBattleUI();
         }
-    } else {
-        console.error("Objet non trouvé dans l'inventaire :", itemId);
     }
 }
 
+// Mise à jour de l'interface de l'inventaire
 function updateInventoryPageUI() {
     const inventoryItemsList = document.getElementById('inventory-items-list');
-    const equippedWeapon = document.getElementById('equipped-weapon');
-    const equippedArmor = document.getElementById('equipped-armor');
-
-    if (!inventoryItemsList || !equippedWeapon || !equippedArmor) return;
-
+    if (!inventoryItemsList) return;
     inventoryItemsList.innerHTML = '';
 
-    player.inventory.forEach((item, index) => {
+    const equippedWeapon = document.getElementById('equipped-weapon');
+    const equippedArmor = document.getElementById('equipped-armor');
+    const equippedTalisman = document.getElementById('equipped-talisman'); // <-- Ajout de l'ID du talisman
+
+    // Ajout d'une nouvelle ligne pour le talisman
+    document.getElementById('equipment-display').innerHTML = `
+        <h3>Équipement actuel</h3>
+        <p>Arme: <span id="equipped-weapon">${player.equipment.weapon ? player.equipment.weapon.name : 'Aucune'}</span></p>
+        <p>Armure: <span id="equipped-armor">${player.equipment.armor ? player.equipment.armor.name : 'Aucune'}</span></p>
+        <p>Talisman: <span id="equipped-talisman">${player.equipment.talisman ? player.equipment.talisman.name : 'Aucun'}</span></p>
+    `;
+
+    player.inventory.forEach(item => {
         const li = document.createElement('li');
-        let itemInfo = `${item.name}`;
+        let itemInfo = `${item.name} (${item.description})`;
         
-        if (item.type === 'weapon' || item.type === 'armor') {
-            const equippedId = player.equipment[item.type]?.id;
-            const isEquipped = equippedId === item.id;
+        const isEquipped = (player.equipment.weapon && player.equipment.weapon.id === item.id) ||
+                           (player.equipment.armor && player.equipment.armor.id === item.id) ||
+                           (player.equipment.talisman && player.equipment.talisman.id === item.id);
+
+        if (item.type === 'weapon' || item.type === 'armor' || item.type === 'talisman') { // <-- Ajout du type 'talisman'
             const buttonText = isEquipped ? 'Déséquiper' : 'Équiper';
             const action = isEquipped ? 'unequip' : 'equip';
             itemInfo += ` <button onclick="${action}Item('${item.id}', '${item.type}')">${buttonText}</button>`;
@@ -70,6 +77,7 @@ function updateInventoryPageUI() {
 
     equippedWeapon.textContent = player.equipment.weapon ? player.equipment.weapon.name : 'Aucune';
     equippedArmor.textContent = player.equipment.armor ? player.equipment.armor.name : 'Aucune';
+    equippedTalisman.textContent = player.equipment.talisman ? player.equipment.talisman.name : 'Aucun'; // <-- Ajout du talisman
 }
 
 function equipItem(itemId, type) {
@@ -77,6 +85,7 @@ function equipItem(itemId, type) {
     if (itemIndex > -1) {
         const item = player.inventory[itemIndex];
         if (item.type === type) {
+            // Déséquiper l'objet déjà équipé s'il y en a un
             if (player.equipment[type]) {
                 player.inventory.push(player.equipment[type]);
             }
@@ -98,4 +107,15 @@ function unequipItem(type) {
         saveCharacter(player);
         updateInventoryPageUI();
     }
+}
+
+function giveItemToPlayer(itemId, amount = 1) {
+    for (let i = 0; i < amount; i++) {
+        const itemData = itemsData.consumables[itemId] || itemsData.weapons[itemId] || itemsData.armors[itemId] || itemsData.talismans[itemId];
+        if (itemData) {
+            player.inventory.push({ ...itemData });
+        }
+    }
+    saveCharacter(player);
+    showNotification(`${amount} ${itemData.name}(s) ajouté(s) à votre inventaire.`, 'info');
 }

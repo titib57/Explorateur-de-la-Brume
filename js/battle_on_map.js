@@ -8,42 +8,112 @@ function initializeCombat() {
     document.getElementById('flee-button').onclick = flee;
 }
 
-function updateBattleUI() {
-    // Logique de mise à jour de l'interface du combat
-    document.getElementById('player-name-combat').textContent = player.name;
-    document.getElementById('player-hp-combat').textContent = player.hp;
-    document.getElementById('player-max-hp-combat').textContent = player.maxHp;
-    document.getElementById('player-hp-bar-combat').style.width = `${(player.hp / player.maxHp) * 100}%`;
-    document.getElementById('player-mana-combat').textContent = player.mana;
-    document.getElementById('player-max-mana-combat').textContent = player.maxMana;
-    document.getElementById('player-mana-bar-combat').style.width = `${(player.mana / player.maxMana) * 100}%`;
+// Fonction utilitaire pour le journal de combat
+function addToCombatLog(message, className) {
+    const combatLog = document.getElementById('combat-log');
+    if (combatLog) {
+        const entry = document.createElement('p');
+        entry.textContent = message;
+        entry.classList.add(className);
+        combatLog.appendChild(entry);
+        combatLog.scrollTop = combatLog.scrollHeight;
+    }
+}
+
+// Nouvelle fonction pour calculer les dégâts élémentaires en fonction des types
+function calculateElementalDamage(playerAttackType, monsterType, playerResistance) {
+    if (playerAttackType === 'normal') {
+        return 1;
+    }
     
-    document.getElementById('monster-name').textContent = currentMonster.name;
-    document.getElementById('monster-hp').textContent = currentMonster.hp;
-    document.getElementById('monster-max-hp').textContent = currentMonster.maxHp;
-    document.getElementById('monster-hp-bar').style.width = `${(currentMonster.hp / currentMonster.maxHp) * 100}%`;
-    
-    // Assurez-vous que le premier onglet est visible
-    showTab(null, 'attack-tab');
+    let multiplier = 1;
+    const playerAttackInfo = typeEffectiveness[playerAttackType];
+
+    if (playerAttackInfo) {
+        if (playerAttackInfo.strongAgainst.includes(monsterType)) {
+            addToCombatLog("C'est super efficace !", 'log-success');
+            multiplier = 1.5;
+        } else if (playerAttackInfo.weakAgainst.includes(monsterType)) {
+            addToCombatLog("Ce n'est pas très efficace...", 'log-warning');
+            multiplier = 0.5;
+        }
+    }
+
+    // Application de la résistance du joueur
+    if (playerResistance === playerAttackType) {
+        addToCombatLog("Votre talisman réduit les dégâts !", 'log-info');
+        multiplier *= 0.5; // Réduit de moitié les dégâts si le joueur est résistant
+    }
+
+    return multiplier;
 }
 
 function playerAttack() {
-    const damage = player.attackDamage;
-    currentMonster.hp -= damage;
-    addToCombatLog(`Vous attaquez ${currentMonster.name} et lui infligez ${damage} points de dégâts.`, 'log-player');
+    // Le joueur ne peut pas attaquer s'il a 0 mana et que son attaque en coûte
+    const attackId = 'fist_attack'; // L'attaque de base est toujours 'fist_attack'
+    const attackInfo = getAbilityById(attackId);
+    
+    if (player.mana < attackInfo.manaCost) {
+        showNotification("Pas assez de mana pour lancer cette attaque !", 'error');
+        return;
+    }
+    player.mana -= attackInfo.manaCost;
+
+    let totalDamage = player.attackDamage;
+
+    // Ajout du bonus de dégâts pour l'attaque
+    if (attackInfo.damage) {
+        totalDamage += attackInfo.damage;
+    }
+
+    // Calcul des dégâts élémentaires
+    const elementalMultiplier = calculateElementalDamage(attackInfo.type, currentMonster.type, player.elementalResistance);
+    const finalDamage = Math.max(0, totalDamage * elementalMultiplier - currentMonster.defense);
+
+    currentMonster.hp -= finalDamage;
+    addToCombatLog(`Vous infligez ${Math.round(finalDamage)} points de dégâts à ${currentMonster.name}.`, 'log-player-attack');
     
     if (currentMonster.hp <= 0) {
         endCombat('victoire');
     } else {
-        setTimeout(monsterAttack, 1000);
+        monsterTurn();
     }
     updateBattleUI();
 }
 
-function monsterAttack() {
-    const damage = currentMonster.attackDamage - player.defense;
-    player.hp -= Math.max(damage, 1);
-    addToCombatLog(`${currentMonster.name} vous attaque et vous inflige ${Math.max(damage, 1)} points de dégâts.`, 'log-monster');
+function useAbility(abilityId) {
+    const ability = getAbilityById(abilityId);
+
+    if (player.mana < ability.manaCost) {
+        showNotification("Pas assez de mana pour lancer cette capacité !", 'error');
+        return;
+    }
+    player.mana -= ability.manaCost;
+
+    let totalDamage = player.attackDamage;
+    if (ability.damage) {
+        totalDamage += ability.damage;
+    }
+    
+    const elementalMultiplier = calculateElementalDamage(ability.elementalType, currentMonster.type, player.elementalResistance);
+    const finalDamage = Math.max(0, totalDamage * elementalMultiplier - currentMonster.defense);
+
+    currentMonster.hp -= finalDamage;
+    addToCombatLog(`Vous utilisez ${ability.name} et infligez ${Math.round(finalDamage)} points de dégâts à ${currentMonster.name}.`, 'log-player-attack');
+
+    if (currentMonster.hp <= 0) {
+        endCombat('victoire');
+    } else {
+        monsterTurn();
+    }
+    updateBattleUI();
+}
+
+function monsterTurn() {
+    const damageDealt = Math.max(0, currentMonster.attack - player.defense);
+    player.hp -= damageDealt;
+
+    addToCombatLog(`${currentMonster.name} vous inflige ${Math.round(damageDealt)} points de dégâts.`, 'log-monster-attack');
     
     if (player.hp <= 0) {
         endCombat('defaite');
@@ -75,17 +145,5 @@ function endCombat(result) {
             document.getElementById('battle-interface').style.display = 'none';
             updateWorldMapUI();
         }, 3000);
-    }
-}
-
-// Fonction utilitaire pour le journal de combat
-function addToCombatLog(message, className) {
-    const combatLog = document.getElementById('combat-log');
-    if (combatLog) {
-        const entry = document.createElement('p');
-        entry.textContent = message;
-        entry.classList.add(className);
-        combatLog.appendChild(entry);
-        combatLog.scrollTop = combatLog.scrollHeight;
     }
 }

@@ -48,89 +48,152 @@ function loadCharacter() {
     if (!characterData) {
         return false;
     }
-    
-    try {
-        player = JSON.parse(characterData);
-        
-        // Initialisation des propriétés par défaut si elles n'existent pas
-        player.stats = player.stats || { strength: 1, intelligence: 1, speed: 1, dexterity: 1 };
-        player.statPoints = player.statPoints || 0;
-        player.skillPoints = player.skillPoints || 0;
-        player.gold = player.gold || 0;
-        player.xp = player.xp || 0;
-        player.level = player.level || 1;
-        player.unlockedSkills = player.unlockedSkills || ['fist_attack'];
-        player.unlockedClasses = player.unlockedClasses || ['explorateur'];
-        player.inventory = player.inventory || [];
-        player.equipment = player.equipment || { weapon: null, armor: null };
-        player.quests = player.quests || {};
-
-        recalculateDerivedStats();
-        
-        // S'assurer que les HP/Mana actuels ne dépassent pas les maximums
-        player.hp = Math.min(player.hp || player.maxHp, player.maxHp);
-        player.mana = Math.min(player.mana || player.maxMana, player.maxMana);
-
-        console.log("Personnage chargé :", player);
-        return true;
-    } catch (e) {
-        console.error("Erreur lors du chargement du personnage :", e);
-        return false;
-    }
+    player = JSON.parse(characterData);
+    console.log("Personnage chargé :", player);
+    return true;
 }
 
+// Fonction de base pour la création de personnage
+// Cette fonction sera appelée depuis character_creation.html
+function createCharacter(name, age, height, weight, morphology, baseClass) {
+    const newCharacter = {
+        name: name,
+        age: age,
+        height: height,
+        weight: weight,
+        morphology: morphology,
+        baseClass: baseClass,
+        class: 'explorateur',
+        xp: 0,
+        level: 1,
+        xpToNextLevel: 100,
+        statPoints: 5,
+        skillPoints: 1,
+        gold: 0,
+        stats: {
+            strength: 1,
+            intelligence: 1,
+            speed: 1,
+            dexterity: 1
+        },
+        unlockedSkills: ['fist_attack'],
+        unlockedClasses: ['explorateur'],
+        inventory: [],
+        equipment: {
+            weapon: null,
+            armor: null,
+            talisman: null, // <-- Ajout de l'emplacement du talisman
+        },
+        elementalResistance: null, // <-- Ajout de la propriété de résistance
+        quests: {}
+    };
 
-// --- Fonctions de progression et de statistiques ---
+    const baseStats = classBases[baseClass].stats;
+    Object.assign(newCharacter.stats, baseStats);
+    applyPhysicalAttributes(newCharacter);
+    recalculateDerivedStats(newCharacter);
+    
+    newCharacter.hp = newCharacter.maxHp;
+    newCharacter.mana = newCharacter.maxMana;
+
+    saveCharacter(newCharacter);
+    player = newCharacter;
+}
 
 /**
- * Calcule les statistiques dérivées du joueur (HP, Mana, Dégâts, etc.)
- * en fonction de ses statistiques de base et de son équipement.
+ * Recalcule les statistiques dérivées du personnage (HP, Mana, Dégâts, etc.).
+ * Cette fonction est appelée après un changement de stats, d'équipement ou de niveau.
  */
 function recalculateDerivedStats() {
     if (!player) return;
-    
-    player.maxHp = 100 + (player.stats.strength * 15);
+
+    // Calcul des PV et Mana de base
+    player.maxHp = 100 + (player.stats.strength * 10);
     player.maxMana = 50 + (player.stats.intelligence * 10);
-    player.attackDamage = 5 + (player.stats.strength * 2) + (player.stats.dexterity);
-    player.defense = 5 + (player.stats.strength) + (player.stats.dexterity);
-    
-    // Ajout des bonus d'équipement
+    player.attackDamage = 5 + (player.stats.strength * 2);
+    player.defense = 5 + (player.stats.strength + player.stats.dexterity);
+
+    // Bonus d'équipement
     if (player.equipment.weapon) {
-        player.attackDamage += player.equipment.weapon.damage || 0;
+        player.attackDamage += player.equipment.weapon.attack || 0;
+        player.stats.intelligence += player.equipment.weapon.intelligence || 0;
+        player.stats.speed += player.equipment.weapon.speed || 0;
     }
     if (player.equipment.armor) {
         player.defense += player.equipment.armor.defense || 0;
+        player.maxMana += player.equipment.armor.mana || 0;
+    }
+
+    // Effets des compétences passives
+    player.unlockedSkills.forEach(skillId => {
+        const skill = getAbilityById(skillId);
+        if (skill && skill.type === 'passive' && skill.effect) {
+            for (const stat in skill.effect) {
+                if (player.stats.hasOwnProperty(stat)) {
+                    player.stats[stat] += skill.effect[stat];
+                }
+            }
+        }
+    });
+
+    // Bonus de résistance élémentaire de l'équipement
+    if (player.equipment.talisman) {
+        player.elementalResistance = player.equipment.talisman.resistance; // Prend en compte la résistance du talisman
+    } else {
+        player.elementalResistance = null; // Réinitialise si aucun talisman n'est équipé
     }
 }
 
+
 /**
- * Gère l'attribution de l'expérience au joueur et la montée en niveau.
- * @param {number} amount L'expérience à ajouter.
+ * Donne de l'expérience au joueur et vérifie s'il monte de niveau.
+ * @param {number} xpAmount La quantité d'XP à ajouter.
  */
-function giveXP(amount) {
+function giveXP(xpAmount) {
     if (!player) return;
-    player.xp += amount;
     
-    // Boucle de montée en niveau
+    player.xp += xpAmount;
+    showNotification(`Vous gagnez ${xpAmount} points d'expérience.`, 'info');
+    
     while (player.xp >= player.xpToNextLevel) {
         player.xp -= player.xpToNextLevel;
         player.level++;
-        player.statPoints += 5; // Points de stats par niveau
-        player.skillPoints += 1; // Points de compétence par niveau
+        player.statPoints += 2; // Gagne 2 points de stats par niveau
+        player.skillPoints += 1; // Gagne 1 point de compétence par niveau
         player.xpToNextLevel = Math.floor(player.xpToNextLevel * 1.5);
-        
         recalculateDerivedStats();
         player.hp = player.maxHp;
         player.mana = player.maxMana;
-        
-        showNotification(`Félicitations, vous êtes monté au niveau ${player.level} !`, 'success');
-        console.log(`Nouveau niveau: ${player.level}, XP restante: ${player.xp}`);
+        showNotification(`Félicitations ! Vous êtes passé au niveau ${player.level} !`, 'success');
     }
     saveCharacter(player);
 }
 
+// Helper function pour récupérer les détails d'une compétence par son ID
+function getAbilityById(abilityId) {
+    const commonAbilities = abilitiesData.explorateur;
+    const commonAbility = commonAbilities.find(a => a.id === abilityId);
+    if (commonAbility) {
+        return commonAbility;
+    }
+
+    if (abilitiesData[player.class]) {
+        const classAbility = abilitiesData[player.class].find(a => a.id === abilityId);
+        if (classAbility) {
+            return classAbility;
+        }
+    }
+    
+    const baseAbility = abilitiesData.explorateur.find(a => a.id === abilityId);
+    if (baseAbility) {
+        return baseAbility;
+    }
+    
+    return null;
+}
+
 /**
- * Ajuste les statistiques de base du personnage en fonction de sa morphologie.
+ * Applique des ajustements de statistiques de base en fonction de la morphologie du personnage.
  */
 function applyPhysicalAttributes(character) {
     switch (character.morphology) {
@@ -180,5 +243,6 @@ function flee() {
     showNotification("Vous fuyez le combat !", 'info');
     setTimeout(() => {
         document.getElementById('battle-interface').style.display = 'none';
-    }, 1500);
+        updateWorldMapUI();
+    }, 2000);
 }
