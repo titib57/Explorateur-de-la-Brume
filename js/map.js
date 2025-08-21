@@ -9,8 +9,11 @@
     let playerMarker;
     let dungeons = [];
     let nearbyDungeon = null;
+    let selectedDungeon = null; // Nouvelle variable pour le donjon sélectionné
     const mapElement = document.getElementById('map');
     const fullscreenBtn = document.getElementById('toggle-fullscreen-btn');
+    const startBattleBtn = document.getElementById('start-battle-btn');
+
 
     // Définir le donjon du tutoriel séparément
     const tutorialDungeon = {
@@ -49,7 +52,7 @@
         const y0 = lat;
         const x0 = lng;
         // Conversion de mètres en degrés
-        const rd = radius / 111300; 
+        const rd = radius / 111300;
 
         const u = Math.random();
         const v = Math.random();
@@ -113,6 +116,11 @@
             // Créer le marqueur du donjon du tutoriel à sa nouvelle position aléatoire
             tutorialDungeon.marker = L.marker(L.latLng(randomPos.lat, randomPos.lng)).addTo(map);
             tutorialDungeon.marker.bindPopup(`<h3>${tutorialDungeon.name}</h3>`).openPopup();
+            tutorialDungeon.marker.on('click', () => {
+                selectedDungeon = tutorialDungeon;
+                startBattleBtn.style.display = 'block';
+                startBattleBtn.textContent = `Entrer dans ${selectedDungeon.name}`;
+            });
             
             map.setView(latLng, 13);
             fetchDungeonsFromOverpass(latitude, longitude);
@@ -146,6 +154,13 @@
                     <p>Monstre: ${dungeon.monster.name}</p>
                     <p>Distance: ${distanceFormatted}</p>
                 `);
+            
+            // Ajout de l'écouteur de clic pour les donjons dynamiques
+            dungeon.marker.on('click', () => {
+                selectedDungeon = dungeon;
+                startBattleBtn.style.display = 'block';
+                startBattleBtn.textContent = `Entrer dans ${selectedDungeon.name}`;
+            });
         });
     }
 
@@ -228,19 +243,25 @@
             }
         });
         
-        nearbyDungeon = dungeons.find(dungeon => {
+        // Logic for nearby dungeon detection
+        let nearbyDungeon = dungeons.find(dungeon => {
             const distance = calculateDistance(playerLatLng.lat, playerLatLng.lng, dungeon.location.lat, dungeon.location.lng);
-            return distance <= 10;
+            return distance <= 100;
         });
 
-        const startBattleBtn = document.getElementById('start-battle-btn');
-        if (nearbyDungeon) {
+        // Mise à jour de l'interface en fonction du donjon à proximité
+        if (nearbyDungeon && selectedDungeon === null) {
             startBattleBtn.style.display = 'block';
             startBattleBtn.textContent = `Entrer dans ${nearbyDungeon.name}`;
-            
-
-        } else {
+            selectedDungeon = nearbyDungeon;
+        } else if (!nearbyDungeon && selectedDungeon && selectedDungeon.marker.getLatLng().distanceTo(playerMarker.getLatLng()) > 100) {
+            selectedDungeon = null;
             startBattleBtn.style.display = 'none';
+        } else if (selectedDungeon && selectedDungeon.marker.getLatLng().distanceTo(playerMarker.getLatLng()) <= 100) {
+            startBattleBtn.style.display = 'block';
+            startBattleBtn.textContent = `Entrer dans ${selectedDungeon.name}`;
+        } else if (!selectedDungeon && !nearbyDungeon) {
+             startBattleBtn.style.display = 'none';
         }
     }
 
@@ -258,10 +279,12 @@
             }
         );
 
-        document.getElementById('start-battle-btn').addEventListener('click', () => {
-            if (nearbyDungeon) {
-                localStorage.setItem('currentDungeon', JSON.stringify(nearbyDungeon));
+        startBattleBtn.addEventListener('click', () => {
+            if (selectedDungeon) {
+                localStorage.setItem('currentDungeon', JSON.stringify(selectedDungeon));
                 window.location.href = 'battle.html';
+            } else {
+                showNotification("Veuillez d'abord vous approcher d'un donjon ou le sélectionner sur la carte.", 'warning');
             }
         });
 
