@@ -454,3 +454,95 @@ body {
     from { opacity: 1; transform: translateY(0); }
     to { opacity: 0; transform: translateY(-20px); }
 }
+#inventory-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 15px;
+    padding: 10px;
+    background-color: var(--bg-color-medium);
+    border-radius: 8px;
+}
+
+.inventory-item {
+    background-color: var(--bg-color-dark);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s;
+}
+
+.inventory-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.inventory-item img {
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+}
+
+.inventory-item .item-name {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+/* Styles pour les bulles d'aide (tooltips) */
+.tooltip {
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.9);
+    color: var(--text-color-light);
+    text-align: left;
+    border-radius: 6px;
+    padding: 10px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Positionnement au-dessus de l'élément */
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.inventory-item:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Styles pour l'arbre de compétences hiérarchique */
+.skill-tree-container {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 20px;
+}
+
+.skill-node {
+    /* Styles existants */
+}
+
+/* Style des lignes de connexion */
+#skill-tree-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Permet aux clics de passer à travers */
+}
+
+.skill-line {
+    position: absolute;
+    height: 2px;
+    background-color: var(--text-color-light);
+    transform-origin: 0 50%;
+    border-radius: 2px;
+}

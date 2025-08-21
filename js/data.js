@@ -246,7 +246,7 @@ const questsData = {
     'premiers_pas': {
         id: 'premiers_pas',
         name: 'Premiers pas',
-        description: 'Parlez au garde de la ville, il vous demandera de vaincre un mannequin d\'entraînement pour commencer.',
+        description: 'Rends toi dans le donjon de tutoriel pour vaincre un mannequin d\'entraînement.',
         objective: {
             type: 'kill_monster',
             target: 'Mannequin',

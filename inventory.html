@@ -29,13 +29,21 @@
         
         <div id="equipment-display" class="tab-content active">
             <h3>Équipement actuel</h3>
-            <p>Arme: <span id="equipped-weapon">Aucune</span></p>
-            <p>Armure: <span id="equipped-armor">Aucune</span></p>
+            <div class="equipped-item">
+                <p>Arme:</p>
+                <img id="equipped-weapon-icon" src="" alt="Arme équipée">
+                <span id="equipped-weapon-name">Aucune</span>
+            </div>
+            <div class="equipped-item">
+                <p>Armure:</p>
+                <img id="equipped-armor-icon" src="" alt="Armure équipée">
+                <span id="equipped-armor-name">Aucune</span>
+            </div>
         </div>
         
         <div id="inventory-list" class="tab-content" style="display: none;">
             <h3>Tous les objets</h3>
-            <ul id="inventory-items-list"></ul>
+            <div id="inventory-items-grid"></div>
         </div>
     </main>
 
