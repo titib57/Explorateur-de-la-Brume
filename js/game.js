@@ -69,44 +69,95 @@ function loadCharacter() {
  * Calcule les statistiques dérivées du personnage (PV max, mana max, dégâts, etc.).
  */
 function recalculateDerivedStats() {
-    const baseStats = player.stats;
-    let totalStrength = baseStats.strength + (player.equipment.weapon ? player.equipment.weapon.stats.strength || 0 : 0) + (player.equipment.armor ? player.equipment.armor.stats.strength || 0 : 0);
-    let totalIntelligence = baseStats.intelligence + (player.equipment.weapon ? player.equipment.weapon.stats.intelligence || 0 : 0) + (player.equipment.armor ? player.equipment.armor.stats.intelligence || 0 : 0);
-    let totalSpeed = baseStats.speed + (player.equipment.weapon ? player.equipment.weapon.stats.speed || 0 : 0) + (player.equipment.armor ? player.equipment.armor.stats.speed || 0 : 0);
-    let totalDexterity = baseStats.dexterity + (player.equipment.weapon ? player.equipment.weapon.stats.dexterity || 0 : 0) + (player.equipment.armor ? player.equipment.armor.stats.dexterity || 0 : 0);
+    // Réinitialisation des stats de base pour éviter l'accumulation de bonus
+    const baseStats = {
+        strength: 1,
+        intelligence: 1,
+        speed: 1,
+        dexterity: 1
+    };
+    
+    // Créer un objet temporaire pour stocker les calculs
+    let tempPlayer = {
+        stats: { ...baseStats },
+        passiveEffect: {},
+        resistances: {}
+    };
 
-    // Appliquer les effets de compétences passives
-    player.unlockedSkills.forEach(skillId => {
-        const skill = getSkillById(skillId);
-        if (skill && skill.type === 'passive' && skill.effect) {
-            totalStrength += skill.effect.strength || 0;
-            totalIntelligence += skill.effect.intelligence || 0;
-            totalSpeed += skill.effect.speed || 0;
-            totalDexterity += skill.effect.dexterity || 0;
+    // Appliquer les stats de base du joueur
+    for (const stat in player.stats) {
+        tempPlayer.stats[stat] += player.stats[stat];
+    }
+    
+    // Liste des objets équipés pour faciliter la gestion des sets
+    let equippedItems = [];
+    if (player.equipment.weapon) equippedItems.push(player.equipment.weapon);
+    if (player.equipment.armor) equippedItems.push(player.equipment.armor);
+
+    // Dictionnaire pour compter les pièces de chaque set
+    let setPiecesCount = {};
+
+    // Appliquer les stats et effets passifs des objets équipés
+    equippedItems.forEach(item => {
+        if (item.stats) {
+            for (const stat in item.stats) {
+                tempPlayer.stats[stat] += item.stats[stat];
+            }
+        }
+        if (item.passiveEffect) {
+            for (const effect in item.passiveEffect) {
+                tempPlayer.passiveEffect[effect] = (tempPlayer.passiveEffect[effect] || 0) + item.passiveEffect[effect];
+            }
+        }
+        if (item.resistances) {
+            for (const element in item.resistances) {
+                tempPlayer.resistances[element] = (tempPlayer.resistances[element] || 0) + item.resistances[element];
+            }
+        }
+        if (item.set) {
+            setPiecesCount[item.set] = (setPiecesCount[item.set] || 0) + 1;
         }
     });
 
-    player.maxHp = 100 + (totalStrength * 10);
-    player.maxMana = 50 + (totalIntelligence * 5);
-    player.attackDamage = 5 + (totalStrength * 2);
-    player.defense = 2 + (totalDexterity * 1.5);
-    player.critChance = 5 + (totalDexterity * 0.5); // 0.5% de chance de critique par point de Dextérité
-    player.critDamage = 1.5; // Multiplicateur de dégâts critiques de base
-
-    // Mettre à jour l'élément du joueur en fonction de l'arme
-    if (player.equipment.weapon && player.equipment.weapon.element && player.equipment.weapon.element !== 'neutre') {
-        player.element = player.equipment.weapon.element;
-    } else {
-        player.element = 'neutre';
+    // Appliquer les bonus de set si le joueur a toutes les pièces
+    for (const setId in setPiecesCount) {
+        const set = itemSets[setId];
+        if (set && setPiecesCount[setId] === set.pieces.length) {
+            if (set.bonus.stats) {
+                for (const stat in set.bonus.stats) {
+                    tempPlayer.stats[stat] += set.bonus.stats[stat];
+                }
+            }
+            if (set.bonus.passiveEffect) {
+                for (const effect in set.bonus.passiveEffect) {
+                     tempPlayer.passiveEffect[effect] = (tempPlayer.passiveEffect[effect] || 0) + set.bonus.passiveEffect[effect];
+                }
+            }
+            if (set.bonus.resistances) {
+                 for (const element in set.bonus.resistances) {
+                    tempPlayer.resistances[element] = (tempPlayer.resistances[element] || 0) + set.bonus.resistances[element];
+                }
+            }
+        }
     }
+    
+    // Finalisation des calculs des statistiques
+    player.maxHp = 100 + (tempPlayer.stats.strength * 10);
+    player.maxMana = 50 + (tempPlayer.stats.intelligence * 5);
+    player.attackDamage = 5 + (tempPlayer.stats.strength * 2);
+    player.defense = 0 + (tempPlayer.stats.strength * 1.5);
+    player.critChance = 0.05; // 5% de base
+    player.evasionChance = 0;
+    player.armorPenetration = 0;
 
-}
+    // Appliquer les bonus passifs finaux
+    if (tempPlayer.passiveEffect.critChance) player.critChance += tempPlayer.passiveEffect.critChance;
+    if (tempPlayer.passiveEffect.evasionChance) player.evasionChance += tempPlayer.passiveEffect.evasionChance;
+    if (tempPlayer.passiveEffect.armorPenetration) player.armorPenetration += tempPlayer.passiveEffect.armorPenetration;
 
-/**
- * Réinitialise les statistiques du personnage à leur valeur de base.
- */
-function resetCharacterStats() {
-    // Implémentez la réinitialisation si nécessaire
+    // Mettre à jour les stats du joueur
+    player.stats = tempPlayer.stats;
+    player.resistances = tempPlayer.resistances;
 }
 
 
