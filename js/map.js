@@ -99,7 +99,7 @@
 
         // Calculer la nouvelle position aléatoire pour le donjon
         const randomPos = getRandomPoint(latitude, longitude, 10);
-        
+
         // Mettre à jour la position du donjon du tutoriel
         tutorialDungeon.location = { lat: randomPos.lat, lng: randomPos.lng };
 
@@ -112,50 +112,50 @@
             });
             playerMarker = L.marker(latLng, { icon: playerIcon }).addTo(map)
                 .bindPopup("Vous êtes ici").openPopup();
-            
+
             // Créer le marqueur du donjon du tutoriel à sa nouvelle position aléatoire
             tutorialDungeon.marker = L.marker(L.latLng(randomPos.lat, randomPos.lng)).addTo(map);
             tutorialDungeon.marker.bindPopup(`<h3>${tutorialDungeon.name}</h3>`).openPopup();
-            
+
             // Écouteur de clic pour le donjon du tutoriel
             tutorialDungeon.marker.on('click', () => {
                 selectedDungeon = tutorialDungeon;
                 updateDungeonMarkers(playerMarker.getLatLng());
             });
-            
+
             map.setView(latLng, 13);
             fetchDungeonsFromOverpass(latitude, longitude);
         } else {
             playerMarker.setLatLng(latLng);
-            
+
             // Mettre à jour la position du marqueur du donjon du tutoriel
             tutorialDungeon.marker.setLatLng(L.latLng(randomPos.lat, randomPos.lng));
         }
         updateDungeonMarkers(latLng);
     }
-    
+
     function drawDungeonsOnMap() {
         map.eachLayer(layer => {
             if (layer instanceof L.Marker && layer !== playerMarker && layer !== tutorialDungeon.marker) {
                 map.removeLayer(layer);
             }
         });
-        
+
         const playerLatLng = playerMarker ? playerMarker.getLatLng() : null;
 
         dungeons.forEach(dungeon => {
             if (dungeon.id === tutorialDungeon.id) return;
-            
+
             const distance = playerLatLng ? calculateDistance(playerLatLng.lat, playerLatLng.lng, dungeon.location.lat, dungeon.location.lng) : null;
             const distanceFormatted = distance !== null ? `${distance.toFixed(0)} m` : 'Calcul de la distance...';
-            
+
             dungeon.marker = L.marker([dungeon.location.lat, dungeon.location.lng]).addTo(map)
                 .bindPopup(`
                     <h3>${dungeon.name}</h3>
                     <p>Monstre: ${dungeon.monster.name}</p>
                     <p>Distance: ${distanceFormatted}</p>
                 `);
-            
+
             // Ajout de l'écouteur de clic pour les donjons dynamiques
             dungeon.marker.on('click', () => {
                 selectedDungeon = dungeon;
@@ -218,7 +218,7 @@
                 }
             };
         });
-        
+
         // Ajouter le donjon du tutoriel au début de la liste
         dungeons = [tutorialDungeon, ...staticDungeons, ...dynamicDungeons];
         drawDungeonsOnMap();
@@ -229,7 +229,7 @@
 
     function updateDungeonMarkers(playerLatLng) {
         if (!dungeons || !playerLatLng) return;
-        
+
         dungeons.forEach(dungeon => {
             const distance = calculateDistance(playerLatLng.lat, playerLatLng.lng, dungeon.location.lat, dungeon.location.lng);
             const distanceFormatted = (distance > 1000) ? `${(distance / 1000).toFixed(2)} km` : `${distance.toFixed(0)} m`;
@@ -242,7 +242,7 @@
                 `);
             }
         });
-        
+
         // Trouver le donjon le plus proche (pour l'affichage initial)
         nearbyDungeon = dungeons.find(dungeon => {
             const distance = calculateDistance(playerLatLng.lat, playerLatLng.lng, dungeon.location.lat, dungeon.location.lng);

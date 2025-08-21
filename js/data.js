@@ -250,3 +250,52 @@ const questsData = {
         rewardClaimed: false
     }
 };
+const locationTypes = {
+    'foret': {
+        name: 'Forêt mystérieuse',
+        monsters: [
+            { id: 'gobelin', chance: 0.6 },
+            { id: 'loup', chance: 0.3 },
+            { id: 'ours', chance: 0.1 }
+        ]
+    },
+    'plaine': {
+        name: 'Plaines verdoyantes',
+        monsters: [
+            { id: 'lapin_furieux', chance: 0.7 },
+            { id: 'sanglier', chance: 0.2 },
+            { id: 'bandit', chance: 0.1 }
+        ]
+    },
+    'desert': {
+        name: 'Désert aride',
+        monsters: [
+            { id: 'scorpion_geant', chance: 0.6 },
+            { id: 'cobra_royal', chance: 0.3 },
+            { id: 'golem_sable', chance: 0.1 }
+        ]
+    },
+    'lac': {
+        name: 'Bord du lac',
+        monsters: [
+            { id: 'grenouille_toxique', chance: 0.5 },
+            { id: 'serpent_eau', chance: 0.4 },
+            { id: 'creature_lacustre', chance: 0.1 }
+        ]
+    }
+};
+
+const monstersData = {
+    'gobelin': { id: 'gobelin', name: 'Gobelin', hp: 30, attack: 10, defense: 5, xpReward: 10, goldReward: 5 },
+    'loup': { id: 'loup', name: 'Loup', hp: 40, attack: 15, defense: 7, xpReward: 15, goldReward: 8 },
+    'ours': { id: 'ours', name: 'Ours enragé', hp: 80, attack: 25, defense: 10, xpReward: 30, goldReward: 15 },
+    'lapin_furieux': { id: 'lapin_furieux', name: 'Lapin furieux', hp: 20, attack: 5, defense: 2, xpReward: 5, goldReward: 2 },
+    'sanglier': { id: 'sanglier', name: 'Sanglier', hp: 35, attack: 12, defense: 8, xpReward: 12, goldReward: 7 },
+    'bandit': { id: 'bandit', name: 'Bandit de grand chemin', hp: 50, attack: 20, defense: 10, xpReward: 25, goldReward: 10 },
+    'scorpion_geant': { id: 'scorpion_geant', name: 'Scorpion géant', hp: 45, attack: 18, defense: 6, xpReward: 18, goldReward: 9 },
+    'cobra_royal': { id: 'cobra_royal', name: 'Cobra royal', hp: 40, attack: 16, defense: 5, xpReward: 16, goldReward: 8 },
+    'golem_sable': { id: 'golem_sable', name: 'Golem de sable', hp: 90, attack: 22, defense: 15, xpReward: 35, goldReward: 20 },
+    'grenouille_toxique': { id: 'grenouille_toxique', name: 'Grenouille toxique', hp: 25, attack: 8, defense: 4, xpReward: 8, goldReward: 4 },
+    'serpent_eau': { id: 'serpent_eau', name: 'Serpent d\'eau', hp: 30, attack: 10, defense: 5, xpReward: 10, goldReward: 6 },
+    'creature_lacustre': { id: 'creature_lacustre', name: 'Créature lacustre', hp: 70, attack: 20, defense: 12, xpReward: 28, goldReward: 18 }
+};
