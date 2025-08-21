@@ -6,6 +6,11 @@
  * @param {number} duration La durée de l'effet en secondes.
  * @param {string} itemId L'ID de l'objet qui a causé l'effet.
  */
+document.addEventListener('DOMContentLoaded', () => {
+    if (!checkCharacter()) {
+        return;
+    }
+
 function applyTemporaryEffect(effect, duration, itemId) {
     showNotification(`L'effet de ${itemsData.consumables[itemId].name} est actif pour ${duration} secondes !`, 'info');
     

@@ -8,23 +8,28 @@
 const elements = {
     'feu': {
         name: 'Feu',
-        strongAgainst: ['terre', 'air'],
-        weakAgainst: ['eau']
+        strongAgainst: ['terre', 'poison'],
+        weakAgainst: ['eau', 'foudre']
     },
     'eau': {
         name: 'Eau',
-        strongAgainst: ['feu', 'terre'],
-        weakAgainst: ['air']
+        strongAgainst: ['feu'],
+        weakAgainst: ['foudre', 'terre']
     },
     'terre': {
         name: 'Terre',
-        strongAgainst: ['air', 'eau'],
-        weakAgainst: ['feu']
+        strongAgainst: ['foudre', 'poison'],
+        weakAgainst: ['feu', 'eau']
     },
-    'air': {
-        name: 'Air',
-        strongAgainst: ['eau', 'feu'],
+    'foudre': {
+        name: 'Foudre',
+        strongAgainst: ['eau'],
         weakAgainst: ['terre']
+    },
+    'poison': {
+        name: 'Poison',
+        strongAgainst: ['eau'],
+        weakAgainst: ['feu', 'terre']
     },
     'neutre': {
         name: 'Neutre',

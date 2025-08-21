@@ -1,4 +1,8 @@
 ﻿// Fichier : js/quests.js
+document.addEventListener('DOMContentLoaded', () => {
+    if (!checkCharacter()) {
+        return;
+    }
 
 function updateQuestsUI() {
     const questList = document.getElementById('quest-list');

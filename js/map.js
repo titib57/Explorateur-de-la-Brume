@@ -1,7 +1,5 @@
 ﻿document.addEventListener('DOMContentLoaded', () => {
-    if (!loadCharacter()) {
-        showNotification("Vous devez d'abord créer un personnage.", 'warning');
-        window.location.href = 'character_creation.html';
+    if (!checkCharacter()) {
         return;
     }
 

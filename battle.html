@@ -75,6 +75,7 @@
     <script src="js/game.js"></script>
     <script src="js/map.js"></script>
     <script src="js/quests.js"></script>
+    <script src="js/utils.js"></script>
     <script src="js/battle_on_map.js"></script>
     <script src="js/dungeon_minigames.js"></script>
 <script src="js/items.js"></script>
@@ -102,5 +103,13 @@
             }
         }
     </script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!checkCharacter()) {
+            return; // La fonction checkCharacter() gère déjà la redirection
+        }
+        // Le reste de la logique de chargement de la page
+    });
+</script>
 </body>
 </html>

@@ -29,15 +29,15 @@
 
     <script src="js/data.js"></script>
     <script src="js/game.js"></script>
+    <script src="js/utils.js"></script>
     <script src="js/quests.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (!loadCharacter()) {
-                window.location.href = 'character_creation.html';
-                return;
-            }
-            updateQuestsUI();
-        });
-    </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!checkCharacter()) {
+            return; // La fonction checkCharacter() gère déjà la redirection
+        }
+        // Le reste de la logique de chargement de la page
+    });
+</script>
 </body>
 </html>

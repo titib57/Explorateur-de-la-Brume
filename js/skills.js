@@ -1,4 +1,9 @@
-﻿// Fonctions pour la gestion de l'arbre de compétences
+﻿document.addEventListener('DOMContentLoaded', () => {
+    if (!checkCharacter()) {
+        return;
+    }
+
+// Fonctions pour la gestion de l'arbre de compétences
 function checkPrerequisites(skillId, playerClass) {
     const skill = skillTreeData[playerClass]?.skills[skillId];
     if (!skill || !skill.prerequisites || skill.prerequisites.length === 0) {

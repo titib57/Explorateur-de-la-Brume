@@ -83,16 +83,16 @@
     <script src="js/game.js"></script>
     <script src="js/map.js"></script>
     <script src="js/quests.js"></script>
+    <script src="js/utils.js"></script>
     <script src="js/battle_on_map.js"></script>
     <script src="js/dungeon_minigames.js"></script>
 <script src="js/items.js"></script>
     <script src="js/elements.js"></script> 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (!loadCharacter()) {
-                window.location.href = 'character_creation.html';
-                return;
-            }
+ <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!checkCharacter()) {
+            return; // La fonction checkCharacter() gère déjà la redirection
+        }
 
             // Initialisation de la carte Leaflet
             const map = L.map('map').setView([0, 0], 2);

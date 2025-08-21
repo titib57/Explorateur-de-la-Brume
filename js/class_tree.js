@@ -1,11 +1,9 @@
 ﻿document.addEventListener('DOMContentLoaded', () => {
     console.log("Script class_tree.js chargé.");
 
-   if (!loadCharacter()) {
-    console.error("Impossible de charger le personnage. Redirection.");
-    showNotification("Vous devez d'abord créer un personnage.", 'error');
-    window.location.href = 'character_creation.html';
-    return;
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!checkCharacter()) {
+        return;
     }
 
     console.log("Personnage chargé :", player);
@@ -80,7 +78,7 @@
         player.unlockedClasses.push(classId);
 
         if (abilitiesData[classId]) {
-            player.unlockedSkills = [...abilitiesData.explorateur, ...abilitiesData[classId]];
+            player.unlockedSkills.push(...abilitiesData[classId]);
         }
         
         player.stats = { ...chosenClassData.stats };

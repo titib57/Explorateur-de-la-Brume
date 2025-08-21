@@ -238,14 +238,3 @@ function startBattle() {
     // Initialisation du combat (cette fonction doit être dans le nouveau fichier battle_on_map.js)
     initializeCombat(); 
 }
-
-/**
- * Fonction de fuite du combat.
- */
-function flee() {
-    showNotification("Vous fuyez le combat !", 'info');
-    setTimeout(() => {
-        document.getElementById('battle-interface').style.display = 'none';
-        updateWorldMapUI();
-    }, 3000);
-}
