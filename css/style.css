@@ -2,10 +2,10 @@
 
 /* === Variables de Couleurs & Typographie === */
 :root {
-    --bg-color-dark: #100f1c;
-    --bg-color-medium: #1b1a29;
-    --text-color-light: #f5f5f5;
-    --text-color-accent: #d4af37;
+    --bg-color-dark: #0A0914; /* Plus sombre */
+    --bg-color-medium: #151421; /* Plus sombre */
+    --text-color-light: #E0E0E0; /* Un gris plus doux */
+    --text-color-accent: #FFD700; /* Jaune or plus vif */
     --border-color: #3f3e53;
 
     --accent-color-blue: #007acc;
@@ -44,6 +44,7 @@ body {
     color: var(--text-color-accent);
     margin: 0;
     font-size: 2.5rem;
+    text-shadow: 0 0 10px var(--text-color-accent); /* Effet de lueur */
 }
 
 .game-header nav {
@@ -90,7 +91,7 @@ body {
     border-radius: 5px;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s; /* Ajout de box-shadow */
     text-decoration: none;
     display: inline-block;
     border: none;
@@ -103,7 +104,8 @@ body {
 
 .btn-primary:hover {
     background-color: #005a9c;
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.05); /* Lève et agrandit légèrement */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Ajoute une ombre plus prononcée */
 }
 
 .btn-flee {
@@ -113,7 +115,8 @@ body {
 
 .btn-flee:hover {
     background-color: #a62a2a;
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 /* Styles pour les barres de progression */
@@ -128,19 +131,19 @@ body {
 
 .progress-bar {
     height: 100%;
-    transition: width 0.5s ease-in-out; /* AJOUT de la transition pour l'animation */
+    transition: width 0.5s ease-in-out;
 }
 
 .hp-bar {
-    background-color: var(--accent-color-green);
+    background: linear-gradient(90deg, var(--accent-color-green) 0%, #32CD32 100%);
 }
 
 .mana-bar {
-    background-color: var(--accent-color-blue);
+    background: linear-gradient(90deg, var(--accent-color-blue) 0%, #00BFFF 100%);
 }
 
 .xp-bar {
-    background-color: var(--accent-color-purple);
+    background: linear-gradient(90deg, var(--accent-color-purple) 0%, #BA55D3 100%);
 }
 
 /* Styles de la page de combat (battle.html) */
@@ -203,7 +206,7 @@ body {
 
 .btn-ability:hover {
     background-color: #7b439c;
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.05);
 }
 
 /* NOUVEAUX STYLES POUR LE JOURNAL DE COMBAT */
@@ -222,6 +225,12 @@ body {
 .combat-log p {
     margin: 5px 0;
     line-height: 1.2;
+    animation: slideIn 0.3s ease-out; /* Animation d'apparition */
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
 }
 
 .combat-log .log-player {
@@ -233,6 +242,12 @@ body {
 }
 
 /* Styles de l'arbre de compétences (skill_tree.html) */
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+}
+
 #skill-tree-container {
     display: flex;
     flex-wrap: wrap;
@@ -276,6 +291,7 @@ body {
 
 .skill-node.available, .class-node.available {
     border-color: var(--accent-color-blue);
+    animation: pulse 2s infinite; /* Animation de pulsation */
 }
 
 .skill-node.locked, .class-node.locked {
@@ -286,7 +302,7 @@ body {
 }
 
 .skill-node:not(.unlocked):hover, .class-node:not(.unlocked):hover {
-    transform: translateY(-5px);
+    transform: translateY(-5px) scale(1.1); /* soulève et agrandit */
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
 }
 
