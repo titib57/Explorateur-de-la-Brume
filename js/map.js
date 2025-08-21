@@ -226,15 +226,4 @@ node["historic"="statue"](around:100, ${lat}, ${lng});
     } else {
         showNotification("Votre navigateur ne supporte pas la géolocalisation.", 'warning');
     }
-
-    // Ces lignes ont été ajoutées pour corriger l'erreur de référence
-    const player = loadCharacter();
-    const classTreeBtn = document.getElementById('class-tree-btn');
-    if (classTreeBtn) {
-        if (player && player.level >= 5 && player.class === 'explorateur') {
-            classTreeBtn.style.display = 'block';
-        } else {
-            classTreeBtn.style.display = 'none';
-        }
-    }
 });
