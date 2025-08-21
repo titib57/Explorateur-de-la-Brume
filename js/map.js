@@ -116,10 +116,11 @@
             // Créer le marqueur du donjon du tutoriel à sa nouvelle position aléatoire
             tutorialDungeon.marker = L.marker(L.latLng(randomPos.lat, randomPos.lng)).addTo(map);
             tutorialDungeon.marker.bindPopup(`<h3>${tutorialDungeon.name}</h3>`).openPopup();
+            
+            // Écouteur de clic pour le donjon du tutoriel
             tutorialDungeon.marker.on('click', () => {
                 selectedDungeon = tutorialDungeon;
-                startBattleBtn.style.display = 'block';
-                startBattleBtn.textContent = `Entrer dans ${selectedDungeon.name}`;
+                updateDungeonMarkers(playerMarker.getLatLng());
             });
             
             map.setView(latLng, 13);
@@ -158,8 +159,7 @@
             // Ajout de l'écouteur de clic pour les donjons dynamiques
             dungeon.marker.on('click', () => {
                 selectedDungeon = dungeon;
-                startBattleBtn.style.display = 'block';
-                startBattleBtn.textContent = `Entrer dans ${selectedDungeon.name}`;
+                updateDungeonMarkers(playerMarker.getLatLng());
             });
         });
     }
@@ -168,19 +168,19 @@
         const overpassQuery = `
             [out:json];
             (
-              node["historic"="castle"](around:5000, ${lat}, ${lng});
-              node["historic"="ruins"](around:5000, ${lat}, ${lng});
-              node["historic"="fort"](around:5000, ${lat}, ${lng});
-              node["historic"="archaeological_site"](around:5000, ${lat}, ${lng});
-              node["historic"="monument"](around:5000, ${lat}, ${lng});
-              node["historic"="chateau"](around:5000, ${lat}, ${lng});
-              node["historic"="tour"](around:5000, ${lat}, ${lng});
-              node["historic"="cimetiere"](around:5000, ${lat}, ${lng});
-              node["historic"="eglise"](around:5000, ${lat}, ${lng});
-              node["historic"="cathedrale"](around:5000, ${lat}, ${lng});
-              node["historic"="memorial"](around:5000, ${lat}, ${lng});
-              node["historic"="stele"](around:5000, ${lat}, ${lng});
-              node["historic"="statue"](around:5000, ${lat}, ${lng});
+              node["historic"="castle"](around:100, ${lat}, ${lng});
+              node["historic"="ruins"](around:100, ${lat}, ${lng});
+              node["historic"="fort"](around:100, ${lat}, ${lng});
+              node["historic"="archaeological_site"](around:100, ${lat}, ${lng});
+              node["historic"="monument"](around:100, ${lat}, ${lng});
+              node["historic"="chateau"](around:100, ${lat}, ${lng});
+              node["historic"="tour"](around:100, ${lat}, ${lng});
+              node["historic"="cimetiere"](around:100, ${lat}, ${lng});
+              node["historic"="eglise"](around:100, ${lat}, ${lng});
+              node["historic"="cathedrale"](around:100, ${lat}, ${lng});
+              node["historic"="memorial"](around:100, ${lat}, ${lng});
+              node["historic"="stele"](around:100, ${lat}, ${lng});
+              node["historic"="statue"](around:100, ${lat}, ${lng});
             );
             out body;
             >;
@@ -243,25 +243,31 @@
             }
         });
         
-        // Logic for nearby dungeon detection
-        let nearbyDungeon = dungeons.find(dungeon => {
+        // Trouver le donjon le plus proche (pour l'affichage initial)
+        nearbyDungeon = dungeons.find(dungeon => {
             const distance = calculateDistance(playerLatLng.lat, playerLatLng.lng, dungeon.location.lat, dungeon.location.lng);
-            return distance <= 50;
+            return distance <= 100;
         });
 
-        // Mise à jour de l'interface en fonction du donjon à proximité
-        if (nearbyDungeon && selectedDungeon === null) {
+        // Logique de mise à jour du bouton
+        if (selectedDungeon) {
+            const distanceToSelected = calculateDistance(playerLatLng.lat, playerLatLng.lng, selectedDungeon.location.lat, selectedDungeon.location.lng);
+            if (distanceToSelected <= 100) {
+                startBattleBtn.style.display = 'block';
+                startBattleBtn.textContent = `Entrer dans ${selectedDungeon.name}`;
+            } else {
+                startBattleBtn.style.display = 'none';
+                showNotification(`Approchez-vous de ${selectedDungeon.name} pour y entrer.`, 'warning');
+                selectedDungeon = null; // Réinitialise la sélection si le joueur est trop loin
+            }
+        } else if (nearbyDungeon) {
+             // S'il y a un donjon à proximité mais aucun n'est sélectionné,
+             // on le sélectionne automatiquement et on affiche le bouton.
+            selectedDungeon = nearbyDungeon;
             startBattleBtn.style.display = 'block';
             startBattleBtn.textContent = `Entrer dans ${nearbyDungeon.name}`;
-            selectedDungeon = nearbyDungeon;
-        } else if (!nearbyDungeon && selectedDungeon && selectedDungeon.marker.getLatLng().distanceTo(playerMarker.getLatLng()) > 100) {
-            selectedDungeon = null;
+        } else {
             startBattleBtn.style.display = 'none';
-        } else if (selectedDungeon && selectedDungeon.marker.getLatLng().distanceTo(playerMarker.getLatLng()) <= 100) {
-            startBattleBtn.style.display = 'block';
-            startBattleBtn.textContent = `Entrer dans ${selectedDungeon.name}`;
-        } else if (!selectedDungeon && !nearbyDungeon) {
-             startBattleBtn.style.display = 'none';
         }
     }
 
@@ -279,7 +285,8 @@
             }
         );
 
-        startBattleBtn.addEventListener('click', () => {
+        document.getElementById('start-battle-btn').addEventListener('click', () => {
+            // Le bouton utilise maintenant la variable selectedDungeon
             if (selectedDungeon) {
                 localStorage.setItem('currentDungeon', JSON.stringify(selectedDungeon));
                 window.location.href = 'battle.html';
