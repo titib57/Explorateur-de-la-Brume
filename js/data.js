@@ -238,8 +238,21 @@ const skillTreeData = {
     },
     'explorateur': {
         name: "Arbre de compétences de l'explorateur",
-        skills: {}
-    }
+        skills: {
+            'sucer_glaçons': {
+                id: 'sucer_glaçons',
+                name: 'Sucer des glaçons',
+                description: 'Se mettre assis et suçer des glaçons...',
+                cost: 0,
+                prerequisites: [],
+                damage: 0,
+                manaCost: 0,
+                effect: { hp: 5 },
+                type: 'ability',
+                element: 'neutre'
+            },
+}
+    
 };
 
 const questsData = {
