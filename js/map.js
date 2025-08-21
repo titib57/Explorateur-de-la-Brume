@@ -168,19 +168,19 @@
         const overpassQuery = `
             [out:json];
             (
-              node["historic"="castle"](around:10000, ${lat}, ${lng});
-              node["historic"="ruins"](around:10000, ${lat}, ${lng});
-              node["historic"="fort"](around:10000, ${lat}, ${lng});
-              node["historic"="archaeological_site"](around:10000, ${lat}, ${lng});
-              node["historic"="monument"](around:10000, ${lat}, ${lng});
-              node["historic"="chateau"](around:10000, ${lat}, ${lng});
-              node["historic"="tour"](around:10000, ${lat}, ${lng});
-              node["historic"="cimetiere"](around:10000, ${lat}, ${lng});
-              node["historic"="eglise"](around:10000, ${lat}, ${lng});
-              node["historic"="cathedrale"](around:10000, ${lat}, ${lng});
-              node["historic"="memorial"](around:10000, ${lat}, ${lng});
-              node["historic"="stele"](around:10000, ${lat}, ${lng});
-              node["historic"="statue"](around:10000, ${lat}, ${lng});
+              node["historic"="castle"](around:5000, ${lat}, ${lng});
+              node["historic"="ruins"](around:5000, ${lat}, ${lng});
+              node["historic"="fort"](around:5000, ${lat}, ${lng});
+              node["historic"="archaeological_site"](around:5000, ${lat}, ${lng});
+              node["historic"="monument"](around:5000, ${lat}, ${lng});
+              node["historic"="chateau"](around:5000, ${lat}, ${lng});
+              node["historic"="tour"](around:5000, ${lat}, ${lng});
+              node["historic"="cimetiere"](around:5000, ${lat}, ${lng});
+              node["historic"="eglise"](around:5000, ${lat}, ${lng});
+              node["historic"="cathedrale"](around:5000, ${lat}, ${lng});
+              node["historic"="memorial"](around:5000, ${lat}, ${lng});
+              node["historic"="stele"](around:5000, ${lat}, ${lng});
+              node["historic"="statue"](around:5000, ${lat}, ${lng});
             );
             out body;
             >;
@@ -246,7 +246,7 @@
         // Logic for nearby dungeon detection
         let nearbyDungeon = dungeons.find(dungeon => {
             const distance = calculateDistance(playerLatLng.lat, playerLatLng.lng, dungeon.location.lat, dungeon.location.lng);
-            return distance <= 1000;
+            return distance <= 50;
         });
 
         // Mise à jour de l'interface en fonction du donjon à proximité
