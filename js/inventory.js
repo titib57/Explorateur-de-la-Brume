@@ -1,18 +1,6 @@
 ﻿// Fichier : js/inventory.js
 
 // Données fictives d'objets (À FUSIONNER AVEC VOTRE FICHIER data.js)
-const itemsData = {
-    weapons: {
-        'epee_bois': { name: 'Épée en bois', type: 'weapon', attack: 5, iconPath: 'img/icons/epee_bois.png' },
-        'dague_fer': { name: 'Dague en fer', type: 'weapon', attack: 10, iconPath: 'img/icons/dague_fer.png' }
-    },
-    armors: {
-        'plastron_cuir': { name: 'Plastron en cuir', type: 'armor', defense: 5, iconPath: 'img/icons/plastron_cuir.png' }
-    },
-    consumables: {
-        'potion_sante': { name: 'Potion de santé', type: 'consumable', effect: { hp: 50 }, iconPath: 'img/icons/potion_sante.png' }
-    }
-};
 
 function updateInventoryPageUI() {
     const equippedWeaponIcon = document.getElementById('equipped-weapon-icon');
