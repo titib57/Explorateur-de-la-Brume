@@ -19,7 +19,7 @@
         id: 'static_Tutoriel',
         name: 'Donjon du Tutoriel',
         location: null, // Sera mis à jour dynamiquement
-        monster: { name: 'Mannequin', hp: 10, attack: 0, defense: 0, xp: 5, gold: 2 },
+        monster: { name: 'Mannequin', hp: 10, attack: 0, defense: 0, xpReward: 5, goldReward: 2, element: 'neutre' },
         marker: null
     };
 
@@ -81,14 +81,14 @@
     }
 
     const staticDungeons = [
-        { id: 'static_monument_eiffel_tower', name: 'Donjon de la Tour Eiffel', location: { lat: 48.8584, lng: 2.2945 }, monster: { name: 'Gardien de fer', hp: 250, attack: 60, defense: 40, xp: 300, gold: 150 } },
-        { id: 'static_chateau_mont_saint_michel', name: 'Donjon du Mont-Saint-Michel', location: { lat: 48.6361, lng: -1.5111 }, monster: { name: 'Chevalier fantôme', hp: 200, attack: 50, defense: 30, xp: 250, gold: 120 } },
-        { id: 'static_chateau_versailles_castle', name: 'Donjon du Château de Versailles', location: { lat: 48.8041, lng: 2.1204 }, monster: { name: 'Roi maudit', hp: 180, attack: 45, defense: 35, xp: 220, gold: 110 } },
-        { id: 'static_ruins_verdon_gorges', name: 'Donjon des Gorges du Verdon', location: { lat: 43.7458, lng: 6.3147 }, monster: { name: 'Wyvern du Verdon', hp: 150, attack: 40, defense: 25, xp: 180, gold: 90 } },
-        { id: 'static_ruins_dune_du_pilat', name: 'Donjon de la Dune du Pilat', location: { lat: 44.588, lng: -1.216 }, monster: { name: 'Ver des sables géant', hp: 120, attack: 30, defense: 20, xp: 150, gold: 75 } },
-        { id: 'static_ruins_etretat_cliffs', name: 'Donjon des Falaises d\'Étretat', location: { lat: 49.7073, lng: 0.2014 }, monster: { name: 'Gargouille de craie', hp: 100, attack: 25, defense: 15, xp: 120, gold: 60 } },
-        { id: 'static_monument_arc_de_triomphe', name: 'Donjon de l\'Arc de Triomphe', location: { lat: 48.8738, lng: 2.2950 }, monster: { name: 'Garde impérial', hp: 180, attack: 40, defense: 30, xp: 200, gold: 100 } },
-        { id: 'static_cathedrale_notre_dame', name: 'Donjon de Notre-Dame', location: { lat: 48.8529, lng: 2.3499 }, monster: { name: 'Fantôme des gargouilles', hp: 220, attack: 55, defense: 35, xp: 280, gold: 130 } }
+        { id: 'static_monument_eiffel_tower', name: 'Donjon de la Tour Eiffel', location: { lat: 48.8584, lng: 2.2945 }, monster: { name: 'Gardien de fer', hp: 250, attack: 60, defense: 40, xpReward: 300, goldReward: 150 } },
+        { id: 'static_chateau_mont_saint_michel', name: 'Donjon du Mont-Saint-Michel', location: { lat: 48.6361, lng: -1.5111 }, monster: { name: 'Chevalier fantôme', hp: 200, attack: 50, defense: 30, xpReward: 250, goldReward: 120 } },
+        { id: 'static_chateau_versailles_castle', name: 'Donjon du Château de Versailles', location: { lat: 48.8041, lng: 2.1204 }, monster: { name: 'Roi maudit', hp: 180, attack: 45, defense: 35, xpReward: 220, goldReward: 110 } },
+        { id: 'static_ruins_verdon_gorges', name: 'Donjon des Gorges du Verdon', location: { lat: 43.7458, lng: 6.3147 }, monster: { name: 'Wyvern du Verdon', hp: 150, attack: 40, defense: 25, xpReward: 180, goldReward: 90 } },
+        { id: 'static_ruins_dune_du_pilat', name: 'Donjon de la Dune du Pilat', location: { lat: 44.588, lng: -1.216 }, monster: { name: 'Ver des sables géant', hp: 120, attack: 30, defense: 20, xpReward: 150, goldReward: 75 } },
+        { id: 'static_ruins_etretat_cliffs', name: 'Donjon des Falaises d\'Étretat', location: { lat: 49.7073, lng: 0.2014 }, monster: { name: 'Gargouille de craie', hp: 100, attack: 25, defense: 15, xpReward: 120, goldReward: 60 } },
+        { id: 'static_monument_arc_de_triomphe', name: 'Donjon de l\'Arc de Triomphe', location: { lat: 48.8738, lng: 2.2950 }, monster: { name: 'Garde impérial', hp: 180, attack: 40, defense: 30, xpReward: 200, goldReward: 100 } },
+        { id: 'static_cathedrale_notre_dame', name: 'Donjon de Notre-Dame', location: { lat: 48.8529, lng: 2.3499 }, monster: { name: 'Fantôme des gargouilles', hp: 220, attack: 55, defense: 35, xpReward: 280, goldReward: 130 } }
     ];
 
     function updatePlayerLocation(position) {
@@ -110,6 +110,10 @@
         } else {
             playerMarker.setLatLng(latLng);
         }
+        
+        // --- C'est la nouvelle ligne de code que j'ai ajoutée pour fixer le problème. ---
+        // Met à jour la position du donjon du tutoriel pour qu'il soit toujours près du joueur.
+        tutorialDungeon.location = { lat: latitude, lng: longitude };
 
         // Mettre à jour les marqueurs des donjons en fonction de la position du joueur
         updateDungeonMarkers(latLng);
@@ -195,8 +199,8 @@
                     hp: 100,
                     attack: 20,
                     defense: 10,
-                    xp: 50,
-                    gold: 25
+                    xpReward: 50,
+                    goldReward: 25
                 }
             };
         });
@@ -213,7 +217,7 @@
             if (dungeon.marker) {
                 const distance = calculateDistance(playerLatLng.lat, playerLatLng.lng, dungeon.location.lat, dungeon.location.lng);
                 const distanceFormatted = (distance > 1000) ? `${(distance / 1000).toFixed(2)} km` : `${distance.toFixed(0)} m`;
-                
+            
                 dungeon.marker.getPopup().setContent(`
                     <h3>${dungeon.name}</h3>
                     <p>Monstre: ${dungeon.monster.name}</p>
