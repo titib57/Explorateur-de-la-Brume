@@ -48,107 +48,122 @@ function loadCharacter() {
     if (!characterData) {
         return false;
     }
-    
-    try {
-        player = JSON.parse(characterData);
-        
-        // Initialisation des propriétés par défaut si elles n'existent pas
-        player.stats = player.stats || { strength: 1, intelligence: 1, speed: 1, dexterity: 1 };
-        player.statPoints = player.statPoints || 0;
-        player.skillPoints = player.skillPoints || 0;
-        player.gold = player.gold || 0;
-        player.xp = player.xp || 0;
-        player.level = player.level || 1;
-        player.unlockedSkills = player.unlockedSkills || ['fist_attack'];
-        player.unlockedClasses = player.unlockedClasses || ['explorateur'];
-        player.inventory = player.inventory || [];
-        player.equipment = player.equipment || { weapon: null, armor: null };
-        player.quests = player.quests || {};
-
-        recalculateDerivedStats();
-        
-        // S'assurer que les HP/Mana actuels ne dépassent pas les maximums
-        player.hp = Math.min(player.hp || player.maxHp, player.maxHp);
-        player.mana = Math.min(player.mana || player.maxMana, player.maxMana);
-
-        console.log("Personnage chargé :", player);
-        return true;
-    } catch (e) {
-        console.error("Erreur lors du chargement du personnage :", e);
-        return false;
+    player = JSON.parse(characterData);
+    // Assurer que les propriétés de base existent
+    if (!player.unlockedSkills) {
+        player.unlockedSkills = ['fist_attack'];
     }
+    if (!player.equipment) {
+        player.equipment = { weapon: null, armor: null };
+    }
+    if (!player.quests) {
+        player.quests = { ...questsData };
+    }
+    if (!player.element) {
+        player.element = 'neutre';
+    }
+    return true;
 }
 
-
-// --- Fonctions de progression et de statistiques ---
-
 /**
- * Calcule les statistiques dérivées du joueur (HP, Mana, Dégâts, etc.)
- * en fonction de ses statistiques de base et de son équipement.
+ * Calcule les statistiques dérivées du personnage (PV max, mana max, dégâts, etc.).
  */
 function recalculateDerivedStats() {
-    if (!player) return;
-    
-    player.maxHp = 100 + (player.stats.strength * 15);
-    player.maxMana = 50 + (player.stats.intelligence * 10);
-    player.attackDamage = 5 + (player.stats.strength * 2) + (player.stats.dexterity);
-    player.defense = 5 + (player.stats.strength) + (player.stats.dexterity);
-    
-    // Ajout des bonus d'équipement
-    if (player.equipment.weapon) {
-        player.attackDamage += player.equipment.weapon.damage || 0;
+    const baseStats = player.stats;
+    let totalStrength = baseStats.strength + (player.equipment.weapon ? player.equipment.weapon.stats.strength || 0 : 0) + (player.equipment.armor ? player.equipment.armor.stats.strength || 0 : 0);
+    let totalIntelligence = baseStats.intelligence + (player.equipment.weapon ? player.equipment.weapon.stats.intelligence || 0 : 0) + (player.equipment.armor ? player.equipment.armor.stats.intelligence || 0 : 0);
+    let totalSpeed = baseStats.speed + (player.equipment.weapon ? player.equipment.weapon.stats.speed || 0 : 0) + (player.equipment.armor ? player.equipment.armor.stats.speed || 0 : 0);
+    let totalDexterity = baseStats.dexterity + (player.equipment.weapon ? player.equipment.weapon.stats.dexterity || 0 : 0) + (player.equipment.armor ? player.equipment.armor.stats.dexterity || 0 : 0);
+
+    // Appliquer les effets de compétences passives
+    player.unlockedSkills.forEach(skillId => {
+        const skill = getSkillById(skillId);
+        if (skill && skill.type === 'passive' && skill.effect) {
+            totalStrength += skill.effect.strength || 0;
+            totalIntelligence += skill.effect.intelligence || 0;
+            totalSpeed += skill.effect.speed || 0;
+            totalDexterity += skill.effect.dexterity || 0;
+        }
+    });
+
+    player.maxHp = 100 + (totalStrength * 10);
+    player.maxMana = 50 + (totalIntelligence * 5);
+    player.attackDamage = 5 + (totalStrength * 2);
+    player.defense = 2 + (totalDexterity * 1.5);
+    player.critChance = 5 + (totalDexterity * 0.5); // 0.5% de chance de critique par point de Dextérité
+    player.critDamage = 1.5; // Multiplicateur de dégâts critiques de base
+
+    // Mettre à jour l'élément du joueur en fonction de l'arme
+    if (player.equipment.weapon && player.equipment.weapon.element && player.equipment.weapon.element !== 'neutre') {
+        player.element = player.equipment.weapon.element;
+    } else {
+        player.element = 'neutre';
     }
-    if (player.equipment.armor) {
-        player.defense += player.equipment.armor.defense || 0;
-    }
+
 }
 
 /**
- * Gère l'attribution de l'expérience au joueur et la montée en niveau.
- * @param {number} amount L'expérience à ajouter.
+ * Réinitialise les statistiques du personnage à leur valeur de base.
+ */
+function resetCharacterStats() {
+    // Implémentez la réinitialisation si nécessaire
+}
+
+
+/**
+ * Gagne de l'expérience et gère les montées de niveau.
+ * @param {number} amount La quantité d'XP à ajouter.
  */
 function giveXP(amount) {
-    if (!player) return;
     player.xp += amount;
-    
-    // Boucle de montée en niveau
+    showNotification(`Vous avez gagné ${amount} points d'expérience !`, 'info');
     while (player.xp >= player.xpToNextLevel) {
         player.xp -= player.xpToNextLevel;
         player.level++;
-        player.statPoints += 5; // Points de stats par niveau
-        player.skillPoints += 1; // Points de compétence par niveau
         player.xpToNextLevel = Math.floor(player.xpToNextLevel * 1.5);
-        
+        player.statPoints += 3;
+        player.skillPoints += 1;
         recalculateDerivedStats();
-        player.hp = player.maxHp;
+        player.hp = player.maxHp; // Soin complet à la montée de niveau
         player.mana = player.maxMana;
-        
-        showNotification(`Félicitations, vous êtes monté au niveau ${player.level} !`, 'success');
-        console.log(`Nouveau niveau: ${player.level}, XP restante: ${player.xp}`);
+        showNotification(`Vous êtes monté au niveau ${player.level} !`, 'success');
     }
     saveCharacter(player);
 }
 
 /**
- * Ajuste les statistiques de base du personnage en fonction de sa morphologie.
+ * Gère l'obtention d'un objet.
+ * @param {string} itemId L'ID de l'objet.
  */
-function applyPhysicalAttributes(character) {
-    switch (character.morphology) {
-        case 'musculeux':
-            character.stats.strength += 2;
-            character.stats.speed -= 1;
-            break;
-        case 'mince':
-            character.stats.speed += 2;
-            character.stats.strength -= 1;
-            break;
-        case 'potelé':
-            character.stats.strength += 1;
-            character.stats.dexterity -= 1;
-            break;
-        default: // 'normal'
-            break;
+function obtainItem(itemId) {
+    const item = itemsData.weapons[itemId] || itemsData.armors[itemId] || itemsData.consumables[itemId];
+    if (item) {
+        player.inventory.push(item);
+        showNotification(`Vous avez trouvé un(e) ${item.name} !`, 'success');
+        saveCharacter(player);
     }
+}
+
+/**
+ * Trouve une compétence par son ID, en cherchant d'abord dans les arbres de compétences,
+ * puis dans les données de compétences de base.
+ */
+function getSkillById(skillId) {
+    // Vérifier les compétences de l'arbre de classe
+    const classTree = skillTreeData[player.class];
+    if (classTree && classTree.skills[skillId]) {
+        return classTree.skills[skillId];
+    }
+    
+    // Vérifier les compétences des classes de base (guerrier, mage, voleur)
+    for (const classId in abilitiesData) {
+        const ability = abilitiesData[classId].find(a => a.id === skillId);
+        if (ability) {
+            return ability;
+        }
+    }
+    
+    return null;
 }
 
 // --- Fonctions de Combat ---
@@ -180,5 +195,6 @@ function flee() {
     showNotification("Vous fuyez le combat !", 'info');
     setTimeout(() => {
         document.getElementById('battle-interface').style.display = 'none';
-    }, 1500);
+        updateWorldMapUI();
+    }, 3000);
 }

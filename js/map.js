@@ -8,8 +8,7 @@
     const map = L.map('map');
     let playerMarker;
     let dungeons = [];
-    let nearbyDungeon = null;
-    let selectedDungeon = null; // Nouvelle variable pour le donjon sélectionné
+    let selectedDungeon = null;
     const mapElement = document.getElementById('map');
     const fullscreenBtn = document.getElementById('toggle-fullscreen-btn');
     const startBattleBtn = document.getElementById('start-battle-btn');
@@ -51,7 +50,6 @@
     function getRandomPoint(lat, lng, radius) {
         const y0 = lat;
         const x0 = lng;
-        // Conversion de mètres en degrés
         const rd = radius / 111300;
 
         const u = Math.random();
@@ -97,12 +95,7 @@
         const { latitude, longitude } = position.coords;
         const latLng = L.latLng(latitude, longitude);
 
-        // Calculer la nouvelle position aléatoire pour le donjon
-        const randomPos = getRandomPoint(latitude, longitude, 10);
-
-        // Mettre à jour la position du donjon du tutoriel
-        tutorialDungeon.location = { lat: randomPos.lat, lng: randomPos.lng };
-
+        // Mettre à jour la position du marqueur du joueur
         if (!playerMarker) {
             const playerIcon = L.divIcon({
                 className: 'player-icon',
@@ -112,31 +105,20 @@
             });
             playerMarker = L.marker(latLng, { icon: playerIcon }).addTo(map)
                 .bindPopup("Vous êtes ici").openPopup();
-
-            // Créer le marqueur du donjon du tutoriel à sa nouvelle position aléatoire
-            tutorialDungeon.marker = L.marker(L.latLng(randomPos.lat, randomPos.lng)).addTo(map);
-            tutorialDungeon.marker.bindPopup(`<h3>${tutorialDungeon.name}</h3>`).openPopup();
-
-            // Écouteur de clic pour le donjon du tutoriel
-            tutorialDungeon.marker.on('click', () => {
-                selectedDungeon = tutorialDungeon;
-                updateDungeonMarkers(playerMarker.getLatLng());
-            });
-
             map.setView(latLng, 13);
             fetchDungeonsFromOverpass(latitude, longitude);
         } else {
             playerMarker.setLatLng(latLng);
-
-            // Mettre à jour la position du marqueur du donjon du tutoriel
-            tutorialDungeon.marker.setLatLng(L.latLng(randomPos.lat, randomPos.lng));
         }
+
+        // Mettre à jour les marqueurs des donjons en fonction de la position du joueur
         updateDungeonMarkers(latLng);
     }
 
-    function drawDungeonsOnMap() {
+    function renderDungeonsOnMap() {
+        // Supprimer tous les marqueurs de donjons existants
         map.eachLayer(layer => {
-            if (layer instanceof L.Marker && layer !== playerMarker && layer !== tutorialDungeon.marker) {
+            if (layer instanceof L.Marker && layer !== playerMarker) {
                 map.removeLayer(layer);
             }
         });
@@ -144,10 +126,8 @@
         const playerLatLng = playerMarker ? playerMarker.getLatLng() : null;
 
         dungeons.forEach(dungeon => {
-            if (dungeon.id === tutorialDungeon.id) return;
-
             const distance = playerLatLng ? calculateDistance(playerLatLng.lat, playerLatLng.lng, dungeon.location.lat, dungeon.location.lng) : null;
-            const distanceFormatted = distance !== null ? `${distance.toFixed(0)} m` : 'Calcul de la distance...';
+            const distanceFormatted = distance !== null ? ((distance > 1000) ? `${(distance / 1000).toFixed(2)} km` : `${distance.toFixed(0)} m`) : 'Calcul de la distance...';
 
             dungeon.marker = L.marker([dungeon.location.lat, dungeon.location.lng]).addTo(map)
                 .bindPopup(`
@@ -156,12 +136,14 @@
                     <p>Distance: ${distanceFormatted}</p>
                 `);
 
-            // Ajout de l'écouteur de clic pour les donjons dynamiques
             dungeon.marker.on('click', () => {
                 selectedDungeon = dungeon;
-                updateDungeonMarkers(playerMarker.getLatLng());
+                updateStartBattleButton();
             });
         });
+
+        // Mettre à jour le bouton de combat après le rendu
+        updateStartBattleButton();
     }
 
     function fetchDungeonsFromOverpass(lat, lng) {
@@ -219,22 +201,19 @@
             };
         });
 
-        // Ajouter le donjon du tutoriel au début de la liste
+        // Ajouter le donjon du tutoriel et les donjons statiques à la liste
         dungeons = [tutorialDungeon, ...staticDungeons, ...dynamicDungeons];
-        drawDungeonsOnMap();
-        if (playerMarker) {
-             updateDungeonMarkers(playerMarker.getLatLng());
-        }
+        renderDungeonsOnMap();
     }
 
     function updateDungeonMarkers(playerLatLng) {
         if (!dungeons || !playerLatLng) return;
 
         dungeons.forEach(dungeon => {
-            const distance = calculateDistance(playerLatLng.lat, playerLatLng.lng, dungeon.location.lat, dungeon.location.lng);
-            const distanceFormatted = (distance > 1000) ? `${(distance / 1000).toFixed(2)} km` : `${distance.toFixed(0)} m`;
-
             if (dungeon.marker) {
+                const distance = calculateDistance(playerLatLng.lat, playerLatLng.lng, dungeon.location.lat, dungeon.location.lng);
+                const distanceFormatted = (distance > 1000) ? `${(distance / 1000).toFixed(2)} km` : `${distance.toFixed(0)} m`;
+                
                 dungeon.marker.getPopup().setContent(`
                     <h3>${dungeon.name}</h3>
                     <p>Monstre: ${dungeon.monster.name}</p>
@@ -243,31 +222,25 @@
             }
         });
 
-        // Trouver le donjon le plus proche (pour l'affichage initial)
-        nearbyDungeon = dungeons.find(dungeon => {
-            const distance = calculateDistance(playerLatLng.lat, playerLatLng.lng, dungeon.location.lat, dungeon.location.lng);
-            return distance <= 100;
-        });
+        updateStartBattleButton();
+    }
+    
+    function updateStartBattleButton() {
+        if (!playerMarker || !selectedDungeon) {
+            startBattleBtn.style.display = 'none';
+            return;
+        }
 
-        // Logique de mise à jour du bouton
-        if (selectedDungeon) {
-            const distanceToSelected = calculateDistance(playerLatLng.lat, playerLatLng.lng, selectedDungeon.location.lat, selectedDungeon.location.lng);
-            if (distanceToSelected <= 100) {
-                startBattleBtn.style.display = 'block';
-                startBattleBtn.textContent = `Entrer dans ${selectedDungeon.name}`;
-            } else {
-                startBattleBtn.style.display = 'none';
-                showNotification(`Approchez-vous de ${selectedDungeon.name} pour y entrer.`, 'warning');
-                selectedDungeon = null; // Réinitialise la sélection si le joueur est trop loin
-            }
-        } else if (nearbyDungeon) {
-             // S'il y a un donjon à proximité mais aucun n'est sélectionné,
-             // on le sélectionne automatiquement et on affiche le bouton.
-            selectedDungeon = nearbyDungeon;
+        const playerLatLng = playerMarker.getLatLng();
+        const distance = calculateDistance(playerLatLng.lat, playerLatLng.lng, selectedDungeon.location.lat, selectedDungeon.location.lng);
+        
+        if (distance <= 100) {
             startBattleBtn.style.display = 'block';
-            startBattleBtn.textContent = `Entrer dans ${nearbyDungeon.name}`;
+            startBattleBtn.textContent = `Entrer dans ${selectedDungeon.name}`;
         } else {
             startBattleBtn.style.display = 'none';
+            showNotification(`Approchez-vous de ${selectedDungeon.name} pour y entrer.`, 'warning');
+            selectedDungeon = null;
         }
     }
 
@@ -286,12 +259,9 @@
         );
 
         document.getElementById('start-battle-btn').addEventListener('click', () => {
-            // Le bouton utilise maintenant la variable selectedDungeon
             if (selectedDungeon) {
                 localStorage.setItem('currentDungeon', JSON.stringify(selectedDungeon));
                 window.location.href = 'battle.html';
-            } else {
-                showNotification("Veuillez d'abord vous approcher d'un donjon ou le sélectionner sur la carte.", 'warning');
             }
         });
 

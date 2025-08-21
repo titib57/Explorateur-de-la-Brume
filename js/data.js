@@ -1,18 +1,18 @@
 ﻿const abilitiesData = {
     guerrier: [
-        { id: "puissant_coup", name: "Coup puissant", damage: 20, cost: 5, type: 'damage' },
-        { id: "charge", name: "Charge", damage: 30, cost: 10, type: 'damage' }
+        { id: "puissant_coup", name: "Coup puissant", damage: 20, cost: 5, type: 'damage', element: 'neutre' },
+        { id: "charge", name: "Charge", damage: 30, cost: 10, type: 'damage', element: 'neutre' }
     ],
     mage: [
-        { id: "boule_de_feu", name: "Boule de feu", damage: 25, cost: 10, type: 'damage' },
-        { id: "eclair", name: "Éclair", damage: 35, cost: 15, type: 'damage' }
+        { id: "boule_de_feu", name: "Boule de feu", damage: 25, cost: 10, type: 'damage', element: 'feu' },
+        { id: "eclair", name: "Éclair", damage: 35, cost: 15, type: 'damage', element: 'foudre' }
     ],
     voleur: [
-        { id: "attaque_sournoise", name: "Attaque sournoise", damage: 22, cost: 8, type: 'damage' },
-        { id: "jet_de_dague", name: "Jet de dague", damage: 18, cost: 5, type: 'damage' }
+        { id: "attaque_sournoise", name: "Attaque sournoise", damage: 22, cost: 8, type: 'damage', element: 'neutre' },
+        { id: "jet_de_dague", name: "Jet de dague", damage: 18, cost: 5, type: 'damage', element: 'neutre' }
     ],
     explorateur: [
-        { id: "fist_attack", name: "Coup de poing", damage: 5, cost: 0, type: 'damage' }
+        { id: "fist_attack", name: "Coup de poing", damage: 5, cost: 0, type: 'damage', element: 'neutre' }
     ]
 };
 
@@ -69,25 +69,41 @@ const itemsData = {
             id: 'epee_rouillee',
             name: 'Épée rouillée',
             damage: 5,
-            type: 'weapon'
+            type: 'weapon',
+            element: 'neutre',
+            stats: { strength: 1 }
+        },
+        'epee_de_feu': {
+            id: 'epee_de_feu',
+            name: 'Épée de feu',
+            damage: 15,
+            type: 'weapon',
+            element: 'feu',
+            stats: { strength: 3 }
         },
         'arc_simple': {
             id: 'arc_simple',
             name: 'Arc simple',
             damage: 4,
-            type: 'weapon'
+            type: 'weapon',
+            element: 'neutre',
+            stats: { dexterity: 1 }
         },
         'baton_en_bois': {
             id: 'baton_en_bois',
             name: 'Bâton en bois',
             damage: 3,
-            type: 'weapon'
+            type: 'weapon',
+            element: 'neutre',
+            stats: { intelligence: 1 }
         },
         'dague_simple': {
             id: 'dague_simple',
             name: 'Dague simple',
             damage: 3,
-            type: 'weapon'
+            type: 'weapon',
+            element: 'neutre',
+            stats: { dexterity: 1 }
         }
     },
     armors: {
@@ -95,13 +111,15 @@ const itemsData = {
             id: 'tunique_de_lin',
             name: 'Tunique de lin',
             defense: 2,
-            type: 'armor'
+            type: 'armor',
+            stats: { dexterity: 1 }
         },
         'plastron_en_cuir': {
             id: 'plastron_en_cuir',
             name: 'Plastron en cuir',
             defense: 5,
-            type: 'armor'
+            type: 'armor',
+            stats: { strength: 2 }
         }
     },
     consumables: {
@@ -115,30 +133,18 @@ const itemsData = {
 };
 
 const monstersData = {
-    'gobelin': {
-        name: 'Gobelin',
-        maxHp: 30,
-        hp: 30,
-        attackDamage: 8,
-        xpReward: 25,
-        goldReward: 5
-    },
-    'loup': {
-        name: 'Loup',
-        maxHp: 40,
-        hp: 40,
-        attackDamage: 10,
-        xpReward: 35,
-        goldReward: 8
-    },
-    'chef_gobelin': {
-        name: 'Chef Gobelin',
-        maxHp: 80,
-        hp: 80,
-        attackDamage: 15,
-        xpReward: 100,
-        goldReward: 25
-    }
+    'gobelin': { id: 'gobelin', name: 'Gobelin', hp: 30, attack: 10, defense: 5, xpReward: 10, goldReward: 5, element: 'terre' },
+    'loup': { id: 'loup', name: 'Loup', hp: 40, attack: 15, defense: 7, xpReward: 15, goldReward: 8, element: 'neutre' },
+    'ours': { id: 'ours', name: 'Ours enragé', hp: 80, attack: 25, defense: 10, xpReward: 30, goldReward: 15, element: 'terre' },
+    'lapin_furieux': { id: 'lapin_furieux', name: 'Lapin furieux', hp: 20, attack: 5, defense: 2, xpReward: 5, goldReward: 2, element: 'neutre' },
+    'sanglier': { id: 'sanglier', name: 'Sanglier', hp: 35, attack: 12, defense: 8, xpReward: 12, goldReward: 7, element: 'terre' },
+    'bandit': { id: 'bandit', name: 'Bandit de grand chemin', hp: 50, attack: 20, defense: 10, xpReward: 25, goldReward: 10, element: 'neutre' },
+    'scorpion_geant': { id: 'scorpion_geant', name: 'Scorpion géant', hp: 45, attack: 18, defense: 6, xpReward: 18, goldReward: 9, element: 'feu' },
+    'cobra_royal': { id: 'cobra_royal', name: 'Cobra royal', hp: 40, attack: 16, defense: 5, xpReward: 16, goldReward: 8, element: 'poison' },
+    'golem_sable': { id: 'golem_sable', name: 'Golem de sable', hp: 90, attack: 22, defense: 15, xpReward: 35, goldReward: 20, element: 'terre' },
+    'grenouille_toxique': { id: 'grenouille_toxique', name: 'Grenouille toxique', hp: 25, attack: 8, defense: 4, xpReward: 8, goldReward: 4, element: 'eau' },
+    'serpent_eau': { id: 'serpent_eau', name: 'Serpent d\'eau', hp: 30, attack: 10, defense: 5, xpReward: 10, goldReward: 6, element: 'eau' },
+    'creature_lacustre': { id: 'creature_lacustre', name: 'Créature lacustre', hp: 70, attack: 20, defense: 12, xpReward: 28, goldReward: 18, element: 'eau' }
 };
 
 const skillsData = {
@@ -163,7 +169,8 @@ const skillTreeData = {
                 prerequisites: [],
                 damage: 50,
                 manaCost: 20,
-                type: 'ability'
+                type: 'ability',
+                element: 'neutre'
             },
             'peau_de_fer': {
                 id: 'peau_de_fer',
@@ -172,7 +179,8 @@ const skillTreeData = {
                 cost: 1,
                 prerequisites: ['frappe_puissante'],
                 effect: { defense: 5 },
-                type: 'passive'
+                type: 'passive',
+                element: 'neutre'
             }
         }
     },
@@ -187,7 +195,8 @@ const skillTreeData = {
                 prerequisites: [],
                 damage: 60,
                 manaCost: 20,
-                type: 'ability'
+                type: 'ability',
+                element: 'foudre'
             },
             'bouclier_arcanique': {
                 id: 'bouclier_arcanique',
@@ -196,7 +205,8 @@ const skillTreeData = {
                 cost: 1,
                 prerequisites: ['eclair_de_foudre'],
                 effect: { maxMana: 10 },
-                type: 'passive'
+                type: 'passive',
+                element: 'neutre'
             }
         }
     },
@@ -211,7 +221,8 @@ const skillTreeData = {
                 prerequisites: [],
                 damage: 25,
                 manaCost: 10,
-                type: 'ability'
+                type: 'ability',
+                element: 'neutre'
             },
             'agilite_superieure': {
                 id: 'agilite_superieure',
@@ -220,7 +231,8 @@ const skillTreeData = {
                 cost: 1,
                 prerequisites: ['attaque_rapide'],
                 effect: { speed: 2, dexterity: 2 },
-                type: 'passive'
+                type: 'passive',
+                element: 'neutre'
             }
         }
     },
@@ -250,6 +262,7 @@ const questsData = {
         rewardClaimed: false
     }
 };
+
 const locationTypes = {
     'foret': {
         name: 'Forêt mystérieuse',
@@ -285,17 +298,35 @@ const locationTypes = {
     }
 };
 
-const monstersData = {
-    'gobelin': { id: 'gobelin', name: 'Gobelin', hp: 30, attack: 10, defense: 5, xpReward: 10, goldReward: 5 },
-    'loup': { id: 'loup', name: 'Loup', hp: 40, attack: 15, defense: 7, xpReward: 15, goldReward: 8 },
-    'ours': { id: 'ours', name: 'Ours enragé', hp: 80, attack: 25, defense: 10, xpReward: 30, goldReward: 15 },
-    'lapin_furieux': { id: 'lapin_furieux', name: 'Lapin furieux', hp: 20, attack: 5, defense: 2, xpReward: 5, goldReward: 2 },
-    'sanglier': { id: 'sanglier', name: 'Sanglier', hp: 35, attack: 12, defense: 8, xpReward: 12, goldReward: 7 },
-    'bandit': { id: 'bandit', name: 'Bandit de grand chemin', hp: 50, attack: 20, defense: 10, xpReward: 25, goldReward: 10 },
-    'scorpion_geant': { id: 'scorpion_geant', name: 'Scorpion géant', hp: 45, attack: 18, defense: 6, xpReward: 18, goldReward: 9 },
-    'cobra_royal': { id: 'cobra_royal', name: 'Cobra royal', hp: 40, attack: 16, defense: 5, xpReward: 16, goldReward: 8 },
-    'golem_sable': { id: 'golem_sable', name: 'Golem de sable', hp: 90, attack: 22, defense: 15, xpReward: 35, goldReward: 20 },
-    'grenouille_toxique': { id: 'grenouille_toxique', name: 'Grenouille toxique', hp: 25, attack: 8, defense: 4, xpReward: 8, goldReward: 4 },
-    'serpent_eau': { id: 'serpent_eau', name: 'Serpent d\'eau', hp: 30, attack: 10, defense: 5, xpReward: 10, goldReward: 6 },
-    'creature_lacustre': { id: 'creature_lacustre', name: 'Créature lacustre', hp: 70, attack: 20, defense: 12, xpReward: 28, goldReward: 18 }
+const elements = {
+    'feu': {
+        name: 'Feu',
+        strongAgainst: ['terre', 'poison'],
+        weakAgainst: ['eau', 'foudre']
+    },
+    'eau': {
+        name: 'Eau',
+        strongAgainst: ['feu'],
+        weakAgainst: ['foudre', 'terre']
+    },
+    'terre': {
+        name: 'Terre',
+        strongAgainst: ['foudre', 'poison'],
+        weakAgainst: ['feu', 'eau']
+    },
+    'foudre': {
+        name: 'Foudre',
+        strongAgainst: ['eau'],
+        weakAgainst: ['terre']
+    },
+    'poison': {
+        name: 'Poison',
+        strongAgainst: ['eau'],
+        weakAgainst: ['feu', 'terre']
+    },
+    'neutre': {
+        name: 'Neutre',
+        strongAgainst: [],
+        weakAgainst: []
+    }
 };
