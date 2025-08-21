@@ -1,8 +1,5 @@
 // Fichier : js/battle_on_map.js
 
-// Les variables globales (player, currentMonster, etc.) sont déjà définies dans game.js
-// La fonction calculateElementalDamage est maintenant dans elements.js
-// La fonction updateQuestObjective est maintenant dans quests.js
 document.addEventListener('DOMContentLoaded', () => {
     if (!checkCharacter()) {
         return;
