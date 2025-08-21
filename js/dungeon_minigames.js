@@ -28,18 +28,29 @@ const miniGamesData = {
             }
         ]
     },
-    'ruins': {
-        name: 'La Plaque Ancienne',
-        description: "Vous explorez des ruines antiques envahies par la végétation. Pour trouver le chemin, vous devez déchiffrer une inscription latine.",
+ 'ruins': {
+        name: 'Les Ruines de l\'Oubli',
+        description: 'Pour passer les ruines, vous devez résoudre une énigme simple, laissée par un voyageur.',
         steps: [
             {
                 type: 'text',
-                prompt: "Une plaque de pierre se dresse devant vous. Elle est fissurée, mais l'inscription est claire : 'Alea iacta est.' Que signifie cette phrase ?\n\nIndice : C'est ce que Jules César aurait dit en traversant le Rubicon.",
-                requiredAnswer: "le sort en est jeté",
-                successMessage: "L'inscription brille, révélant un passage secret sous vos pieds.",
-                successConsequence: { type: 'xp', amount: 50 },
-                failureMessage: "Une dalle s'effondre sous vous, vous tombez dans un piège !",
-                failureConsequence: { type: 'damage', amount: 30 }
+                prompt: 'Une voix murmure : "Je suis toujours là mais on ne me voit jamais. On me cherche quand on me perd. Qui suis-je ?"',
+                requiredItem: 'le chemin', // Réponse attendue
+                failureMessage: "Vous vous êtes perdu dans les ruines. Un gobelin énervé vous barre la route.",
+                failureConsequence: { type: 'battle', monsterId: 'goblin_tutoriel' }
+            },
+            {
+                type: 'choice',
+                prompt: 'Un homme est dans un ascenseur. Il monte toujours jusqu’au 7e étage et descend au rez-de-chaussée. Sauf si il pleut, il monte au 9e étage. Pourquoi ?',
+                choices: [
+                    { text: 'Il est petit et il ne peut atteindre le bouton que du 9e étage en se mettant sur la pointe des pieds', consequence: 'failure' },
+                    { text: 'Il ne peut atteindre le bouton que du 7e étage en se mettant sur la pointe des pieds', consequence: 'success' },
+                    { text: 'Il est claustrophobe et il préfère prendre les escaliers', consequence: 'failure' }
+                ],
+                successMessage: "La sortie est à vous. Vous avez l'esprit vif.",
+                failureMessage: "La réponse est erronée. Un gobelin apparait.",
+                successConsequence: { type: 'reward', xp: 50, gold: 10 },
+                failureConsequence: { type: 'battle', monsterId: 'goblin_tutoriel' }
             }
         ]
     }

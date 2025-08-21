@@ -31,5 +31,20 @@ async function startDungeon(dungeonId) {
 document.getElementById('start-battle-btn').addEventListener('click', () => {
     if (nearbyDungeon) {
         startDungeon(nearbyDungeon.id);
+function addDungeonMarkers() {
+    for (const dungeonId in dungeonsData) {
+        const dungeon = dungeonsData[dungeonId];
+        const marker = L.marker([dungeon.location.lat, dungeon.location.lng]).addTo(map);
+
+        marker.on('click', () => {
+            nearbyDungeon = dungeon;
+            document.getElementById('start-battle-btn').style.display = 'block';
+            showNotification(`Vous êtes à proximité de ${dungeon.name}.`, 'info');
+        });
+
+        // Personnalisez l'icône si vous le souhaitez
+        // marker.setIcon(L.icon({ ... }));
+    }
+}
     }
 });

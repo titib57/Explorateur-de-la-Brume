@@ -169,6 +169,13 @@ const itemsData = {
 };
 
 const dungeonsData = {
+ tutorial_dungeon: {
+        id: 'tutorial_dungeon',
+        name: 'Le Passage des Ruines',
+        location: { lat: 48.8584, lng: 2.2945 }, // Coordonnées près de l'emplacement du joueur
+        minigame: 'ruins',
+        boss: 'goblin_tutoriel',
+    },
     'goblin_cave': {
         name: 'Grotte des Gobelins',
         monster: 'gobelin',
@@ -188,6 +195,21 @@ const dungeonsData = {
 };
 
 const monstersData = {
+ goblin_tutoriel: {
+        id: 'goblin_tutoriel',
+        name: 'Petit gobelin',
+        description: 'Un gobelin faible, idéal pour un premier combat.',
+        stats: {
+            hp: 20,
+            mana: 5,
+            attack: 5,
+            defense: 2,
+            speed: 8
+        },
+        loot: {
+            xp: 20,
+            gold: 5,
+    },
     'gobelin': {
         id: 'gobelin',
         name: 'Gobelin',
