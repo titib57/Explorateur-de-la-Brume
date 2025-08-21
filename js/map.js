@@ -12,6 +12,15 @@
     const mapElement = document.getElementById('map');
     const fullscreenBtn = document.getElementById('toggle-fullscreen-btn');
 
+    // Définir le donjon du tutoriel séparément
+    const tutorialDungeon = {
+        id: 'static_Tutoriel',
+        name: 'Donjon du Tutoriel',
+        location: null, // Sera mis à jour dynamiquement
+        monster: { name: 'Mannequin', hp: 10, attack: 0, defense: 0, xp: 5, gold: 2 },
+        marker: null
+    };
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
@@ -51,7 +60,6 @@
     }
 
     const staticDungeons = [
-        { id: 'static_Tutoriel', name: 'Turoriel', location: { L.marker(latLng, { icon: playerIcon }).addTo(map) }, monster: { name: 'Mannequin', hp: 10, attack: 0, defense: 0, xp: 5, gold: 2 } },
         { id: 'static_monument_eiffel_tower', name: 'Donjon de la Tour Eiffel', location: { lat: 48.8584, lng: 2.2945 }, monster: { name: 'Gardien de fer', hp: 250, attack: 60, defense: 40, xp: 300, gold: 150 } },
         { id: 'static_chateau_mont_saint_michel', name: 'Donjon du Mont-Saint-Michel', location: { lat: 48.6361, lng: -1.5111 }, monster: { name: 'Chevalier fantôme', hp: 200, attack: 50, defense: 30, xp: 250, gold: 120 } },
         { id: 'static_chateau_versailles_castle', name: 'Donjon du Château de Versailles', location: { lat: 48.8041, lng: 2.1204 }, monster: { name: 'Roi maudit', hp: 180, attack: 45, defense: 35, xp: 220, gold: 110 } },
@@ -75,17 +83,27 @@
             });
             playerMarker = L.marker(latLng, { icon: playerIcon }).addTo(map)
                 .bindPopup("Vous êtes ici").openPopup();
+            
+            // Créer le marqueur du donjon du tutoriel
+            tutorialDungeon.marker = L.marker(latLng).addTo(map);
+            tutorialDungeon.location = { lat: latLng.lat, lng: latLng.lng };
+            tutorialDungeon.marker.bindPopup(`<h3>${tutorialDungeon.name}</h3>`).openPopup();
+            
             map.setView(latLng, 13);
             fetchDungeonsFromOverpass(latitude, longitude);
         } else {
             playerMarker.setLatLng(latLng);
+            
+            // Mettre à jour la position du marqueur du donjon du tutoriel
+            tutorialDungeon.marker.setLatLng(latLng);
+            tutorialDungeon.location = { lat: latLng.lat, lng: latLng.lng };
         }
         updateDungeonMarkers(latLng);
     }
     
     function drawDungeonsOnMap() {
         map.eachLayer(layer => {
-            if (layer instanceof L.Marker && layer !== playerMarker) {
+            if (layer instanceof L.Marker && layer !== playerMarker && layer !== tutorialDungeon.marker) {
                 map.removeLayer(layer);
             }
         });
@@ -93,6 +111,8 @@
         const playerLatLng = playerMarker ? playerMarker.getLatLng() : null;
 
         dungeons.forEach(dungeon => {
+            if (dungeon.id === tutorialDungeon.id) return; // Ne pas redessiner le donjon du tutoriel
+            
             const distance = playerLatLng ? calculateDistance(playerLatLng.lat, playerLatLng.lng, dungeon.location.lat, dungeon.location.lng) : null;
             const distanceFormatted = distance !== null ? `${distance.toFixed(0)} m` : 'Calcul de la distance...';
             
@@ -119,9 +139,9 @@
               node["historic"="cimetiere"](around:100, ${lat}, ${lng});
               node["historic"="eglise"](around:100, ${lat}, ${lng});
               node["historic"="cathedrale"](around:100, ${lat}, ${lng});
-node["historic"="memorial"](around:100, ${lat}, ${lng});
-node["historic"="stele"](around:100, ${lat}, ${lng});
-node["historic"="statue"](around:100, ${lat}, ${lng});
+              node["historic"="memorial"](around:100, ${lat}, ${lng});
+              node["historic"="stele"](around:100, ${lat}, ${lng});
+              node["historic"="statue"](around:100, ${lat}, ${lng});
             );
             out body;
             >;
@@ -160,7 +180,8 @@ node["historic"="statue"](around:100, ${lat}, ${lng});
             };
         });
         
-        dungeons = [...staticDungeons, ...dynamicDungeons];
+        // Ajouter le donjon du tutoriel au début de la liste
+        dungeons = [tutorialDungeon, ...staticDungeons, ...dynamicDungeons];
         drawDungeonsOnMap();
         if (playerMarker) {
              updateDungeonMarkers(playerMarker.getLatLng());
@@ -170,7 +191,6 @@ node["historic"="statue"](around:100, ${lat}, ${lng});
     function updateDungeonMarkers(playerLatLng) {
         if (!dungeons || !playerLatLng) return;
         
-        // Update all dungeon popups with the correct distance
         dungeons.forEach(dungeon => {
             const distance = calculateDistance(playerLatLng.lat, playerLatLng.lng, dungeon.location.lat, dungeon.location.lng);
             const distanceFormatted = (distance > 1000) ? `${(distance / 1000).toFixed(2)} km` : `${distance.toFixed(0)} m`;
