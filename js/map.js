@@ -51,6 +51,7 @@
     }
 
     const staticDungeons = [
+        { id: 'static_Tutoriel', name: 'Turoriel', location: { L.marker(latLng, { icon: playerIcon }).addTo(map) }, monster: { name: 'Mannequin', hp: 10, attack: 0, defense: 0, xp: 5, gold: 2 } },
         { id: 'static_monument_eiffel_tower', name: 'Donjon de la Tour Eiffel', location: { lat: 48.8584, lng: 2.2945 }, monster: { name: 'Gardien de fer', hp: 250, attack: 60, defense: 40, xp: 300, gold: 150 } },
         { id: 'static_chateau_mont_saint_michel', name: 'Donjon du Mont-Saint-Michel', location: { lat: 48.6361, lng: -1.5111 }, monster: { name: 'Chevalier fantôme', hp: 200, attack: 50, defense: 30, xp: 250, gold: 120 } },
         { id: 'static_chateau_versailles_castle', name: 'Donjon du Château de Versailles', location: { lat: 48.8041, lng: 2.1204 }, monster: { name: 'Roi maudit', hp: 180, attack: 45, defense: 35, xp: 220, gold: 110 } },
