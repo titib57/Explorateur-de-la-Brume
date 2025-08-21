@@ -238,10 +238,6 @@
             startBattleBtn.style.display = 'block';
             startBattleBtn.textContent = `Entrer dans ${nearbyDungeon.name}`;
             
-            // Cette ligne a été supprimée pour éviter l'ouverture continue de la popup
-            // if (nearbyDungeon.marker) {
-            //     nearbyDungeon.marker.openPopup();
-            // }
 
         } else {
             startBattleBtn.style.display = 'none';
