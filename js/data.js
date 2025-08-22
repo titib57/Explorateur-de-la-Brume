@@ -352,53 +352,73 @@ const questsData = {
             gold: 250
         },
         nextQuestId: null
-    }
- 'dungeon_tutoriel': {
-        name: 'Dungeon du Tutoriel',
-        description: 'Vaincre le mannequin dans le donjon pour prouver votre force.',
+    },
+    'quete_foret': {
+        id: 'quete_foret',
+        name: 'Le mystère de la forêt',
+        description: 'Vainquez 5 loups pour découvrir la source des étranges bruits dans la forêt.',
         objective: {
             type: 'kill_monster',
-            target: 'mannequin',
-            required: 1,
-            current: 0
+            target: 'loup',
+            current: 0,
+            required: 5
         },
-        // Location sera définie dynamiquement ou référencée depuis dungeonsData
-        location: null,
+        reward: {
+            xp: 100,
+            gold: 50
+        },
         nextQuestId: null
     },
-    'dungeon_template': {
-        name: 'Quête de donjon',
-        description: 'Vaincre le monstre du donjon pour le terminer.',
+    'quete_plaine': {
+        id: 'quete_plaine',
+        name: 'Chasse aux bandits',
+        description: 'Éliminez les bandits qui terrorisent les plaines.',
         objective: {
             type: 'kill_monster',
-            target: '', // Sera remplacé par le monstre réel du donjon
-            required: 1,
-            current: 0
+            target: 'bandit',
+            current: 0,
+            required: 3
         },
-        // Location sera définie dynamiquement
-        location: null,
+        reward: {
+            xp: 120,
+            gold: 60
+        },
+        nextQuestId: null
+    },
+    'quete_desert': {
+        id: 'quete_desert',
+        name: 'L\'ombre du désert',
+        description: 'Trouvez et affrontez le golem de sable qui garde le trésor du désert.',
+        objective: {
+            type: 'kill_monster',
+            target: 'golem_sable',
+            current: 0,
+            required: 1
+        },
+        reward: {
+            xp: 150,
+            gold: 80
+        },
+        nextQuestId: null
+    },
+    'quete_lac': {
+        id: 'quete_lac',
+        name: 'Les profondeurs du lac',
+        description: 'Défendez le village en éliminant les créatures lacustres qui attaquent les pêcheurs.',
+        objective: {
+            type: 'kill_monster',
+            target: 'creature_lacustre',
+            current: 0,
+            required: 2
+        },
+        reward: {
+            xp: 130,
+            gold: 70
+        },
         nextQuestId: null
     }
 };
 
-const dungeonsData = {
-    'static_Tutoriel': {
-        name: 'Donjon du Tutoriel',
-        location: { lat: 48.970141, lng: 6.20815 },
-        monster: { name: 'Mannequin', hp: 10, attack: 1, defense: 0, xpReward: 5, goldReward: 2, element: 'neutre' }
-    },
-    'dynamic_caverne': {
-        name: 'Caverne des monstres',
-        monster: { name: 'Loup des cavernes', hp: 20, attack: 5, defense: 1, xpReward: 15, goldReward: 10, element: 'terre' },
-        questTemplateId: 'dungeon_template'
-    },
-    'dynamic_antre_dragon': {
-        name: 'Antre du Dragon',
-        monster: { name: 'Dragon', hp: 100, attack: 25, defense: 10, xpReward: 500, goldReward: 200, element: 'feu' },
-        questTemplateId: 'dungeon_template'
-    }
-};
-};
 const locationTypes = {
     'foret': {
         name: 'Forêt mystérieuse',
@@ -465,4 +485,12 @@ const elements = {
         strongAgainst: [],
         weakAgainst: []
     }
+};
+
+// --- Données de quêtes par donjon ---
+const dungeonQuestsData = {
+    'foret': 'quete_foret',
+    'plaine': 'quete_plaine',
+    'desert': 'quete_desert',
+    'lac': 'quete_lac',
 };
