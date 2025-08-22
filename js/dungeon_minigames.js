@@ -11,6 +11,24 @@ const miniGamesData = {
         successXP: 50,
         successGold: 20
     },
+    'castle': {
+        description: "Vous entrez dans un ancien château, son labyrinthe de couloirs est une énigme. Pour avancer, vous devez deviner le mot de passe du fantôme gardien.",
+        questions: ["Le premier mot est 'chevalier', le second est 'dragon'. Quel est le troisième ?", "Quel est le plus grand château du monde ?", "Combien de tours a le château de Chambord ?"],
+        answers: ["princesse", "château de prague", "3"],
+        successMessage: "Le fantôme acquiesce, la voie s'ouvre devant vous.",
+        failureMessage: "Une herse tombe, bloquant le chemin. Vous devez affronter le fantôme gardien !",
+        successXP: 50,
+        successGold: 20
+    },
+    'ruins': {
+        description: "Vous explorez des ruines antiques envahies par la végétation. Pour trouver le chemin, vous devez déchiffrer une inscription latine.",
+        questions: ["Qu'est-ce qui est 'Veni, vidi, vici' ?", "Quelle est la traduction de 'Alea iacta est' ?", "Quel empereur a construit le Colisée ?"],
+        answers: ["je suis venu, j'ai vu, j'ai vaincu", "le sort en est jeté", "vespasien"],
+        successMessage: "L'inscription brille, révélant un passage secret sous vos pieds.",
+        failureMessage: "Une dalle s'effondre sous vous, vous tombez dans un piège. Vous devez affronter le gardien des ruines !",
+        successXP: 75,
+        successGold: 30
+    }
     'ruins': {
         description: "Vous explorez des ruines antiques envahies par la végétation. Pour trouver le chemin, vous devez déchiffrer une inscription latine.",
         questions: ["Qu'est-ce qui est 'Veni, vidi, vici' ?", "Quelle est la traduction de 'Alea iacta est' ?", "Quel empereur a construit le Colisée ?"],

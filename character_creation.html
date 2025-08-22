@@ -11,7 +11,6 @@
     <header class="game-header">
         <h1>Explorateur de la Brume</h1>
         <nav>
-        
         </nav>
     </header>
 
@@ -42,55 +41,35 @@
                 <label for="char-morphology">Morphologie :</label>
                 <select id="char-morphology">
                     <option value="mince">Mince</option>
-                    <option value="normal" selected>Normale</option>
-                    <option value="musculeux">Musculeuse</option>
-                    <option value="potelé">Potelée</option>
+                    <option value="normal">Normal</option>
+                    <option value="musclé">Musclé</option>
+                    <option value="robuste">Robuste</option>
                 </select>
             </div>
 
             <button type="submit" class="btn-primary">Créer le personnage</button>
         </form>
     </main>
-
     <div id="notification-container"></div>
     <script src="js/game.js"></script>
+    <script src="js/utils.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('character-form');
-            const navLinks = document.querySelectorAll('nav a');
-            const hasCharacter = localStorage.getItem('playerCharacter') !== null;
-            
-            // Masquer les liens de navigation si aucun personnage n'existe
-            if (!hasCharacter) {
-                navLinks.forEach(link => {
-                    if (link.id !== 'create-char-link' && link.id !== 'world-map-link') {
-                        link.style.display = 'none';
-                    }
-                });
-            }
-
-            form.addEventListener('submit', (e) => {
+            document.getElementById('character-form').addEventListener('submit', (e) => {
                 e.preventDefault();
 
-                const name = document.getElementById('char-name').value;
-                const age = parseInt(document.getElementById('char-age').value);
-                const height = parseInt(document.getElementById('char-height').value);
-                const weight = parseInt(document.getElementById('char-weight').value);
-                const morphology = document.getElementById('char-morphology').value;
-                
-                // Création de l'objet personnage
                 const newCharacter = {
-                    name,
-                    age,
-                    height,
-                    weight,
-                    morphology,
+                    name: document.getElementById('char-name').value,
+                    age: parseInt(document.getElementById('char-age').value),
+                    height: parseInt(document.getElementById('char-height').value),
+                    weight: parseInt(document.getElementById('char-weight').value),
+                    morphology: document.getElementById('char-morphology').value,
                     class: 'explorateur',
                     xp: 0,
                     level: 1,
                     xpToNextLevel: 100,
-                    statPoints: 5, // Ajout de 5 points de stats pour le joueur
-                    skillPoints: 1, // Ajout de 1 point de compétence pour le joueur
+                    statPoints: 5,
+                    skillPoints: 1,
                     gold: 0,
                     stats: {
                         strength: 1,
@@ -108,10 +87,8 @@
                     quests: {}
                 };
 
-                // Sauvegarde du personnage
                 saveCharacter(newCharacter);
                 
-                // Vérification de la sauvegarde et redirection
                 if (localStorage.getItem('playerCharacter')) {
                     showNotification('Personnage créé avec succès !', 'success');
                     setTimeout(() => {

@@ -15,7 +15,6 @@
             <a id="world-map-link" href="world_map.html">Carte du monde</a>
             <a href="skill_tree.html">Arbre de compétences</a>
             <a href="stats.html">Statistiques</a>
-<script src="js/items.js"></script>
             <a href="inventory.html">Inventaire</a>
             <a href="quests.html">Quêtes</a>
         </nav>
@@ -33,12 +32,12 @@
             <div class="equipped-item">
                 <p>Arme:</p>
                 <img id="equipped-weapon-icon" src="" alt="Arme équipée">
-                <span id="equipped-weapon-name">Aucune</span>
+                <span id="equipped-weapon-name"></span>
             </div>
             <div class="equipped-item">
                 <p>Armure:</p>
                 <img id="equipped-armor-icon" src="" alt="Armure équipée">
-                <span id="equipped-armor-name">Aucune</span>
+                <span id="equipped-armor-name"></span>
             </div>
         </div>
         
@@ -48,17 +47,18 @@
         </div>
     </main>
 
+    <div id="notification-container"></div>
     <script src="js/data.js"></script>
-<script src="js/items.js"></script>
+    <script src="js/items.js"></script>
     <script src="js/game.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/inventory.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            if (!loadCharacter()) {
-                window.location.href = 'character_creation.html';
+            if (!checkCharacter()) {
                 return;
             }
+            loadCharacter();
             updateInventoryPageUI();
         });
 
@@ -71,16 +71,8 @@
                 btn.classList.remove('active');
             });
             document.getElementById(tabId).style.display = 'block';
-            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`button[onclick="showInventoryTab('${tabId}')"]`).classList.add('active');
         }
     </script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        if (!checkCharacter()) {
-            return; // La fonction checkCharacter() gère déjà la redirection
-        }
-        // Le reste de la logique de chargement de la page
-    });
-</script>
 </body>
 </html>

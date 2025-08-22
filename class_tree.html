@@ -51,21 +51,21 @@
         <h2>Arbre des classes</h2>
         <p>Points de compétence : <span id="skill-points">0</span></p>
         <div id="class-tree-container" class="skill-tree-container">
-            </div>
+        </div>
     </main>
-
+    <div id="notification-container"></div>
     <script src="js/data.js"></script>
     <script src="js/game.js"></script>
     <script src="js/utils.js"></script>
-<script src="js/items.js"></script>
     <script src="js/class_tree.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        if (!checkCharacter()) {
-            return; // La fonction checkCharacter() gère déjà la redirection
-        }
-        // Le reste de la logique de chargement de la page
-    });
-</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!checkCharacter()) {
+                return;
+            }
+            loadCharacter();
+            updateClassTreeUI();
+        });
+    </script>
 </body>
 </html>
