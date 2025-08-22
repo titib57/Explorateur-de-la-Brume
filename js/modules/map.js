@@ -265,4 +265,3 @@
     } else {
         showNotification("Votre navigateur ne supporte pas la géolocalisation.", 'warning');
     }
-});
