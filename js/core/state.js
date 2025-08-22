@@ -3,6 +3,7 @@
 // Importez les données nécessaires depuis d'autres fichiers.
 // Assurez-vous que ces fichiers existent et que les chemins sont corrects.
 import { questsData, itemSets, abilitiesData, classBases, itemsData, skillTreeData } from './gameData.js';
+import { showNotification } from './notifications.js';
 
 // Déclarez les variables globales du jeu et exportez-les pour qu'elles soient accessibles.
 export let player;

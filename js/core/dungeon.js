@@ -1,5 +1,7 @@
-﻿import { pointsOfInterest, monstersData, dungeonTypes, bossesData } from './gameData.js';
-import { showNotification, currentDungeon } from './state.js';
+﻿// Fichier : js/core/dungeon.js
+
+import { pointsOfInterest, dungeonTypes, monstersData, bossesData, poiQuests } from './gameData.js';
+import { showNotification, currentDungeon, player, saveCharacter } from './state.js';
 
 /**
  * Calcule la distance entre deux points géographiques (formule simplifiée).
@@ -11,14 +13,13 @@ function calculateDistance(loc1, loc2) {
 }
 
 /**
- * Génère un donjon dynamique en fonction du lieu réel le plus proche.
+ * Génère un donjon dynamique et une quête en fonction du lieu réel le plus proche.
  * @param {object} playerLocation La position actuelle du joueur { x, y }.
  */
 export function generateDungeon(playerLocation) {
     let closestPOI = null;
     let minDistance = Infinity;
 
-    // Trouver le point d'intérêt le plus proche
     for (const poiId in pointsOfInterest) {
         const poi = pointsOfInterest[poiId];
         const distance = calculateDistance(playerLocation, poi.location);
@@ -34,7 +35,7 @@ export function generateDungeon(playerLocation) {
     }
 
     const dungeonType = dungeonTypes[closestPOI.dungeonType];
-    
+
     // Sélectionne un monstre au hasard du pool de monstres du lieu
     const randomMonsterId = closestPOI.monsterPool[Math.floor(Math.random() * closestPOI.monsterPool.length)];
     const monsterData = monstersData[randomMonsterId];
@@ -63,7 +64,22 @@ export function generateDungeon(playerLocation) {
     showNotification(`Vous entrez dans ${newDungeon.name}! ${newDungeon.description}`, 'info');
 
     // Mettre à jour l'état du donjon actuel
-    currentDungeon = newDungeon; 
+    currentDungeon = newDungeon;
+
+    // Gérer la quête dynamique
+    const newQuestId = closestPOI.questId;
+    const newQuest = poiQuests[newQuestId];
     
+    // Vérifier si la quête existe et n'a pas déjà été acceptée
+    if (newQuest && (!player.quests || !player.quests[newQuestId])) {
+        // Initialiser l'objet de quêtes si nécessaire
+        if (!player.quests) {
+            player.quests = {};
+        }
+        player.quests[newQuestId] = { ...newQuest };
+        showNotification(`Nouvelle quête débloquée : ${newQuest.name}`, 'success');
+        saveCharacter(player);
+    }
+
     return true;
 }

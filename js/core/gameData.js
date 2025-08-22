@@ -146,7 +146,13 @@ export const monstersData = {
     'golem_sable': { id: 'golem_sable', name: 'Golem de sable', hp: 90, attack: 22, defense: 15, xpReward: 35, goldReward: 20, element: 'terre' },
     'grenouille_toxique': { id: 'grenouille_toxique', name: 'Grenouille toxique', hp: 25, attack: 8, defense: 4, xpReward: 8, goldReward: 4, element: 'eau' },
     'serpent_eau': { id: 'serpent_eau', name: 'Serpent d\'eau', hp: 30, attack: 10, defense: 5, xpReward: 10, goldReward: 6, element: 'eau' },
-    'creature_lacustre': { id: 'creature_lacustre', name: 'Créature lacustre', hp: 70, attack: 20, defense: 12, xpReward: 28, goldReward: 18, element: 'eau' }
+    'creature_lacustre': { id: 'creature_lacustre', name: 'Créature lacustre', hp: 70, attack: 20, defense: 12, xpReward: 28, goldReward: 18, element: 'eau' },
+    'rat_des_egouts': { id: 'rat_des_egouts', name: 'Rat des égouts', hp: 20, attack: 5, defense: 2, xpReward: 5, goldReward: 2, element: 'neutre' },
+    'corbeau_enrage': { id: 'corbeau_enrage', name: 'Corbeau enragé', hp: 25, attack: 7, defense: 3, xpReward: 8, goldReward: 4, element: 'air' },
+    'momie_reveillee': { id: 'momie_reveillee', name: 'Momie réveillée', hp: 50, attack: 15, defense: 10, xpReward: 20, goldReward: 12, element: 'terre' },
+    'scarabee_geants': { id: 'scarabee_geants', name: 'Scarabée géant', hp: 45, attack: 18, defense: 6, xpReward: 18, goldReward: 9, element: 'terre' },
+    'guerrier_fantome': { id: 'guerrier_fantome', name: 'Guerrier fantôme', hp: 80, attack: 25, defense: 10, xpReward: 30, goldReward: 15, element: 'neutre' },
+    'dragon_ancestral': { id: 'dragon_ancestral', name: 'Dragon ancestral', hp: 120, attack: 40, defense: 20, xpReward: 50, goldReward: 30, element: 'feu' }
 };
 
 export const skillsData = {
@@ -273,7 +279,7 @@ export const questsData = {
             gold: 20,
             item: 'potion_de_soin'
         },
-        nextQuestId: 'lart_devoluer' 
+        nextQuestId: 'lart_devoluer'
     },
     'lart_devoluer': {
         id: 'lart_devoluer',
@@ -443,21 +449,24 @@ export const pointsOfInterest = {
         location: { x: 48.8584, y: 2.2945 },
         difficulty: 'facile',
         dungeonType: 'tour',
-        monsterPool: ['rat_des_egouts', 'corbeau_enrage']
+        monsterPool: ['rat_des_egouts', 'corbeau_enrage'],
+        questId: 'tour_eiffel_quest'
     },
     'pyramides_de_gizeh': {
         name: 'Pyramides de Gizeh',
         location: { x: 29.9792, y: 31.1342 },
         difficulty: 'intermediaire',
         dungeonType: 'tombeau',
-        monsterPool: ['momie_reveillee', 'scarabee_geants']
+        monsterPool: ['momie_reveillee', 'scarabee_geants'],
+        questId: 'pyramides_de_gizeh_quest'
     },
     'grande_muraille_de_chine': {
         name: 'Grande Muraille de Chine',
         location: { x: 40.4319, y: 116.5704 },
         difficulty: 'difficile',
         dungeonType: 'muraille',
-        monsterPool: ['guerrier_fantome', 'dragon_ancestral']
+        monsterPool: ['guerrier_fantome', 'dragon_ancestral'],
+        questId: 'grande_muraille_de_chine_quest'
     }
 };
 
@@ -483,4 +492,55 @@ export const bossesData = {
     'chef_des_corbeaux': { name: 'Chef des Corbeaux', hp: 50, damage: 15 },
     'gardien_des_tombes': { name: 'Gardien des Tombes', hp: 100, damage: 30 },
     'dragon_ancestral': { name: 'Dragon Ancestral', hp: 200, damage: 50 }
+};
+
+export const poiQuests = {
+    'tour_eiffel_quest': {
+        id: 'tour_eiffel_quest',
+        name: 'L\'esprit de fer de la Tour',
+        description: 'L\'esprit de Gustave Eiffel a été corrompu par la brume. Vainquez-le pour ramener la paix à Paris.',
+        objective: {
+            type: 'kill_monster',
+            target: 'chef_des_corbeaux', 
+            required: 1,
+            current: 0
+        },
+        reward: {
+            xp: 200,
+            gold: 100,
+            item: 'epee_de_feu'
+        }
+    },
+    'pyramides_de_gizeh_quest': {
+        id: 'pyramides_de_gizeh_quest',
+        name: 'La malédiction des pharaons',
+        description: 'Un ancien pharaon maudit a été réveillé. Calmez sa rage en l\'affrontant dans son tombeau.',
+        objective: {
+            type: 'kill_monster',
+            target: 'gardien_des_tombes',
+            required: 1,
+            current: 0
+        },
+        reward: {
+            xp: 450,
+            gold: 250,
+            item: 'amulette_du_sable'
+        }
+    },
+    'grande_muraille_de_chine_quest': {
+        id: 'grande_muraille_de_chine_quest',
+        name: 'La défense de l\'Empereur',
+        description: 'L\'esprit protecteur de la Grande Muraille s\'est retourné contre son peuple. Affrontez le dragon ancestral pour libérer son âme.',
+        objective: {
+            type: 'kill_monster',
+            target: 'dragon_ancestral',
+            required: 1,
+            current: 0
+        },
+        reward: {
+            xp: 800,
+            gold: 500,
+            item: 'epee_du_dragon'
+        }
+    }
 };
