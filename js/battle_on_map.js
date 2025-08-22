@@ -1,24 +1,21 @@
 // Fichier : js/battle_on_map.js
 
-let player, currentMonster;
-
 document.addEventListener('DOMContentLoaded', () => {
     if (!checkCharacter()) {
         return;
     }
-    player = loadCharacter();
-});
+
+const monsterElementDisplay = document.getElementById('monster-element-display');
+const playerElementDisplay = document.getElementById('player-element-display');
 
 function initializeCombat() {
     updateBattleUI();
-    document.getElementById('normal-attack-button').onclick = () => playerAttack('basic');
-    document.getElementById('abilities-button').onclick = () => showActions('abilities-tab', event);
-    document.getElementById('inventory-button').onclick = () => showActions('consumables-tab', event);
+    document.getElementById('normal-attack-button').onclick = playerAttack;
     document.getElementById('flee-button').onclick = flee;
 }
 
 function updateBattleUI() {
-    // Player
+    // Logique de mise à jour de l'interface du combat
     document.getElementById('player-name').textContent = player.name;
     document.getElementById('player-hp').textContent = player.hp;
     document.getElementById('player-max-hp').textContent = player.maxHp;
@@ -26,109 +23,94 @@ function updateBattleUI() {
     document.getElementById('player-mana').textContent = player.mana;
     document.getElementById('player-max-mana').textContent = player.maxMana;
     document.getElementById('player-mana-bar').style.width = `${(player.mana / player.maxMana) * 100}%`;
-    const playerElement = player.equipment.weapon && itemsData.weapons[player.equipment.weapon.id] ? itemsData.weapons[player.equipment.weapon.id].element : 'neutre';
-    document.getElementById('player-element-display').textContent = `Élément: ${elements[playerElement].name}`;
-
-    // Monster
+    
     document.getElementById('monster-name').textContent = currentMonster.name;
     document.getElementById('monster-hp').textContent = currentMonster.hp;
-    document.getElementById('monster-max-hp').textContent = currentMonster.hp;
-    document.getElementById('monster-hp-bar').style.width = `${(currentMonster.hp / currentMonster.hp) * 100}%`;
-    document.getElementById('monster-mana').textContent = currentMonster.mana;
-    document.getElementById('monster-max-mana').textContent = currentMonster.mana;
-    document.getElementById('monster-mana-bar').style.width = `${(currentMonster.mana / currentMonster.mana) * 100}%`;
-    document.getElementById('monster-element-display').textContent = `Élément: ${elements[currentMonster.element].name}`;
+    document.getElementById('monster-max-hp').textContent = currentMonster.maxHp;
+    document.getElementById('monster-hp-bar').style.width = `${(currentMonster.hp / currentMonster.maxHp) * 100}%`;
+
+    // Afficher les éléments
+    playerElementDisplay.textContent = `Élément: ${elements[player.element].name}`;
+    playerElementDisplay.className = `element-${player.element}`;
+
+    monsterElementDisplay.textContent = `Élément: ${elements[currentMonster.element].name}`;
+    monsterElementDisplay.className = `element-${currentMonster.element}`;
+
+    updateAbilitiesUI(); // Assurez-vous que cette fonction est toujours disponible
+    updateConsumablesUI();
 }
 
-function playerAttack(type, abilityId = null) {
-    if (currentMonster.hp <= 0) return;
+function playerAttack() {
+    const attackDamage = player.attackDamage;
+    const playerElement = player.equipment.weapon?.element || player.element;
 
-    let baseDamage = player.attackDamage;
-    let attackElement = 'neutre';
-
-    if (type === 'ability' && abilityId) {
-        const ability = getSkillById(abilityId);
-        if (!ability || player.mana < ability.cost) {
-            showNotification("Mana insuffisant ou compétence invalide.", 'error');
-            return;
-        }
-        player.mana -= ability.cost;
-        baseDamage = ability.damage;
-        attackElement = ability.element;
-        addToCombatLog(`Vous utilisez ${ability.name}.`, 'log-info');
-    } else {
-        addToCombatLog("Vous lancez une attaque de base.", 'log-info');
-    }
-
-    const damageResult = calculateElementalDamage(player, currentMonster, baseDamage, attackElement);
-    currentMonster.hp -= damageResult.damage;
+    const { damage, message } = calculateElementalDamage(player, currentMonster, attackDamage, playerElement);
     
-    addToCombatLog(`Vous infligez ${damageResult.damage} dégâts au ${currentMonster.name}.`, 'log-damage');
-    if (damageResult.message) {
-        addToCombatLog(damageResult.message, damageResult.isCrit ? 'log-crit' : 'log-info');
+    currentMonster.hp -= damage;
+    
+    addToCombatLog(`Vous attaquez ${currentMonster.name} pour ${damage} dégâts.`, 'log-player');
+    if (message) {
+        showNotification(message, 'info');
     }
-
-    updateBattleUI();
-    saveCharacter(player);
-
+    
     if (currentMonster.hp <= 0) {
-        endBattle('win');
+        endCombat('victoire');
     } else {
-        setTimeout(monsterAttack, 2000);
+        monsterAttack();
     }
+    updateBattleUI();
 }
 
 function monsterAttack() {
-    if (player.hp <= 0) return;
-
-    const damageResult = calculateElementalDamage(currentMonster, player, currentMonster.attack, currentMonster.element);
-    player.hp -= damageResult.damage;
-
-    addToCombatLog(`${currentMonster.name} vous inflige ${damageResult.damage} dégâts.`, 'log-damage');
-    if (damageResult.message) {
-        addToCombatLog(damageResult.message, damageResult.isCrit ? 'log-crit' : 'log-info');
-    }
+    // Le monstre n'a pas d'arme, son attaque a l'élément du monstre lui-même
+    const monsterDamageResult = calculateElementalDamage(currentMonster, player, currentMonster.attack, currentMonster.element);
+    const monsterDamage = monsterDamageResult.damage;
     
-    updateBattleUI();
-    saveCharacter(player);
+    player.hp -= monsterDamage;
+    
+    addToCombatLog(`${currentMonster.name} vous attaque pour ${monsterDamage} dégâts.`, 'log-monster');
+    if (monsterDamageResult.message) {
+        showNotification(monsterDamageResult.message, 'info');
+    }
 
     if (player.hp <= 0) {
-        endBattle('lose');
+        endCombat('defaite');
     }
+    updateBattleUI();
 }
 
-function endBattle(result) {
-    if (result === 'win') {
-        addToCombatLog(`Vous avez vaincu le ${currentMonster.name}!`, 'log-success');
-        
-        player.xp += currentMonster.xpReward;
+function endCombat(result) {
+    if (result === 'victoire') {
+        addToCombatLog(`Vous avez vaincu ${currentMonster.name} !`, 'log-success');
+        giveXP(currentMonster.xpReward);
         player.gold += currentMonster.goldReward;
         
-        checkLevelUp();
-        
+        // Mettez à jour les quêtes si nécessaire (exemple : tuer un monstre)
         updateQuestObjective('kill_monster', currentMonster.id);
         
         saveCharacter(player);
         setTimeout(() => {
+            // Cacher l'interface de combat
             document.getElementById('battle-interface').style.display = 'none';
-            window.location.href = 'world_map.html';
+            // Mettre à jour les stats du joueur sur la carte
+            updateWorldMapUI();
         }, 3000);
     } else { // défaite
-        addToCombatLog("Vous avez été vaincu ! Vous vous réveillez à l'entrée du donjon.", 'log-error');
+        addToCombatLog("Vous avez été vaincu ! La fuite est votre seule option !", 'log-error');
         player.hp = player.maxHp;
         saveCharacter(player);
         setTimeout(() => {
             document.getElementById('battle-interface').style.display = 'none';
-            window.location.href = 'world_map.html';
+            updateWorldMapUI();
         }, 3000);
     }
 }
 
 function flee() {
-    showNotification("Vous fuyez le combat !", 'info');
+    showNotification("Vous fuyez le combat ! La fuite est votre seule option !", 'info');
     setTimeout(() => {
         document.getElementById('battle-interface').style.display = 'none';
-        window.location.href = 'world_map.html';
+        updateWorldMapUI();
     }, 3000);
 }
 
@@ -140,6 +122,6 @@ function addToCombatLog(message, className) {
         entry.textContent = message;
         entry.classList.add(className);
         combatLog.appendChild(entry);
-        combatLog.scrollTop = combatLog.scrollHeight;
+        combatLog.scrollTop = combatLog.scrollHeight; // Scroll vers le bas
     }
 }

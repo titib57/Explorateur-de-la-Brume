@@ -63,20 +63,17 @@ function calculateElementalDamage(attacker, target, baseDamage, attackElement) {
     }
 
     // Calcul final des dégâts
-    let finalDamage = Math.max(0, (baseDamage * damageMultiplier) - (target.defense || 0));
+    let finalDamage = Math.max(0, (baseDamage * damageMultiplier) - target.defense);
 
-    // Gérer les coups critiques (basé sur la dextérité du joueur)
-    const critChance = attacker.stats ? attacker.stats.dexterity * 0.5 : 0;
-    const critDamage = attacker.stats ? attacker.stats.dexterity * 0.1 + 1 : 1;
-    
-    if (Math.random() * 100 < critChance) {
-        finalDamage *= critDamage;
+    // Gérer les coups critiques
+    if (Math.random() * 100 < attacker.critChance) {
+        finalDamage *= attacker.critDamage;
         message = (message ? message + " " : "") + "Coup critique !";
     }
 
     return {
         damage: Math.round(finalDamage),
-        message: message,
-        isCrit: message && message.includes("Coup critique")
+        multiplier: damageMultiplier,
+        message: message
     };
 }

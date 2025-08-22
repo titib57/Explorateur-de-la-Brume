@@ -32,41 +32,19 @@ body {
     min-height: 100vh;
 }
 
-.game-container {
-    padding: 20px;
-    margin: 20px auto;
-    max-width: 900px;
-    background: var(--bg-color-medium);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    flex-grow: 1;
-}
-
-h1, h2 {
-    font-family: var(--fantasy-font);
-    color: var(--text-color-accent);
-    text-align: center;
-    text-transform: uppercase;
-}
-
-h3 {
-    color: var(--text-color-light);
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 5px;
-    margin-top: 20px;
-}
-
 .game-header {
-    background: var(--bg-color-medium);
-    border-bottom: 1px solid var(--border-color);
-    padding: 10px 20px;
+    background-color: var(--bg-color-medium);
+    padding: 20px;
     text-align: center;
+    border-bottom: 2px solid var(--border-color);
 }
 
 .game-header h1 {
+    font-family: var(--fantasy-font);
+    color: var(--text-color-accent);
     margin: 0;
-    font-size: 2rem;
+    font-size: 2.5rem;
+    text-shadow: 0 0 10px var(--text-color-accent); /* Effet de lueur */
 }
 
 .game-header nav {
@@ -76,8 +54,8 @@ h3 {
 .game-header nav a {
     color: var(--text-color-light);
     text-decoration: none;
-    padding: 5px 15px;
-    margin: 0 5px;
+    margin: 0 15px;
+    font-weight: bold;
     transition: color 0.3s;
 }
 
@@ -85,219 +63,434 @@ h3 {
     color: var(--text-color-accent);
 }
 
-.btn-primary, .btn-flee, .btn-stat {
-    background-color: var(--accent-color-blue);
-    color: var(--text-color-light);
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-family: var(--main-font);
-    font-size: 1rem;
-    transition: background-color 0.3s, transform 0.2s;
-    text-decoration: none;
-    display: inline-block;
-    text-align: center;
+.game-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: var(--bg-color-medium);
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--border-color);
 }
 
-.btn-primary:hover, .btn-stat:hover {
-    background-color: #005f99;
-    transform: translateY(-2px);
+.game-container h2 {
+    font-family: var(--fantasy-font);
+    text-align: center;
+    color: var(--text-color-accent);
+    margin-top: 0;
+}
+
+.action-buttons {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.btn-primary, .btn-flee, .btn-ability, .btn-stat, .tab-button {
+    font-family: var(--main-font);
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s; /* Ajout de box-shadow */
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+}
+
+.btn-primary {
+    background-color: var(--accent-color-blue);
+    color: var(--text-color-light);
+}
+
+.btn-primary:hover {
+    background-color: #005a9c;
+    transform: translateY(-2px) scale(1.05); /* Lève et agrandit légèrement */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Ajoute une ombre plus prononcée */
 }
 
 .btn-flee {
     background-color: var(--accent-color-red);
-}
-
-.btn-flee:hover {
-    background-color: #c0392b;
-    transform: translateY(-2px);
-}
-
-.btn-stat {
-    padding: 5px 10px;
-    font-size: 0.8rem;
-    margin: 0 5px;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.form-group input, .form-group select {
-    width: 100%;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-color-dark);
     color: var(--text-color-light);
 }
 
-.stat-group {
-    margin-top: 20px;
+.btn-flee:hover {
+    background-color: #a62a2a;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-.stats-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.stat-item {
-    text-align: center;
-}
-
+/* Styles pour les barres de progression */
 .progress-bar-container {
-    width: 100%;
-    background-color: var(--bg-color-dark);
-    border-radius: 5px;
+    background-color: #333;
     border: 1px solid var(--border-color);
-    height: 10px;
-    margin-top: 5px;
+    border-radius: 5px;
+    height: 15px;
     overflow: hidden;
+    margin-top: 5px;
 }
 
 .progress-bar {
     height: 100%;
-    background-color: var(--accent-color-green);
-    transition: width 0.3s ease;
+    transition: width 0.5s ease-in-out;
 }
 
-.red-bar {
-    background-color: var(--accent-color-red);
+.hp-bar {
+    background: linear-gradient(90deg, var(--accent-color-green) 0%, #32CD32 100%);
 }
 
-.blue-bar {
-    background-color: var(--accent-color-blue);
+.mana-bar {
+    background: linear-gradient(90deg, var(--accent-color-blue) 0%, #00BFFF 100%);
 }
 
-#battle-interface {
+.xp-bar {
+    background: linear-gradient(90deg, var(--accent-color-purple) 0%, #BA55D3 100%);
+}
+
+/* Styles de la page de combat (battle.html) */
+#combat-info {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: flex-start;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-#player-stats, #monster-stats {
-    flex: 1;
-    min-width: 250px;
-    background-color: #222;
-    padding: 20px;
-    border-radius: 8px;
-}
-
-#combat-log {
-    background-color: #1e1e1e;
-    border: 1px solid #333;
-    padding: 10px;
-    height: 200px;
-    overflow-y: auto;
-    margin-top: 20px;
-    border-radius: 8px;
-    flex-basis: 100%;
-}
-
-.log-info { color: #888; }
-.log-attack { color: var(--text-color-light); }
-.log-damage { color: var(--accent-color-red); }
-.log-heal { color: var(--accent-color-green); }
-.log-crit { color: var(--accent-color-yellow); }
-.log-success { color: var(--accent-color-green); }
-.log-error { color: var(--accent-color-red); }
-.log-warning { color: var(--accent-color-yellow); }
-
-.notification-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
-}
-
-.notification {
-    background-color: #333;
-    color: var(--text-color-light);
-    padding: 10px 20px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-    opacity: 0.9;
-    min-width: 250px;
     text-align: center;
 }
 
-.notification.success { background-color: var(--accent-color-green); }
-.notification.error { background-color: var(--accent-color-red); }
-.notification.warning { background-color: var(--accent-color-yellow); }
+#player-stats, #monster-stats {
+    flex-basis: 45%;
+    background-color: var(--bg-color-dark);
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+}
+
+#combat-info h3 {
+    margin-top: 0;
+    font-family: var(--fantasy-font);
+    color: var(--text-color-accent);
+}
+
+.combat-actions {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
 
 .tab-button {
-    background-color: #333;
+    background-color: var(--bg-color-dark);
     color: var(--text-color-light);
-    border: 1px solid var(--border-color);
-    border-bottom: none;
-    padding: 10px 20px;
-    border-radius: 8px 8px 0 0;
-    cursor: pointer;
+    border: 2px solid var(--border-color);
 }
 
 .tab-button.active {
-    background-color: var(--bg-color-medium);
-    border-color: var(--text-color-accent);
+    background-color: var(--accent-color-blue);
+    border-color: var(--accent-color-blue);
 }
 
 .tab-content {
-    background-color: var(--bg-color-medium);
-    border: 1px solid var(--border-color);
-    border-top: none;
+    border: 2px solid var(--border-color);
+    padding: 20px;
+    border-radius: 8px;
+    background-color: var(--bg-color-dark);
+}
+
+.btn-ability {
+    background-color: var(--accent-color-purple);
+    color: white;
+    margin: 5px;
+}
+
+.btn-ability:hover {
+    background-color: #7b439c;
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* NOUVEAUX STYLES POUR LE JOURNAL DE COMBAT */
+.combat-log {
+    background-color: var(--bg-color-dark);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 20px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: var(--main-font);
+    font-size: 0.9em;
+}
+
+.combat-log p {
+    margin: 5px 0;
+    line-height: 1.2;
+    animation: slideIn 0.3s ease-out; /* Animation d'apparition */
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.combat-log .log-player {
+    color: var(--text-color-accent);
+}
+
+.combat-log .log-monster {
+    color: var(--accent-color-red);
+}
+
+/* Styles de l'arbre de compétences (skill_tree.html) */
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+}
+
+#skill-tree-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
     padding: 20px;
 }
 
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 10px;
+.skill-node {
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    background-color: #333;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.skill-node img {
+    width: 60px;
+    height: 60px;
+}
+
+.skill-node p {
+    margin-top: 5px;
+    font-size: 0.8rem;
+}
+
+.skill-node.unlocked, .class-node.unlocked {
+    border-color: var(--accent-color-green);
+    background-color: #1e3a24;
+    cursor: default;
+}
+
+.skill-node.available, .class-node.available {
+    border-color: var(--accent-color-blue);
+    animation: pulse 2s infinite; /* Animation de pulsation */
+}
+
+.skill-node.locked, .class-node.locked {
+    background-color: #1e1e1e;
+    border-color: #cc3333;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+}
+
+.skill-node:not(.unlocked):hover, .class-node:not(.unlocked):hover {
+    transform: translateY(-5px) scale(1.1); /* soulève et agrandit */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* Styles pour la page de statistiques (stats.html) */
+#stats-allocation .stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.btn-stat {
+    width: 30px;
+    height: 30px;
+    background-color: var(--accent-color-blue);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.btn-stat[data-action="minus"] {
+    background-color: var(--accent-color-red);
+}
+
+#current-stats, #stats-allocation {
+    background-color: var(--bg-color-dark);
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border: 2px solid var(--border-color);
+}
+
+#current-stats h3, #stats-allocation h3 {
+    font-family: var(--fantasy-font);
+    color: var(--text-color-accent);
+}
+
+/* Styles pour la carte du monde */
+.map-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+}
+
+#map.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+}
+
+#toggle-fullscreen-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1001;
+}
+
+/* Styles pour le menu contextuel (non utilisé actuellement mais bonne pratique) */
+.leaflet-popup-content-wrapper {
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-light);
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+.leaflet-popup-tip {
+    background-color: var(--bg-color-dark);
+}
+.leaflet-popup-content {
     padding: 10px;
 }
 
-.item-card {
-    background-color: #2c2b3f;
+/* Style de la page d'inventaire */
+#inventory-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#inventory-tabs .tab-button.active {
+    background-color: var(--accent-color-blue);
+    color: white;
+}
+
+.inventory-items-list li {
+    background-color: var(--bg-color-dark);
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+/* Styles pour les notifications */
+#notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+}
+
+.notification {
+    padding: 15px 25px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    color: var(--text-color-light);
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.5s ease-out, fadeOut 0.5s ease-in 4.5s;
+}
+
+.notification.info {
+    background-color: var(--accent-color-blue);
+}
+
+.notification.success {
+    background-color: var(--accent-color-green);
+}
+
+.notification.warning {
+    background-color: var(--accent-color-yellow);
+}
+
+.notification.error {
+    background-color: var(--accent-color-red);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-20px); }
+}
+#inventory-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 15px;
+    padding: 10px;
+    background-color: var(--bg-color-medium);
+    border-radius: 8px;
+}
+
+.inventory-item {
+    background-color: var(--bg-color-dark);
     border: 2px solid var(--border-color);
     border-radius: 8px;
     padding: 10px;
     text-align: center;
-    transition: transform 0.2s;
     cursor: pointer;
+    position: relative;
+    transition: transform 0.2s;
 }
 
-.item-card:hover {
+.inventory-item:hover {
     transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
 }
 
-.item-card img {
-    width: 64px;
-    height: 64px;
+.inventory-item img {
+    width: 60px;
+    height: 60px;
     border-radius: 4px;
 }
 
-.item-card p {
-    margin: 5px 0 0;
-    font-size: 0.9rem;
+.inventory-item .item-name {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.8em;
+    font-weight: bold;
 }
-
-/* Rareté des objets */
-.rarity-common { border-color: #888; }
-.rarity-uncommon { border-color: var(--accent-color-green); }
-.rarity-rare { border-color: var(--accent-color-blue); }
-.rarity-epic { border-color: var(--accent-color-purple); }
-.rarity-legendary { border-color: var(--text-color-accent); }
 
 /* Styles pour les bulles d'aide (tooltips) */
 .tooltip {
@@ -309,7 +502,7 @@ h3 {
     padding: 10px;
     position: absolute;
     z-index: 1;
-    bottom: 125%;
+    bottom: 125%; /* Positionnement au-dessus de l'élément */
     left: 50%;
     transform: translateX(-50%);
     opacity: 0;
@@ -327,15 +520,29 @@ h3 {
 .skill-tree-container {
     position: relative;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
     padding: 20px;
 }
 
-.skill-tree-line {
+.skill-node {
+    /* Styles existants */
+}
+
+/* Style des lignes de connexion */
+#skill-tree-lines {
     position: absolute;
-    width: 2px;
-    background-color: var(--border-color);
-    z-index: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Permet aux clics de passer à travers */
+}
+
+.skill-line {
+    position: absolute;
+    height: 2px;
+    background-color: var(--text-color-light);
+    transform-origin: 0 50%;
+    border-radius: 2px;
 }

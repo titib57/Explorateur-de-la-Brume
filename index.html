@@ -14,9 +14,11 @@
             <a href="index.html">Accueil</a>
             <a id="create-char-link" href="character_creation.html">Créer un personnage</a>
             <a id="world-map-link" href="world_map.html">Carte du monde</a>
+        
             <a href="skill_tree.html">Arbre de compétences</a>
             <a href="stats.html">Statistiques</a>
             <a href="inventory.html">Inventaire</a>
+<script src="js/items.js"></script>
             <a href="quests.html">Quêtes</a>
         </nav>
     </header>
@@ -28,13 +30,10 @@
         </p>
         <div class="action-buttons">
             <a id="start-adventure-btn" href="character_creation.html" class="btn-primary">Commencer l'aventure</a>
-            <button id="delete-char-btn" class="btn-flee" style="display: none;">Supprimer le personnage</button>
+            <button id="delete-char-btn" class="btn-flee">Supprimer le personnage</button>
         </div>
     </main>
 
-    <div id="notification-container"></div>
-
-    <script src="js/utils.js"></script>
     <script src="js/game.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -45,17 +44,17 @@
             const navLinks = document.querySelectorAll('nav a:not(#create-char-link)');
             
             if (hasCharacter) {
-                createCharLink.style.display = 'none';
-                startBtn.style.display = 'none';
-                deleteBtn.style.display = 'block';
-                navLinks.forEach(link => link.style.display = 'inline');
+                 createCharLink.style.display = 'none';
+                 startBtn.style.display = 'none';
+                 deleteBtn.style.display = 'block';
+                 navLinks.forEach(link => link.style.display = 'inline');
             } else {
-                navLinks.forEach(link => {
-                    if (link.id !== 'create-char-link') {
-                        link.style.display = 'none';
-                    }
-                });
-                deleteBtn.style.display = 'none';
+                 navLinks.forEach(link => {
+                     if (link.id !== 'create-char-link') {
+                         link.style.display = 'none';
+                     }
+                 });
+                 deleteBtn.style.display = 'none';
             }
 
             deleteBtn.addEventListener('click', () => {

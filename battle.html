@@ -12,8 +12,8 @@
         <h1>Explorateur de la Brume</h1>
         <nav>
             <a href="index.html">Accueil</a>
-            <a id="create-char-link" href="character_creation.html" style="display: none;">Créer un personnage</a>
-            <a id="world-map-link" href="world_map.html" style="display: none;">Carte du monde</a>
+            <a id="create-char-link" href="character_creation.html">Créer un personnage</a>
+            <a id="world-map-link" href="world_map.html">Carte du monde</a>
             <a href="battle.html">Combat</a>
             <a href="skill_tree.html">Arbre de compétences</a>
             <a href="stats.html">Statistiques</a>
@@ -26,71 +26,66 @@
         <h2>Combat</h2>
         <div id="battle-interface">
             <div id="player-stats">
-                <h3 id="player-name"></h3>
+                <h3></h3>
                 <p>PV: <span id="player-hp"></span> / <span id="player-max-hp"></span></p>
                 <div class="progress-bar-container">
-                    <div id="player-hp-bar" class="progress-bar"></div>
+                    <div id="player-hp-bar" class="progress-bar hp-bar"></div>
                 </div>
                 <p>Mana: <span id="player-mana"></span> / <span id="player-max-mana"></span></p>
                 <div class="progress-bar-container">
-                    <div id="player-mana-bar" class="progress-bar blue-bar"></div>
+                    <div id="player-mana-bar" class="progress-bar mana-bar"></div>
                 </div>
-                <p id="player-element-display" class="element-info"></p>
+                <p>Arme: <span id="equipped-weapon"></span></p>
+                <p>Armure: <span id="equipped-armor"></span></p>
             </div>
             
             <div id="monster-stats">
-                <h3 id="monster-name"></h3>
-                <p>PV: <span id="monster-hp"></span> / <span id="monster-max-hp"></span></p>
+                <h3></h3>
+                <p>PV: <span id="monster-hp"></span></p>
                 <div class="progress-bar-container">
-                    <div id="monster-hp-bar" class="progress-bar red-bar"></div>
-                </div>
-                 <p>Mana: <span id="monster-mana"></span> / <span id="monster-max-mana"></span></p>
-                <div class="progress-bar-container">
-                    <div id="monster-mana-bar" class="progress-bar blue-bar"></div>
-                </div>
-                <p id="monster-element-display" class="element-info"></p>
-            </div>
-
-            <div id="combat-log"></div>
-
-            <div id="battle-actions">
-                <div class="action-buttons">
-                    <button id="normal-attack-button" class="btn-primary">Attaque de base</button>
-                    <button id="abilities-button" class="btn-primary" onclick="showActions('abilities-tab', event)">Compétences</button>
-                    <button id="inventory-button" class="btn-primary" onclick="showActions('consumables-tab', event)">Consommables</button>
-                    <button id="flee-button" class="btn-flee">Fuir</button>
-                </div>
-
-                <div id="abilities-tab" class="action-tab" style="display: none;">
-                    <h3>Compétences</h3>
-                    <div id="abilities-list" class="grid-container"></div>
-                </div>
-                
-                <div id="consumables-tab" class="action-tab" style="display: none;">
-                    <h3>Consommables</h3>
-                    <div id="consumables-list" class="grid-container"></div>
+                    <div id="monster-hp-bar" class="progress-bar hp-bar"></div>
                 </div>
             </div>
         </div>
+        
+        <div class="action-buttons">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="showActions('attack-tab', event)">Attaquer</button>
+                <button class="tab-button" onclick="showActions('abilities-tab', event)">Capacités</button>
+                <button class="tab-button" onclick="showActions('inventory-tab', event)">Consommables</button>
+            </div>
+            
+            <div class="action-tabs-container">
+                <div id="attack-tab" class="action-tab">
+                    <button id="basic-attack-btn" onclick="performBasicAttack()" class="btn-primary">Attaque de base</button>
+                </div>
+                <div id="abilities-tab" class="action-tab" style="display:none;">
+                    <ul id="abilities-list"></ul>
+                </div>
+                <div id="inventory-tab" class="action-tab" style="display:none;">
+                    <ul id="consumable-list"></ul>
+                </div>
+            </div>
+            
+            <button onclick="flee()" class="btn-flee">Fuir</button>
+        </div>
     </main>
-    <div id="notification-container"></div>
-    <script src="js/data.js"></script>
+     <div id="notification-container"></div>
+   <script src="js/data.js"></script>
     <script src="js/game.js"></script>
-    <script src="js/utils.js"></script>
+    <script src="js/map.js"></script>
     <script src="js/quests.js"></script>
-    <script src="js/items.js"></script>
-    <script src="js/elements.js"></script> 
+    <script src="js/utils.js"></script>
     <script src="js/battle_on_map.js"></script>
     <script src="js/dungeon_minigames.js"></script>
+<script src="js/items.js"></script>
+    <script src="js/elements.js"></script> 
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            if (!checkCharacter()) {
-                return;
-            }
-            loadCharacter();
             startBattle();
         });
-
+        
         function showActions(tabId, event) {
             document.querySelectorAll('.action-tab').forEach(tab => {
                 tab.style.display = 'none';
@@ -99,16 +94,22 @@
             document.querySelectorAll('.tab-button').forEach(btn => {
                 btn.classList.remove('active');
             });
-            if (event.target) {
-                event.target.classList.add('active');
-            }
+            event.target.classList.add('active');
             
             if (tabId === 'abilities-tab') {
                 updateAbilitiesUI();
-            } else if (tabId === 'consumables-tab') {
+            } else if (tabId === 'inventory-tab') {
                 updateConsumablesUI();
             }
         }
     </script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!checkCharacter()) {
+            return; // La fonction checkCharacter() gère déjà la redirection
+        }
+        // Le reste de la logique de chargement de la page
+    });
+</script>
 </body>
 </html>
