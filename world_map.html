@@ -32,6 +32,24 @@
             height: 100vh;
             z-index: 1000;
         }
+
+        .map-info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 500;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -40,7 +58,7 @@
         <h1>Explorateur de la Brume</h1>
         <nav>
             <a href="index.html">Accueil</a>
-            <a href="world_map.html" class="active">Carte du monde</a>
+            <a id="world-map-link" href="world_map.html">Carte du monde</a>
             <a href="skill_tree.html">Arbre de compétences</a>
             <a href="stats.html">Statistiques</a>
             <a href="inventory.html">Inventaire</a>
@@ -50,25 +68,12 @@
 
     <main class="game-container">
         <h2>Carte du monde</h2>
-       <div id="player-info-container">
-            <p>Niveau: <span id="player-level"></span></p>
-            <p>XP: <span id="player-xp-current"></span> / <span id="player-xp-next"></span></p>
-            <div class="progress-bar-container">
-                <div id="player-xp-bar" class="progress-bar xp-bar"></div>
-            </div>
-            <p>PV: <span id="player-hp"></span> / <span id="player-max-hp"></span></p>
-            <div class="progress-bar-container">
-                <div id="player-hp-bar" class="progress-bar hp-bar"></div>
-            </div>
-            <p>Mana: <span id="player-mana"></span> / <span id="player-max-mana"></span></p>
-            <div class="progress-bar-container">
-                <div id="player-mana-bar" class="progress-bar mana-bar"></div>
-            </div>
-            <p>Or: <span id="player-gold">0</span></p>
-        </div>
-
+        <p>Explorez la Brume pour trouver des donjons et des quêtes !</p>
         <div class="map-container">
             <div id="map"></div>
+            <div class="map-info">
+                <p>Zone actuelle : <span id="current-area"></span></p>
+            </div>
             <button id="toggle-fullscreen-btn" class="btn-primary">Plein écran</button>
         </div>
         <div class="action-buttons">
@@ -78,34 +83,6 @@
     </main>
 
     <div id="notification-container"></div>
-
-    <script src="js/data.js"></script>
-    <script src="js/game.js"></script>
-    <script src="js/map.js"></script>
-    <script src="js/quests.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/battle_on_map.js"></script>
-    <script src="js/dungeon_minigames.js"></script>
-<script src="js/items.js"></script>
-    <script src="js/elements.js"></script> 
- <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        if (!checkCharacter()) {
-            return; // La fonction checkCharacter() gère déjà la redirection
-        }
-
-            // Initialisation de la carte Leaflet
-            const map = L.map('map').setView([0, 0], 2);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 18,
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
-
-            // Appel des fonctions pour mettre à jour l'interface de la carte
-            updateWorldMapUI();
-            addDungeonMarkers(map); // <-- L'appel avec la variable 'map'
-        });
-    </script>
+    <script type="module" src="js/modules/map.js"></script>
 </body>
 </html>

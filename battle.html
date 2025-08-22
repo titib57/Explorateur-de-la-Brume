@@ -26,7 +26,7 @@
         <h2>Combat</h2>
         <div id="battle-interface">
             <div id="player-stats">
-                <h3></h3>
+                <h3 id="player-name"></h3>
                 <p>PV: <span id="player-hp"></span> / <span id="player-max-hp"></span></p>
                 <div class="progress-bar-container">
                     <div id="player-hp-bar" class="progress-bar hp-bar"></div>
@@ -35,81 +35,48 @@
                 <div class="progress-bar-container">
                     <div id="player-mana-bar" class="progress-bar mana-bar"></div>
                 </div>
-                <p>Arme: <span id="equipped-weapon"></span></p>
-                <p>Armure: <span id="equipped-armor"></span></p>
+                <p>Arme: <span id="player-weapon-display"></span></p>
+                <p>Armure: <span id="player-armor-display"></span></p>
             </div>
-            
+
             <div id="monster-stats">
-                <h3></h3>
-                <p>PV: <span id="monster-hp"></span></p>
+                <h3 id="monster-name"></h3>
+                <p>PV: <span id="monster-hp"></span> / <span id="monster-max-hp"></span></p>
                 <div class="progress-bar-container">
                     <div id="monster-hp-bar" class="progress-bar hp-bar"></div>
                 </div>
-            </div>
-        </div>
-        
-        <div class="action-buttons">
-            <div class="tab-buttons">
-                <button class="tab-button active" onclick="showActions('attack-tab', event)">Attaquer</button>
-                <button class="tab-button" onclick="showActions('abilities-tab', event)">Capacités</button>
-                <button class="tab-button" onclick="showActions('inventory-tab', event)">Consommables</button>
+                <img id="monster-icon" src="" alt="Icone de monstre">
             </div>
             
-            <div class="action-tabs-container">
-                <div id="attack-tab" class="action-tab">
-                    <button id="basic-attack-btn" onclick="performBasicAttack()" class="btn-primary">Attaque de base</button>
+            <div id="battle-log" class="combat-log">
+                <h3>Journal de combat</h3>
+                <div id="combat-log"></div>
+            </div>
+
+            <div id="player-actions">
+                <div id="action-tabs">
+                    <button class="tab-button active" onclick="showActions('attack-tab')">Attaquer</button>
+                    <button class="tab-button" onclick="showActions('abilities-tab')">Compétences</button>
+                    <button class="tab-button" onclick="showActions('inventory-tab')">Inventaire</button>
                 </div>
-                <div id="abilities-tab" class="action-tab" style="display:none;">
-                    <ul id="abilities-list"></ul>
+                
+                <div id="attack-tab" class="action-tab active">
+                    <button id="normal-attack-button" class="btn-primary">Attaque normale</button>
+                    <button id="flee-button" class="btn-flee">Fuir</button>
                 </div>
-                <div id="inventory-tab" class="action-tab" style="display:none;">
-                    <ul id="consumable-list"></ul>
+                
+                <div id="abilities-tab" class="action-tab" style="display: none;">
+                    <div id="abilities-list"></div>
+                </div>
+
+                <div id="inventory-tab" class="action-tab" style="display: none;">
+                    <div id="consumables-list"></div>
                 </div>
             </div>
-            
-            <button onclick="flee()" class="btn-flee">Fuir</button>
         </div>
     </main>
-     <div id="notification-container"></div>
-   <script src="js/data.js"></script>
-    <script src="js/game.js"></script>
-    <script src="js/map.js"></script>
-    <script src="js/quests.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/battle_on_map.js"></script>
-    <script src="js/dungeon_minigames.js"></script>
-<script src="js/items.js"></script>
-    <script src="js/elements.js"></script> 
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            startBattle();
-        });
-        
-        function showActions(tabId, event) {
-            document.querySelectorAll('.action-tab').forEach(tab => {
-                tab.style.display = 'none';
-            });
-            document.getElementById(tabId).style.display = 'block';
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            if (tabId === 'abilities-tab') {
-                updateAbilitiesUI();
-            } else if (tabId === 'inventory-tab') {
-                updateConsumablesUI();
-            }
-        }
-    </script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        if (!checkCharacter()) {
-            return; // La fonction checkCharacter() gère déjà la redirection
-        }
-        // Le reste de la logique de chargement de la page
-    });
-</script>
+    <div id="notification-container"></div>
+    <script type="module" src="js/modules/battle.js"></script>
 </body>
 </html>

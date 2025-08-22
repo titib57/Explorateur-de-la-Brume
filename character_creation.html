@@ -10,9 +10,7 @@
 
     <header class="game-header">
         <h1>Explorateur de la Brume</h1>
-        <nav>
-        
-        </nav>
+        <nav></nav>
     </header>
 
     <main class="game-container">
@@ -37,14 +35,11 @@
                 <label for="char-weight">Poids (kg) :</label>
                 <input type="number" id="char-weight" min="50" max="150" value="70">
             </div>
-
+            
             <div class="form-group">
-                <label for="char-morphology">Morphologie :</label>
-                <select id="char-morphology">
-                    <option value="mince">Mince</option>
-                    <option value="normal" selected>Normale</option>
-                    <option value="musculeux">Musculeuse</option>
-                    <option value="potelé">Potelée</option>
+                <label for="char-class">Classe :</label>
+                <select id="char-class">
+                    <option value="explorateur">Explorateur</option>
                 </select>
             </div>
 
@@ -53,74 +48,25 @@
     </main>
 
     <div id="notification-container"></div>
-    <script src="js/game.js"></script>
-    <script>
+    
+    <script type="module" src="js/modules/character.js"></script>
+    <script type="module">
+        import { createCharacter } from './js/modules/character.js';
+        
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('character-form');
-            const navLinks = document.querySelectorAll('nav a');
-            const hasCharacter = localStorage.getItem('playerCharacter') !== null;
-            
-            // Masquer les liens de navigation si aucun personnage n'existe
-            if (!hasCharacter) {
-                navLinks.forEach(link => {
-                    if (link.id !== 'create-char-link' && link.id !== 'world-map-link') {
-                        link.style.display = 'none';
-                    }
+            if (form) {
+                form.addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    const name = document.getElementById('char-name').value;
+                    const age = parseInt(document.getElementById('char-age').value);
+                    const height = parseInt(document.getElementById('char-height').value);
+                    const weight = parseInt(document.getElementById('char-weight').value);
+                    const charClass = document.getElementById('char-class').value;
+                    
+                    createCharacter(name, age, height, weight, charClass);
                 });
             }
-
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-
-                const name = document.getElementById('char-name').value;
-                const age = parseInt(document.getElementById('char-age').value);
-                const height = parseInt(document.getElementById('char-height').value);
-                const weight = parseInt(document.getElementById('char-weight').value);
-                const morphology = document.getElementById('char-morphology').value;
-                
-                // Création de l'objet personnage
-                const newCharacter = {
-                    name,
-                    age,
-                    height,
-                    weight,
-                    morphology,
-                    class: 'explorateur',
-                    xp: 0,
-                    level: 1,
-                    xpToNextLevel: 100,
-                    statPoints: 5, // Ajout de 5 points de stats pour le joueur
-                    skillPoints: 1, // Ajout de 1 point de compétence pour le joueur
-                    gold: 0,
-                    stats: {
-                        strength: 1,
-                        intelligence: 1,
-                        speed: 1,
-                        dexterity: 1
-                    },
-                    unlockedSkills: ['fist_attack'],
-                    unlockedClasses: ['explorateur'],
-                    inventory: [],
-                    equipment: {
-                        weapon: null,
-                        armor: null
-                    },
-                    quests: {}
-                };
-
-                // Sauvegarde du personnage
-                saveCharacter(newCharacter);
-                
-                // Vérification de la sauvegarde et redirection
-                if (localStorage.getItem('playerCharacter')) {
-                    showNotification('Personnage créé avec succès !', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'stats.html';
-                    }, 2000);
-                } else {
-                    showNotification('Erreur: Impossible de sauvegarder le personnage. Veuillez réessayer.', 'error');
-                }
-            });
         });
     </script>
 </body>

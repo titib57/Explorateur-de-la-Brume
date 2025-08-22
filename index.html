@@ -18,7 +18,6 @@
             <a href="skill_tree.html">Arbre de compétences</a>
             <a href="stats.html">Statistiques</a>
             <a href="inventory.html">Inventaire</a>
-<script src="js/items.js"></script>
             <a href="quests.html">Quêtes</a>
         </nav>
     </header>
@@ -34,9 +33,12 @@
         </div>
     </main>
 
-    <script src="js/game.js"></script>
-    <script>
+    <div id="notification-container"></div>
+    <script type="module">
+        import { checkCharacter } from './js/core/utils.js';
+        
         document.addEventListener('DOMContentLoaded', () => {
+            checkCharacter();
             const hasCharacter = localStorage.getItem('playerCharacter') !== null;
             const createCharLink = document.getElementById('create-char-link');
             const startBtn = document.getElementById('start-adventure-btn');

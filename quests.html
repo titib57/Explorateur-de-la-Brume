@@ -16,7 +16,6 @@
            <a href="skill_tree.html">Arbre de compétences</a>
             <a href="stats.html">Statistiques</a>
             <a href="inventory.html">Inventaire</a>
-<script src="js/items.js"></script>
             <a href="quests.html">Quêtes</a>
         </nav>
     </header>
@@ -27,17 +26,7 @@
         </div>
     </main>
 
-    <script src="js/data.js"></script>
-    <script src="js/game.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/quests.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        if (!checkCharacter()) {
-            return; // La fonction checkCharacter() gère déjà la redirection
-        }
-        // Le reste de la logique de chargement de la page
-    });
-</script>
+    <div id="notification-container"></div>
+    <script type="module" src="js/modules/quests.js"></script>
 </body>
 </html>

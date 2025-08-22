@@ -255,6 +255,9 @@ body {
     justify-content: center;
     padding: 20px;
 }
+#delete-char-btn {
+    display: none;
+}
 
 .skill-node {
     width: 120px;
