@@ -1,7 +1,7 @@
 ﻿import { checkCharacter } from './core/utils.js';
 import { showNotification } from './core/notifications.js';
 import { generateDungeon } from './modules/dungeon.js';
-import { pointsOfInterest, dungeonTypes } from './core/gameData.js'; // Assurez-vous d'importer les données
+import { pointsOfInterest, dungeonTypes } from './core/gameData.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!checkCharacter()) {
@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const map = L.map('map');
     let playerMarker;
-    let selectedDungeon = null;
+    let selectedDungeon = null; // Stocke l'objet donjon sélectionné, pas seulement le marqueur
     const mapElement = document.getElementById('map');
     const fullscreenBtn = document.getElementById('toggle-fullscreen-btn');
     const startBattleBtn = document.getElementById('start-battle-btn');
@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 dungeonMarker.bindTooltip(poi.name, { permanent: true, direction: "top" });
                 
                 dungeonMarker.on('click', () => {
+                    // Stocke l'objet complet du donjon, pas seulement le marqueur
                     selectedDungeon = {
                         id: poiId,
                         ...poi,
@@ -58,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Fonction pour mettre à jour la position du joueur et les boutons d'action
     function updatePlayerLocation(position) {
         const { latitude, longitude } = position.coords;
         const playerLatLng = L.latLng(latitude, longitude);
@@ -66,15 +68,17 @@ document.addEventListener('DOMContentLoaded', () => {
             playerMarker = L.marker(playerLatLng).addTo(map);
             playerMarker.bindTooltip("Vous êtes ici", { permanent: true, direction: "top" });
             map.setView(playerLatLng, 15);
-            loadDungeons();
+            loadDungeons(); // Charge les donjons une fois la carte centrée
         } else {
             playerMarker.setLatLng(playerLatLng);
             map.panTo(playerLatLng);
         }
         
+        // Appelle la fonction de mise à jour des boutons après chaque changement de position
         updateActionButtons();
     }
     
+    // Fonction pour activer/désactiver le bouton "Entrer dans le donjon"
     function updateActionButtons() {
         if (!selectedDungeon || !playerMarker) {
             startBattleBtn.style.display = 'none';
@@ -91,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             startBattleBtn.style.display = 'none';
             showNotification(`Approchez-vous de ${selectedDungeon.name} pour y entrer.`, 'warning');
+            selectedDungeon = null; // Réinitialise la sélection si le joueur s'éloigne
         }
     }
 
@@ -100,4 +105,24 @@ document.addEventListener('DOMContentLoaded', () => {
             updatePlayerLocation,
             (error) => {
                 console.error("Erreur de géolocalisation :", error);
-                showNotification("Impossible d'obtenir votre position. La carte ne pourra pas fonctionner correctement.",
+                showNotification("Impossible d'obtenir votre position. La carte ne pourra pas fonctionner correctement.", 'error');
+            }, {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0,
+            }
+        );
+
+        startBattleBtn.addEventListener('click', () => {
+            if (selectedDungeon) {
+                // Passage de l'objet de localisation correct à generateDungeon
+                generateDungeon({ x: selectedDungeon.location.lng, y: selectedDungeon.location.lat });
+                window.location.href = 'battle.html';
+            } else {
+                showNotification("Veuillez sélectionner un donjon pour y entrer.", 'warning');
+            }
+        });
+    } else {
+        showNotification("Votre navigateur ne supporte pas la géolocalisation.", 'warning');
+    }
+});
