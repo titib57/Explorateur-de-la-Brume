@@ -4,20 +4,21 @@ import { generateDungeon } from './modules/dungeon.js';
 import { pointsOfInterest, dungeonTypes } from './core/gameData.js';
 import { player } from './core/state.js';
 
-// Fonction pour calculer la distance entre deux points géographiques (formule simplifiée)
-// Cette fonction est nécessaire pour le bouton "Entrer dans le donjon".
+// Fonction pour calculer la distance entre deux points géographiques (simplifié pour la démo)
 function calculateDistance(loc1, loc2) {
     const dx = loc1.lat - loc2.lat;
-    const dy = loc1.y - loc2.y;
+    const dy = loc1.lng - loc2.lng;
+    // Approximation en mètres pour une meilleure logique de jeu
     return Math.sqrt(dx * dx + dy * dy) * 111320;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Vérifie si un personnage existe avant de charger la carte
+    // Étape 1: Vérifie si un personnage existe, sinon redirige
     if (!checkCharacter()) {
         return;
     }
 
+    // Étape 2: Initialisation des variables et des éléments de la carte
     const map = L.map('map');
     let playerMarker;
     let selectedDungeon = null;
@@ -26,11 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const startBattleBtn = document.getElementById('start-battle-btn');
     const classTreeBtn = document.getElementById('class-tree-btn');
 
-    // Initialisation de la couche de tuiles OpenStreetMap
+    // Étape 3: Ajout de la couche de tuiles OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
+    // Étape 4: Gestion des événements de la carte
     window.addEventListener('resize', () => {
         map.invalidateSize();
     });
@@ -48,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300);
     });
 
-    // Fonction pour charger et afficher tous les donjons sur la carte
+    // Étape 5: Chargement et affichage des donjons sur la carte
     function loadDungeons() {
         for (const poiId in pointsOfInterest) {
             const poi = pointsOfInterest[poiId];
@@ -69,10 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Fonction pour mettre à jour la position du joueur et les boutons d'action
+    // Étape 6: Mise à jour de la position du joueur et des boutons d'action
     function updatePlayerLocation(position) {
         const { latitude, longitude } = position.coords;
-        const playerLatLng = L.latLng(latitude, longitude);
+        const playerLatLng = L.LatLng(latitude, longitude);
 
         if (!playerMarker) {
             playerMarker = L.marker(playerLatLng).addTo(map);
@@ -87,13 +89,13 @@ document.addEventListener('DOMContentLoaded', () => {
         updateActionButtons();
     }
     
-    // Fonction pour activer/désactiver le bouton "Entrer dans le donjon"
+    // Étape 7: Gestion de l'affichage des boutons d'action
     function updateActionButtons() {
         if (!selectedDungeon || !playerMarker) {
             startBattleBtn.style.display = 'none';
         } else {
             const playerLatLng = playerMarker.getLatLng();
-            const dungeonLatLng = L.latLng(selectedDungeon.location.lat, selectedDungeon.location.lng);
+            const dungeonLatLng = L.LatLng(selectedDungeon.location.lat, selectedDungeon.location.lng);
             const distance = calculateDistance(playerLatLng, dungeonLatLng);
             
             if (distance <= 100) {
@@ -106,14 +108,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        if (player.level >= 5 && player.class === 'explorateur') {
+        if (player && player.level >= 5 && player.class === 'explorateur') {
             classTreeBtn.style.display = 'block';
         } else {
             classTreeBtn.style.display = 'none';
         }
     }
 
-
+    // Étape 8: Démarrage de la géolocalisation
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
             updatePlayerLocation,
