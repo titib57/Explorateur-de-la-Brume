@@ -1,4 +1,6 @@
-﻿export const abilitiesData = {
+﻿// Fichier : js/core/gameData.js
+
+export const abilitiesData = {
     guerrier: [
         { id: "puissant_coup", name: "Coup puissant", damage: 20, cost: 5, type: 'damage', element: 'neutre' },
         { id: "charge", name: "Charge", damage: 30, cost: 10, type: 'damage', element: 'neutre' }
@@ -251,8 +253,8 @@ export const skillTreeData = {
                 type: 'ability',
                 element: 'neutre'
             },
-}
-    
+        }
+    }
 };
 
 export const questsData = {
@@ -271,7 +273,7 @@ export const questsData = {
             gold: 20,
             item: 'potion_de_soin'
         },
-        nextQuestId: 'lart_devoluer' // ID de la prochaine quête à débloquer
+        nextQuestId: 'lart_devoluer' 
     },
     'lart_devoluer': {
         id: 'lart_devoluer',
@@ -354,6 +356,7 @@ export const questsData = {
         nextQuestId: null
     }
 };
+
 export const locationTypes = {
     'foret': {
         name: 'Forêt mystérieuse',
@@ -420,4 +423,64 @@ export const elements = {
         strongAgainst: [],
         weakAgainst: []
     }
+};
+
+export const itemSets = {
+    'set_du_guerrier_debout': {
+        name: "Set du Guerrier Debout",
+        pieces: ['epee_du_guerrier_debout', 'armure_du_guerrier_debout'],
+        bonus: {
+            stats: {
+                strength: 5,
+            }
+        }
+    }
+};
+
+export const pointsOfInterest = {
+    'tour_eiffel': {
+        name: 'Tour Eiffel',
+        location: { x: 48.8584, y: 2.2945 },
+        difficulty: 'facile',
+        dungeonType: 'tour',
+        monsterPool: ['rat_des_egouts', 'corbeau_enrage']
+    },
+    'pyramides_de_gizeh': {
+        name: 'Pyramides de Gizeh',
+        location: { x: 29.9792, y: 31.1342 },
+        difficulty: 'intermediaire',
+        dungeonType: 'tombeau',
+        monsterPool: ['momie_reveillee', 'scarabee_geants']
+    },
+    'grande_muraille_de_chine': {
+        name: 'Grande Muraille de Chine',
+        location: { x: 40.4319, y: 116.5704 },
+        difficulty: 'difficile',
+        dungeonType: 'muraille',
+        monsterPool: ['guerrier_fantome', 'dragon_ancestral']
+    }
+};
+
+export const dungeonTypes = {
+    'tour': {
+        description: 'Une ancienne tour infestée de créatures volantes et d\'esprits tourmentés.',
+        boss: 'chef_des_corbeaux',
+        rewards: { gold: 50, item: 'plume_rare' }
+    },
+    'tombeau': {
+        description: 'Les couloirs sinueux et sombres d\'un tombeau antique gardé par des âmes perdues.',
+        boss: 'gardien_des_tombes',
+        rewards: { gold: 150, item: 'amulette_du_sable' }
+    },
+    'muraille': {
+        description: 'Les vestiges d\'une muraille défensive où des guerriers fantômes patrouillent inlassablement.',
+        boss: 'dragon_ancestral',
+        rewards: { gold: 500, item: 'epee_du_dragon' }
+    }
+};
+
+export const bossesData = {
+    'chef_des_corbeaux': { name: 'Chef des Corbeaux', hp: 50, damage: 15 },
+    'gardien_des_tombes': { name: 'Gardien des Tombes', hp: 100, damage: 30 },
+    'dragon_ancestral': { name: 'Dragon Ancestral', hp: 200, damage: 50 }
 };

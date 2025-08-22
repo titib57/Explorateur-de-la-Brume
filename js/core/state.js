@@ -1,9 +1,8 @@
 ﻿// Fichier : js/state.js
 
 // Importez les données nécessaires depuis d'autres fichiers.
-// Assurez-vous d'avoir un fichier 'gameData.js' au même niveau que 'state.js'.
-import { questsData, itemSets, abilitiesData } from './gameData.js';
-import { skillTreeData } from './gameData.js';
+// Assurez-vous que ces fichiers existent et que les chemins sont corrects.
+import { questsData, itemSets, abilitiesData, classBases, itemsData, skillTreeData } from './gameData.js';
 
 // Déclarez les variables globales du jeu et exportez-les pour qu'elles soient accessibles.
 export let player;
@@ -69,16 +68,38 @@ export function loadCharacter() {
 }
 
 /**
+ * Gère le passage de niveau.
+ */
+export function levelUp() {
+    player.level++;
+    player.xp = player.xp - player.xpToNextLevel;
+    player.xpToNextLevel = Math.floor(player.xpToNextLevel * 1.5);
+    player.statPoints += 3;
+    player.skillPoints += 1;
+    showNotification(`Félicitations ! Vous êtes passé au niveau ${player.level} !`, 'success');
+    recalculateDerivedStats();
+    player.hp = player.maxHp; 
+    player.mana = player.maxMana;
+}
+
+/**
+ * Gagne de l'expérience et gère les montées de niveau.
+ * @param {number} amount La quantité d'XP à ajouter.
+ */
+export function giveXP(amount) {
+    player.xp += amount;
+    showNotification(`Vous avez gagné ${amount} points d'expérience !`, 'info');
+    if (player.xp >= player.xpToNextLevel) {
+        levelUp();
+    }
+    saveCharacter(player);
+}
+
+/**
  * Calcule les statistiques dérivées du personnage (PV max, mana max, dégâts, etc.).
  */
 export function recalculateDerivedStats() {
-    const baseStats = {
-        strength: 1,
-        intelligence: 1,
-        speed: 1,
-        dexterity: 1
-    };
-    
+    const baseStats = classBases[player.class].stats;
     let tempPlayer = {
         stats: { ...baseStats },
         passiveEffect: {},
@@ -150,28 +171,7 @@ export function recalculateDerivedStats() {
 }
 
 
-// --- Fonctions de progression et d'inventaire ---
-
-/**
- * Gagne de l'expérience et gère les montées de niveau.
- * @param {number} amount La quantité d'XP à ajouter.
- */
-export function giveXP(amount) {
-    player.xp += amount;
-    showNotification(`Vous avez gagné ${amount} points d'expérience !`, 'info');
-    while (player.xp >= player.xpToNextLevel) {
-        player.xp -= player.xpToNextLevel;
-        player.level++;
-        player.xpToNextLevel = Math.floor(player.xpToNextLevel * 1.5);
-        player.statPoints += 3;
-        player.skillPoints += 1;
-        recalculateDerivedStats();
-        player.hp = player.maxHp; 
-        player.mana = player.maxMana;
-        showNotification(`Vous êtes monté au niveau ${player.level} !`, 'success');
-    }
-    saveCharacter(player);
-}
+// --- Fonctions d'inventaire ---
 
 /**
  * Gère l'obtention d'un objet.
