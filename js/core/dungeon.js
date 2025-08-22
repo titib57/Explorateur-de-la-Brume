@@ -1,11 +1,13 @@
 ﻿// Fichier : js/core/dungeon.js
 
 import { pointsOfInterest, dungeonTypes, monstersData, bossesData, poiQuests } from './gameData.js';
-import { currentDungeon, player, saveCharacter } from './state.js';
 import { showNotification } from './notifications.js';
+import { currentDungeon, player, saveCharacter } from './state.js';
 
 /**
  * Calcule la distance entre deux points géographiques (formule simplifiée).
+ * @param {object} loc1 Le premier emplacement { x, y }.
+ * @param {object} loc2 Le deuxième emplacement { x, y }.
  */
 function calculateDistance(loc1, loc2) {
     const dx = loc1.x - loc2.x;
@@ -36,28 +38,58 @@ export function generateDungeon(playerLocation) {
     }
 
     const dungeonType = dungeonTypes[closestPOI.dungeonType];
+    if (!dungeonType) {
+        showNotification("Type de donjon non défini.", 'error');
+        return false;
+    }
 
-    // Sélectionne un monstre au hasard du pool de monstres du lieu
+    // Sélectionne un monstre et un boss au hasard du pool de monstres et de boss du lieu
     const randomMonsterId = closestPOI.monsterPool[Math.floor(Math.random() * closestPOI.monsterPool.length)];
-    const monsterData = monstersData[randomMonsterId];
+    const randomBossId = closestPOI.bossPool[Math.floor(Math.random() * closestPOI.bossPool.length)];
     
-    // Crée un objet donjon plus détaillé
+    const monsterData = monstersData[randomMonsterId];
+    const bossData = bossesData[randomBossId];
+
+    // Calcul des statistiques dynamiques en fonction du niveau du joueur
+    const levelFactor = player.level;
+    const baseMonsterHP = monsterData.hp;
+    const baseMonsterDamage = monsterData.damage;
+    const baseMonsterXP = monsterData.xpReward;
+    const baseMonsterGold = monsterData.goldReward;
+
+    const baseBossHP = bossData.hp;
+    const baseBossDamage = bossData.damage;
+    const baseBossXP = bossData.xpReward;
+    const baseBossGold = bossData.goldReward;
+
+    const scaledMonster = {
+        name: monsterData.name,
+        hp: baseMonsterHP + (levelFactor * 5),
+        damage: baseMonsterDamage + (levelFactor * 2),
+        xpReward: baseMonsterXP + (levelFactor * 10),
+        goldReward: baseMonsterGold + (levelFactor * 5),
+        element: monsterData.element
+    };
+
+    const scaledBoss = {
+        name: bossData.name,
+        hp: baseBossHP + (levelFactor * 15),
+        damage: baseBossDamage + (levelFactor * 5),
+        xpReward: baseBossXP + (levelFactor * 30),
+        goldReward: baseBossGold + (levelFactor * 15),
+        element: bossData.element
+    };
+
+    // Crée un objet donjon plus détaillé avec les statistiques ajustées
     const newDungeon = {
+        id: closestPOI.id,
         name: `Le donjon de ${closestPOI.name}`,
         location: closestPOI.location,
         difficulty: closestPOI.difficulty,
         type: closestPOI.dungeonType,
         description: dungeonType.description,
-        monsters: [{
-            name: monsterData.name,
-            hp: monsterData.hp,
-            damage: monsterData.damage
-        }],
-        boss: {
-            name: bossesData[dungeonType.boss].name,
-            hp: bossesData[dungeonType.boss].hp,
-            damage: bossesData[dungeonType.boss].damage
-        },
+        monsters: [scaledMonster],
+        boss: scaledBoss,
         rewards: dungeonType.rewards
     };
 
@@ -66,7 +98,7 @@ export function generateDungeon(playerLocation) {
 
     // Mettre à jour l'état du donjon actuel
     currentDungeon = newDungeon;
-
+    
     // Gérer la quête dynamique
     const newQuestId = closestPOI.questId;
     const newQuest = poiQuests[newQuestId];
@@ -81,4 +113,6 @@ export function generateDungeon(playerLocation) {
         showNotification(`Nouvelle quête débloquée : ${newQuest.name}`, 'success');
         saveCharacter(player);
     }
+
+    return true;
 }
