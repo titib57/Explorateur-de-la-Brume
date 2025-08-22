@@ -26,7 +26,7 @@ export function generateDungeon(playerLocation) {
     for (const poiId in pointsOfInterest) {
         const poi = pointsOfInterest[poiId];
         const distance = calculateDistance(playerLocation, poi.location);
-        if (distance < 1000) {
+        if (distance < distance) {
             minDistance = distance;
             closestPOI = poi;
         }
