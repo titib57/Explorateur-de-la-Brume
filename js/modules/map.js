@@ -1,10 +1,17 @@
-﻿import { checkCharacter } from './core/utils.js';
+﻿import { checkCharacter, addToCombatLog } from './core/utils.js';
 import { showNotification } from './core/notifications.js';
 import { generateDungeon } from './modules/dungeon.js';
 import { pointsOfInterest, dungeonTypes } from './core/gameData.js';
+import { player } from './core/state.js';
+
+// Fonction pour calculer la distance entre deux points géographiques (formule simplifiée)
+function calculateDistance(loc1, loc2) {
+    const dx = loc1.lat - loc2.lat;
+    const dy = loc1.lng - loc2.lng;
+    return Math.sqrt(dx * dx + dy * dy) * 111320; // Approximation de la conversion en mètres
+}
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Vérifie si un personnage existe avant de charger la carte
     if (!checkCharacter()) {
         return;
     }
@@ -15,8 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const mapElement = document.getElementById('map');
     const fullscreenBtn = document.getElementById('toggle-fullscreen-btn');
     const startBattleBtn = document.getElementById('start-battle-btn');
-    
-    // Initialisation de la couche de tuiles OpenStreetMap
+    const classTreeBtn = document.getElementById('class-tree-btn');
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
@@ -38,14 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300);
     });
 
-    // Fonction pour charger et afficher tous les donjons sur la carte
     function loadDungeons() {
         for (const poiId in pointsOfInterest) {
             const poi = pointsOfInterest[poiId];
             if (poi.dungeonType && dungeonTypes[poi.dungeonType]) {
                 const dungeonMarker = L.marker([poi.location.lat, poi.location.lng]).addTo(map);
                 dungeonMarker.bindTooltip(poi.name, { permanent: true, direction: "top" });
-                
+
                 dungeonMarker.on('click', () => {
                     selectedDungeon = {
                         id: poiId,
@@ -59,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Fonction pour mettre à jour la position du joueur et les boutons d'action
     function updatePlayerLocation(position) {
         const { latitude, longitude } = position.coords;
         const playerLatLng = L.latLng(latitude, longitude);
@@ -73,11 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
             playerMarker.setLatLng(playerLatLng);
             map.panTo(playerLatLng);
         }
-        
+
         updateActionButtons();
     }
-    
-    // Fonction pour activer/désactiver le bouton "Entrer dans le donjon"
+
     function updateActionButtons() {
         if (!selectedDungeon || !playerMarker) {
             startBattleBtn.style.display = 'none';
@@ -86,8 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const playerLatLng = playerMarker.getLatLng();
         const dungeonLatLng = L.latLng(selectedDungeon.location.lat, selectedDungeon.location.lng);
-        const distance = playerLatLng.distanceTo(dungeonLatLng);
-        
+        const distance = calculateDistance(playerLatLng, dungeonLatLng);
+
         if (distance <= 100) {
             startBattleBtn.style.display = 'block';
             startBattleBtn.textContent = `Entrer dans ${selectedDungeon.name}`;
@@ -96,7 +100,15 @@ document.addEventListener('DOMContentLoaded', () => {
             showNotification(`Approchez-vous de ${selectedDungeon.name} pour y entrer.`, 'warning');
             selectedDungeon = null;
         }
+        
+        // Affichage du bouton "Arbre de classes" si les conditions sont remplies
+        if (player.level >= 5 && player.class === 'explorateur') {
+            classTreeBtn.style.display = 'block';
+        } else {
+            classTreeBtn.style.display = 'none';
+        }
     }
+
 
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
@@ -113,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         startBattleBtn.addEventListener('click', () => {
             if (selectedDungeon) {
-                // Génère le donjon avant la redirection
+                // Passage de l'objet de localisation correct à generateDungeon
                 generateDungeon({ x: selectedDungeon.location.lng, y: selectedDungeon.location.lat });
                 window.location.href = 'battle.html';
             } else {
