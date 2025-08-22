@@ -3,44 +3,22 @@
 // Importez les données nécessaires depuis d'autres fichiers.
 // Assurez-vous que ces fichiers existent et que les chemins sont corrects.
 import { questsData, itemSets, abilitiesData, classBases, itemsData, skillTreeData } from './gameData.js';
-
+import { showNotification } from './notifications.js';
 
 // Déclarez les variables globales du jeu et exportez-les pour qu'elles soient accessibles.
 export let player;
 export let currentMonster;
 export let currentDungeon;
 
-// --- Système de Notifications ---
-const notificationContainer = document.createElement('div');
-notificationContainer.id = 'notification-container';
-document.body.appendChild(notificationContainer);
 
-/**
- * Affiche une notification non bloquante à l'écran.
- * @param {string} message Le texte de la notification.
- * @param {string} type Le type de notification ('success', 'info', 'warning', 'error').
- */
-export function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.classList.add('notification', type);
-    notification.textContent = message;
-    notificationContainer.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 5000);
-}
+
 
 
 // --- Gestion du Personnage et de la Sauvegarde ---
 
-/**
- * Sauvegarde l'objet du joueur dans le localStorage.
- * @param {object} playerObject L'objet du joueur à sauvegarder.
- */
 export function saveCharacter(playerObject) {
     localStorage.setItem('playerCharacter', JSON.stringify(playerObject));
-    console.log("Personnage sauvegardé !");
+
 }
 
 /**
