@@ -262,18 +262,18 @@
         );
 
         document.getElementById('start-battle-btn').addEventListener('click', () => {
-           if (selectedDungeon) {
-    // Créez un nouvel objet qui ne contient pas la propriété 'marker'
-    const dungeonToSave = {
-        id: selectedDungeon.id,
-        name: selectedDungeon.name,
-        location: selectedDungeon.location,
-        monster: selectedDungeon.monster
-    };
-    localStorage.setItem('currentDungeon', JSON.stringify(dungeonToSave));
-    window.location.href = 'battle.html';
-}
-        });
+    if (selectedDungeon) {
+        // Créez un nouvel objet sans la propriété 'marker' pour éviter l'erreur de référence circulaire
+        const dungeonToSave = {
+            id: selectedDungeon.id,
+            name: selectedDungeon.name,
+            location: selectedDungeon.location,
+            monster: selectedDungeon.monster
+        };
+        localStorage.setItem('currentDungeon', JSON.stringify(dungeonToSave));
+        window.location.href = 'battle.html';
+    }
+});
 
     } else {
         showNotification("Votre navigateur ne supporte pas la géolocalisation.", 'warning');
