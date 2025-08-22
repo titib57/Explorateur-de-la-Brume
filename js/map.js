@@ -11,7 +11,6 @@
     const fullscreenBtn = document.getElementById('toggle-fullscreen-btn');
     const startBattleBtn = document.getElementById('start-battle-btn');
 
-
     // Définir le donjon du tutoriel séparément
     const tutorialDungeon = {
         id: 'static_Tutoriel',
@@ -261,19 +260,20 @@
             }
         );
 
+        // Code pour le bouton de combat, maintenant dans le bon bloc
         document.getElementById('start-battle-btn').addEventListener('click', () => {
-    if (selectedDungeon) {
-        // Créez un nouvel objet sans la propriété 'marker' pour éviter l'erreur de référence circulaire
-        const dungeonToSave = {
-            id: selectedDungeon.id,
-            name: selectedDungeon.name,
-            location: selectedDungeon.location,
-            monster: selectedDungeon.monster
-        };
-        localStorage.setItem('currentDungeon', JSON.stringify(dungeonToSave));
-        window.location.href = 'battle.html';
-    }
-});
+            if (selectedDungeon) {
+                // Créez un nouvel objet sans la propriété 'marker' pour éviter l'erreur de référence circulaire
+                const dungeonToSave = {
+                    id: selectedDungeon.id,
+                    name: selectedDungeon.name,
+                    location: selectedDungeon.location,
+                    monster: selectedDungeon.monster
+                };
+                localStorage.setItem('currentDungeon', JSON.stringify(dungeonToSave));
+                window.location.href = 'battle.html';
+            }
+        });
 
     } else {
         showNotification("Votre navigateur ne supporte pas la géolocalisation.", 'warning');
