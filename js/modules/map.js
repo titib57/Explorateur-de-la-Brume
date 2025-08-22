@@ -4,18 +4,19 @@ import { generateDungeon } from './modules/dungeon.js';
 import { pointsOfInterest, dungeonTypes } from './core/gameData.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Vérifie si un personnage existe avant de charger la carte
     if (!checkCharacter()) {
         return;
     }
 
     const map = L.map('map');
     let playerMarker;
-    let selectedDungeon = null; // Stocke l'objet donjon sélectionné, pas seulement le marqueur
+    let selectedDungeon = null;
     const mapElement = document.getElementById('map');
     const fullscreenBtn = document.getElementById('toggle-fullscreen-btn');
     const startBattleBtn = document.getElementById('start-battle-btn');
-    const classTreeBtn = document.getElementById('class-tree-btn');
-
+    
+    // Initialisation de la couche de tuiles OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
@@ -46,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 dungeonMarker.bindTooltip(poi.name, { permanent: true, direction: "top" });
                 
                 dungeonMarker.on('click', () => {
-                    // Stocke l'objet complet du donjon, pas seulement le marqueur
                     selectedDungeon = {
                         id: poiId,
                         ...poi,
@@ -68,13 +68,12 @@ document.addEventListener('DOMContentLoaded', () => {
             playerMarker = L.marker(playerLatLng).addTo(map);
             playerMarker.bindTooltip("Vous êtes ici", { permanent: true, direction: "top" });
             map.setView(playerLatLng, 15);
-            loadDungeons(); // Charge les donjons une fois la carte centrée
+            loadDungeons();
         } else {
             playerMarker.setLatLng(playerLatLng);
             map.panTo(playerLatLng);
         }
         
-        // Appelle la fonction de mise à jour des boutons après chaque changement de position
         updateActionButtons();
     }
     
@@ -95,10 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             startBattleBtn.style.display = 'none';
             showNotification(`Approchez-vous de ${selectedDungeon.name} pour y entrer.`, 'warning');
-            selectedDungeon = null; // Réinitialise la sélection si le joueur s'éloigne
+            selectedDungeon = null;
         }
     }
-
 
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
@@ -115,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         startBattleBtn.addEventListener('click', () => {
             if (selectedDungeon) {
-                // Passage de l'objet de localisation correct à generateDungeon
+                // Génère le donjon avant la redirection
                 generateDungeon({ x: selectedDungeon.location.lng, y: selectedDungeon.location.lat });
                 window.location.href = 'battle.html';
             } else {
