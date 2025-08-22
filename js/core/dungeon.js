@@ -2,6 +2,7 @@
 
 import { pointsOfInterest, dungeonTypes, monstersData, bossesData, poiQuests } from './gameData.js';
 import { showNotification, currentDungeon, player, saveCharacter } from './state.js';
+import { showNotification } from './notifications.js';
 
 /**
  * Calcule la distance entre deux points géographiques (formule simplifiée).
