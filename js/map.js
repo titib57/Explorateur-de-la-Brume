@@ -1,4 +1,6 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
+﻿// Fichier : js/map.js
+
+document.addEventListener('DOMContentLoaded', () => {
     if (!checkCharacter()) {
         return;
     }
@@ -11,7 +13,6 @@
     const fullscreenBtn = document.getElementById('toggle-fullscreen-btn');
     const startBattleBtn = document.getElementById('start-battle-btn');
 
-    // Définir les données pour la génération de donjons
     const dungeonsData = {
         'forest': {
             name: 'Donjon de la Forêt',
@@ -34,27 +35,25 @@
             type: 'ruins'
         }
     };
-
-    // Fonction utilitaire pour générer un point aléatoire dans un rayon donné
+    
     function generateRandomPoint(center, radius) {
         const y0 = center.lat;
         const x0 = center.lng;
-        const rd = radius / 111300; // Conversion des mètres en degrés
-
+        const rd = radius / 111300;
+    
         const u = Math.random();
         const v = Math.random();
         const w = rd * Math.sqrt(u);
         const t = 2 * Math.PI * v;
         const x = w * Math.cos(t);
         const y = w * Math.sin(t);
-
+    
         return { lat: y + y0, lng: x + x0 };
     }
 
-    // Générer des donjons dynamiques dans un rayon de 10km
     function generateDynamicDungeons(lat, lng, radius) {
         const dungeons = [];
-        const numDungeons = Math.floor(Math.random() * 6) + 3; // Entre 3 et 8 donjons
+        const numDungeons = Math.floor(Math.random() * 6) + 3;
         const types = Object.keys(dungeonsData);
 
         for (let i = 0; i < numDungeons; i++) {
@@ -74,11 +73,10 @@
         return dungeons;
     }
 
-    // Fonction pour simuler la récupération des donjons
     function fetchDungeonsFromOverpass(lat, lng) {
         const radius = 10000;
         const dynamicDungeons = generateDynamicDungeons(lat, lng, radius);
-
+        
         const staticDungeons = [
             {
                 id: 'forest_dungeon',
@@ -95,11 +93,10 @@
                 type: 'cave'
             }
         ];
-
+        
         return [...staticDungeons, ...dynamicDungeons];
     }
-
-    // Définir le donjon du tutoriel séparément
+    
     const tutorialDungeon = {
         id: 'static_Tutoriel',
         name: 'Donjon du Tutoriel',
