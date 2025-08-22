@@ -1,7 +1,7 @@
 ﻿// Fichier : js/core/dungeon.js
 
 import { pointsOfInterest, dungeonTypes, monstersData, bossesData, poiQuests } from './gameData.js';
-import { showNotification, currentDungeon, player, saveCharacter } from './state.js';
+import { currentDungeon, player, saveCharacter } from './state.js';
 import { showNotification } from './notifications.js';
 
 /**
@@ -81,6 +81,4 @@ export function generateDungeon(playerLocation) {
         showNotification(`Nouvelle quête débloquée : ${newQuest.name}`, 'success');
         saveCharacter(player);
     }
-
-    return true;
 }

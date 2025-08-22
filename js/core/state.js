@@ -1,30 +1,23 @@
 ﻿// Fichier : js/state.js
 
-// Importez les données nécessaires depuis d'autres fichiers.
-// Assurez-vous que ces fichiers existent et que les chemins sont corrects.
 import { questsData, itemSets, abilitiesData, classBases, itemsData, skillTreeData } from './gameData.js';
 import { showNotification } from './notifications.js';
 
-// Déclarez les variables globales du jeu et exportez-les pour qu'elles soient accessibles.
+
+
 export let player;
 export let currentMonster;
 export let currentDungeon;
 
 
 
-
-
-// --- Gestion du Personnage et de la Sauvegarde ---
-
 export function saveCharacter(playerObject) {
     localStorage.setItem('playerCharacter', JSON.stringify(playerObject));
 
 }
 
-/**
- * Charge l'objet du joueur depuis le localStorage.
- * @returns {boolean} Vrai si le personnage a été chargé, faux sinon.
- */
+
+
 export function loadCharacter() {
     const characterData = localStorage.getItem('playerCharacter');
     if (!characterData) {
@@ -46,9 +39,8 @@ export function loadCharacter() {
     return true;
 }
 
-/**
- * Gère le passage de niveau.
- */
+
+
 export function levelUp() {
     player.level++;
     player.xp = player.xp - player.xpToNextLevel;
@@ -61,10 +53,8 @@ export function levelUp() {
     player.mana = player.maxMana;
 }
 
-/**
- * Gagne de l'expérience et gère les montées de niveau.
- * @param {number} amount La quantité d'XP à ajouter.
- */
+
+
 export function giveXP(amount) {
     player.xp += amount;
     showNotification(`Vous avez gagné ${amount} points d'expérience !`, 'info');
@@ -74,9 +64,8 @@ export function giveXP(amount) {
     saveCharacter(player);
 }
 
-/**
- * Calcule les statistiques dérivées du personnage (PV max, mana max, dégâts, etc.).
- */
+
+
 export function recalculateDerivedStats() {
     const baseStats = classBases[player.class].stats;
     let tempPlayer = {
