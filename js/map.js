@@ -17,7 +17,7 @@
         id: 'static_Tutoriel',
         name: 'Donjon du Tutoriel',
         location: null, // Sera mis à jour dynamiquement
-        monster: { name: 'Mannequin', hp: 10, attack: 0, defense: 0, xpReward: 5, goldReward: 2, element: 'neutre' },
+        monster: { name: 'Mannequin', hp: 10, attack: 1, defense: 0, xpReward: 5, goldReward: 2, element: 'neutre' },
         marker: null
     };
 
@@ -152,19 +152,20 @@
         const overpassQuery = `
             [out:json];
             (
-              node["historic"="castle"](around:1000, ${lat}, ${lng});
-              node["historic"="ruins"](around:1000, ${lat}, ${lng});
-              node["historic"="fort"](around:1000, ${lat}, ${lng});
-              node["historic"="archaeological_site"](around:1000, ${lat}, ${lng});
-              node["historic"="monument"](around:1000, ${lat}, ${lng});
-              node["historic"="chateau"](around:1000, ${lat}, ${lng});
-              node["historic"="tour"](around:1000, ${lat}, ${lng});
-              node["historic"="cimetiere"](around:1000, ${lat}, ${lng});
-              node["historic"="eglise"](around:1000, ${lat}, ${lng});
-              node["historic"="cathedrale"](around:1000, ${lat}, ${lng});
-              node["historic"="memorial"](around:1000, ${lat}, ${lng});
-              node["historic"="stele"](around:1000, ${lat}, ${lng});
-              node["historic"="statue"](around:1000, ${lat}, ${lng});
+              node["historic"="castle"](around:5000, ${lat}, ${lng});
+              node["historic"="ruins"](around:5000, ${lat}, ${lng});
+              node["historic"="fort"](around:5000, ${lat}, ${lng});
+              node["historic"="archaeological_site"](around:5000, ${lat}, ${lng});
+              node["historic"="monument"](around:5000, ${lat}, ${lng});
+              node["historic"="chapelle"](around:5000, ${lat}, ${lng});
+              node["historic"="chateau"](around:5000, ${lat}, ${lng});
+              node["historic"="tour"](around:5000, ${lat}, ${lng});
+              node["historic"="cimetiere"](around:5000, ${lat}, ${lng});
+              node["historic"="eglise"](around:5000, ${lat}, ${lng});
+              node["historic"="cathedrale"](around:5000, ${lat}, ${lng});
+              node["historic"="memorial"](around:5000, ${lat}, ${lng});
+              node["historic"="stele"](around:5000, ${lat}, ${lng});
+              node["historic"="statue"](around:5000, ${lat}, ${lng});
             );
             out body;
             >;
