@@ -7,6 +7,7 @@
     let playerMarker;
     let dungeons = [];
     let selectedDungeon = null;
+const dungeonMarkers = {};
     const mapElement = document.getElementById('map');
     const fullscreenBtn = document.getElementById('toggle-fullscreen-btn');
     const startBattleBtn = document.getElementById('start-battle-btn');
@@ -27,7 +28,51 @@
     window.addEventListener('resize', () => {
         map.invalidateSize();
     });
+function generateDungeons(playerLocation) {
+    // Effacer les donjons existants
+    dungeons.forEach(d => {
+        if (d.marker) {
+            map.removeLayer(d.marker);
+        }
+    });
+    dungeons = [];
+    
+    // Ajouter les donjons statiques
+    for (const dungeonId in dungeonsData) {
+        if (dungeonsData[dungeonId].location) {
+            createDungeonMarker(dungeonId, dungeonsData[dungeonId].location);
+        }
+    }
 
+    // Ajouter des donjons dynamiques si nécessaire
+    // ... (Votre logique de génération de donjons dynamiques)
+    // Exemple : un donjon dynamique généré aléatoirement
+    const dynamicDungeonLocation = L.latLng(
+        playerLocation.lat + (Math.random() - 0.5) * 0.05,
+        playerLocation.lng + (Math.random() - 0.5) * 0.05
+    );
+    createDungeonMarker('dynamic_caverne', dynamicDungeonLocation);
+
+    updateActionButtons();
+}
+
+// Fonction utilitaire pour créer et lier un marqueur à un donjon
+function createDungeonMarker(dungeonId, location) {
+    const dungeon = {
+        id: dungeonId,
+        ...dungeonsData[dungeonId],
+        location: { lat: location.lat, lng: location.lng },
+        marker: L.marker(location, { icon: dungeonIcon }).addTo(map)
+    };
+    dungeons.push(dungeon);
+
+    dungeon.marker.on('click', () => {
+        selectedDungeon = dungeon;
+        updateActionButtons();
+        showNotification(`Vous êtes près de ${dungeon.name}.`, 'info');
+    });
+    dungeonMarkers[dungeonId] = dungeon.marker; // Sauvegarder la référence
+}
     function toggleFullscreen() {
         if (!mapElement.classList.contains('fullscreen')) {
             mapElement.classList.add('fullscreen');
@@ -271,7 +316,8 @@
                     monster: selectedDungeon.monster
                 };
                 localStorage.setItem('currentDungeon', JSON.stringify(dungeonToSave));
-                window.location.href = 'battle.html';
+ startDungeonQuest(selectedDungeon.id);
+                window.location.href = 'quests.html';
             }
         });
 

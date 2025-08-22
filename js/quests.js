@@ -65,19 +65,79 @@ if (quest.nextQuestId && questsData[quest.nextQuestId]) {
         updateQuestsUI();
     }
 }
+// Fichier : js/quests.js
 
+// ... (votre code existant, y compris la fonction getDistance)
+
+/**
+ * Commence une quête de donjon, si elle n'est pas déjà dans le journal du joueur.
+ * @param {string} dungeonId L'ID du donjon.
+ * @param {object} dungeonLocation La position du donjon {lat, lng}.
+ */
+function startDungeonQuest(dungeonId, dungeonLocation) {
+    // Déterminer quel modèle de quête utiliser
+    const dungeonData = dungeonsData[dungeonId];
+    if (!dungeonData) {
+        console.error(`Donjon non trouvé avec l'ID : ${dungeonId}`);
+        showNotification("Erreur lors du démarrage de la quête de donjon.", 'error');
+        return;
+    }
+
+    const questTemplateId = dungeonData.questTemplateId || `${dungeonId}`;
+    const questTemplate = questsData[questTemplateId];
+    
+    if (!questTemplate) {
+        console.error(`Modèle de quête non trouvé avec l'ID : ${questTemplateId}`);
+        showNotification("Erreur lors du démarrage de la quête de donjon.", 'error');
+        return;
+    }
+
+    const questId = `${dungeonId}_quest`;
+    if (!player.quests[questId]) {
+        // Créer une nouvelle quête basée sur le modèle
+        const newQuest = JSON.parse(JSON.stringify(questTemplate)); // Clone profond
+        newQuest.name = newQuest.name.replace('Quête de donjon', dungeonData.name);
+        newQuest.location = dungeonLocation;
+        newQuest.objective.target = dungeonData.monster.name;
+
+        player.quests[questId] = newQuest;
+        saveCharacter(player);
+        showNotification(`Nouvelle quête de donjon débloquée : ${newQuest.name}!`, 'info');
+    } else {
+        showNotification(`Vous avez déjà la quête "${player.quests[questId].name}".`, 'info');
+    }
+}
+
+/**
+ * Met à jour le progrès d'un objectif de quête.
+ * @param {string} type Le type d'objectif (ex: 'kill_monster').
+ * @param {string} target L'identifiant de la cible (ex: l'id d'un monstre).
+ */
 function updateQuestObjective(type, target) {
+    const playerPosition = playerMarker.getLatLng();
+    const playerLocation = { lat: playerPosition.lat, lng: playerPosition.lng };
+
     for (const questId in player.quests) {
         const quest = player.quests[questId];
-        if (!quest.completed && quest.objective.type === type && quest.objective.target === target) {
-            quest.objective.current++;
-            if (quest.objective.current >= quest.objective.required) {
-                quest.completed = true;
-                showNotification(`Quête terminée : ${quest.name} !`, 'success');
+        
+        // Vérifier si la quête est en cours, que l'objectif correspond et qu'elle a une localisation.
+        if (!quest.completed && quest.objective.type === type && quest.objective.target === target && quest.location) {
+            
+            const distanceToObjective = getDistance(playerLocation, quest.location);
+            
+            // Si le joueur est à moins de 100 mètres de la quête, elle est active.
+            if (distanceToObjective <= 100) {
+                quest.objective.current++;
+                if (quest.objective.current >= quest.objective.required) {
+                    quest.completed = true;
+                    showNotification(`Quête terminée : ${quest.name} !`, 'success');
+                }
+                saveCharacter(player);
+                updateQuestsUI();
+                return;
+            } else {
+                showNotification(`Vous devez être à proximité de la zone de la quête pour la valider.`, 'warning');
             }
-            saveCharacter(player);
-            updateQuestsUI();
-            return;
         }
     }
 }

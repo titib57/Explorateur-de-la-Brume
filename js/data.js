@@ -353,6 +353,51 @@ const questsData = {
         },
         nextQuestId: null
     }
+ 'dungeon_tutoriel': {
+        name: 'Dungeon du Tutoriel',
+        description: 'Vaincre le mannequin dans le donjon pour prouver votre force.',
+        objective: {
+            type: 'kill_monster',
+            target: 'mannequin',
+            required: 1,
+            current: 0
+        },
+        // Location sera définie dynamiquement ou référencée depuis dungeonsData
+        location: null,
+        nextQuestId: null
+    },
+    'dungeon_template': {
+        name: 'Quête de donjon',
+        description: 'Vaincre le monstre du donjon pour le terminer.',
+        objective: {
+            type: 'kill_monster',
+            target: '', // Sera remplacé par le monstre réel du donjon
+            required: 1,
+            current: 0
+        },
+        // Location sera définie dynamiquement
+        location: null,
+        nextQuestId: null
+    }
+};
+
+const dungeonsData = {
+    'static_Tutoriel': {
+        name: 'Donjon du Tutoriel',
+        location: { lat: 48.970141, lng: 6.20815 },
+        monster: { name: 'Mannequin', hp: 10, attack: 1, defense: 0, xpReward: 5, goldReward: 2, element: 'neutre' }
+    },
+    'dynamic_caverne': {
+        name: 'Caverne des monstres',
+        monster: { name: 'Loup des cavernes', hp: 20, attack: 5, defense: 1, xpReward: 15, goldReward: 10, element: 'terre' },
+        questTemplateId: 'dungeon_template'
+    },
+    'dynamic_antre_dragon': {
+        name: 'Antre du Dragon',
+        monster: { name: 'Dragon', hp: 100, attack: 25, defense: 10, xpReward: 500, goldReward: 200, element: 'feu' },
+        questTemplateId: 'dungeon_template'
+    }
+};
 };
 const locationTypes = {
     'foret': {
