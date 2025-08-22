@@ -1,9 +1,4 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
-    if (!checkCharacter()) {
-        return;
-    }
-
-    const map = L.map('map');
+﻿    const map = L.map('map');
     let playerMarker;
     let dungeons = [];
     let selectedDungeon = null;

@@ -3,7 +3,7 @@
 // Importez les données nécessaires depuis d'autres fichiers.
 // Assurez-vous que ces fichiers existent et que les chemins sont corrects.
 import { questsData, itemSets, abilitiesData, classBases, itemsData, skillTreeData } from './gameData.js';
-import { showNotification } from './notifications.js';
+
 
 // Déclarez les variables globales du jeu et exportez-les pour qu'elles soient accessibles.
 export let player;
@@ -204,24 +204,4 @@ export function getSkillById(skillId) {
     }
     
     return null;
-}
-
-// --- Fonctions de Combat ---
-
-/**
- * Commence une bataille en chargeant un monstre du donjon.
- */
-export function startBattle() {
-    const dungeonData = localStorage.getItem('currentDungeon');
-    if (!dungeonData) {
-        showNotification("Aucun donjon à explorer !", 'error');
-        return;
-    }
-    currentDungeon = JSON.parse(dungeonData);
-    currentMonster = { ...currentDungeon.monster };
-    console.log("Bataille commencée contre :", currentMonster);
-    
-    document.getElementById('battle-interface').style.display = 'block';
-    
-    initializeCombat(); 
 }
