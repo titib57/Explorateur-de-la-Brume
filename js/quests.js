@@ -1,5 +1,55 @@
 ﻿// Fichier : js/quests.js
 
+// Données des quêtes
+const questsData = {
+    'premiers_pas': {
+        name: "Premiers pas dans la brume",
+        description: "Explorez un donjon et tuez le mannequin d'entraînement pour prouver votre courage.",
+        objective: {
+            type: 'kill_monster',
+            target: 'Mannequin',
+            current: 0,
+            required: 1
+        },
+        reward: {
+            xp: 20,
+            gold: 10
+        },
+        nextQuestId: null
+    },
+    'chasse_au_goblinoide': {
+        name: "Chasse au Goblinoïde",
+        description: "Traquez et tuez le Goblinoïde des bois qui terrorise la forêt.",
+        objective: {
+            type: 'kill_monster',
+            target: 'Goblinoïde des bois',
+            current: 0,
+            required: 1
+        },
+        reward: {
+            xp: 50,
+            gold: 30,
+            item: 'epee_de_fer'
+        },
+        nextQuestId: null
+    }
+};
+
+// Associe les donjons (par leur ID) aux quêtes
+const dungeonQuestsData = {
+    'static_Tutoriel': 'premiers_pas',
+    'forest_dungeon': 'chasse_au_goblinoide'
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (!checkCharacter()) {
+        return;
+    }
+
+    updateQuestsUI();
+});
+
+// Fonction pour mettre à jour l'affichage des quêtes.
 function updateQuestsUI() {
     const questList = document.getElementById('quest-list');
     if (!questList) return;
@@ -39,6 +89,7 @@ function addQuest(questId) {
     }
 }
 
+// Fonction pour réclamer la récompense d'une quête terminée
 function claimQuestReward(questId) {
     const quest = player.quests[questId];
     if (quest && quest.completed && !quest.rewardClaimed) {
@@ -74,6 +125,7 @@ function claimQuestReward(questId) {
     }
 }
 
+// Fonction pour mettre à jour les objectifs de quête du joueur
 function updateQuestObjective(type, target) {
     for (const questId in player.quests) {
         const quest = player.quests[questId];
