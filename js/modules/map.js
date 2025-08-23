@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Étape 2: Initialisation des variables et des éléments de la carte
-    const map = L.map('map');
+    // AJOUT DE setView() POUR QUE LA CARTE S'AFFICHE PAR DÉFAUT
+    const map = L.map('map').setView([48.8566, 2.3522], 6);
     let playerMarker;
     let selectedDungeon = null;
     const mapElement = document.getElementById('map');
@@ -57,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (poi.dungeonType && dungeonTypes[poi.dungeonType]) {
                 const dungeonMarker = L.marker([poi.location.lat, poi.location.lng]).addTo(map);
                 dungeonMarker.bindTooltip(poi.name, { permanent: true, direction: "top" });
-                
+
                 dungeonMarker.on('click', () => {
                     selectedDungeon = {
                         id: poiId,
@@ -85,10 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
             playerMarker.setLatLng(playerLatLng);
             map.panTo(playerLatLng);
         }
-        
+
         updateActionButtons();
     }
-    
+
     // Étape 7: Gestion de l'affichage des boutons d'action
     function updateActionButtons() {
         if (!selectedDungeon || !playerMarker) {
@@ -97,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const playerLatLng = playerMarker.getLatLng();
             const dungeonLatLng = L.LatLng(selectedDungeon.location.lat, selectedDungeon.location.lng);
             const distance = calculateDistance(playerLatLng, dungeonLatLng);
-            
+
             if (distance <= 100) {
                 startBattleBtn.style.display = 'block';
                 startBattleBtn.textContent = `Entrer dans ${selectedDungeon.name}`;
@@ -107,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectedDungeon = null;
             }
         }
-        
+
         if (player && player.level >= 5 && player.class === 'explorateur') {
             classTreeBtn.style.display = 'block';
         } else {
