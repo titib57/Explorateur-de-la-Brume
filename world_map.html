@@ -33,17 +33,6 @@
             z-index: 1000;
         }
 
-        .map-info {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            z-index: 500;
-        }
-
         .action-buttons {
             display: flex;
             justify-content: center;
@@ -77,12 +66,13 @@
             <button id="toggle-fullscreen-btn" class="btn-primary">Plein écran</button>
         </div>
         <div class="action-buttons">
+            <button id="tutorial-btn" class="btn-primary" style="display: none;">Lancer le tutoriel</button>
             <button id="start-battle-btn" class="btn-primary" style="display: none;">Entrer dans le donjon</button>
-            <a id="class-tree-btn" href="class_tree.html" class="btn-primary" style="display: none;">Quête de classe</a>
+            <a id="class-tree-btn" href="class_tree.html" class="btn-primary" style="display: none;">Quête...</a>
         </div>
     </main>
 
-    <div id="notification-container"></div>
-    <script type="module" src="js/modules/map.js"></script>
+    <script src="js/modules/map.js" type="module"></script>
+    <script src="js/core/notifications.js" type="module"></script>
 </body>
 </html>

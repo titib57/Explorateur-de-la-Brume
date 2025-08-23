@@ -1,174 +1,178 @@
-﻿// Fichier : js/state.js
+﻿// Fichier : js/core/state.js
 
-import { questsData, itemSets, abilitiesData, classBases, itemsData, skillTreeData } from './gameData.js';
-import { showNotification } from './notifications.js';
+import { itemsData } from './gameData.js';
 
+export let player = null;
+export let currentDungeon = null;
 
+// Classe de base pour un personnage
+class Character {
+    constructor(name, playerClass, level, xp, gold, stats, quests, inventory, equipment, abilities, hp, maxHp, mana, maxMana) {
+        this.name = name;
+        this.playerClass = playerClass;
+        this.level = level || 1;
+        this.xp = xp || 0;
+        this.gold = gold || 0;
+        this.stats = stats || { strength: 1, intelligence: 1, speed: 1, dexterity: 1 };
+        this.quests = quests || {};
+        this.inventory = inventory || {};
+        this.equipment = equipment || {};
+        this.abilities = abilities || [];
+        this.hp = hp || 100 + (this.level - 1) * 10;
+        this.maxHp = maxHp || 100 + (this.level - 1) * 10;
+        this.mana = mana || 50 + (this.level - 1) * 5;
+        this.maxMana = maxMana || 50 + (this.level - 1) * 5;
+    }
 
-export let player;
-export let currentMonster;
-export let currentDungeon;
+    addXp(amount) {
+        this.xp += amount;
+        while (this.xp >= this.level * 100) {
+            this.xp -= this.level * 100;
+            this.levelUp();
+        }
+    }
 
+    levelUp() {
+        this.level++;
+        this.stats.strength += 1;
+        this.stats.intelligence += 1;
+        this.stats.speed += 1;
+        this.stats.dexterity += 1;
+        this.maxHp += 10;
+        this.hp = this.maxHp;
+        this.maxMana += 5;
+        this.mana = this.maxMana;
+        saveCharacter();
+    }
 
+    addGold(amount) {
+        this.gold += amount;
+        saveCharacter();
+    }
 
-export function saveCharacter(playerObject) {
-    localStorage.setItem('playerCharacter', JSON.stringify(playerObject));
+    addItemToInventory(itemId, quantity = 1) {
+        if (!this.inventory[itemId]) {
+            this.inventory[itemId] = 0;
+        }
+        this.inventory[itemId] += quantity;
+        saveCharacter();
+    }
 
+    getStat(statName) {
+        return this.stats[statName] + (this.equipment.weapon ? this.equipment.weapon.stats[statName] || 0 : 0) + (this.equipment.armor ? this.equipment.armor.stats[statName] || 0 : 0);
+    }
+
+    getWeaponDamage() {
+        if (this.equipment.weapon) {
+            return this.equipment.weapon.damage;
+        }
+        return 5;
+    }
 }
 
-
-
+/**
+ * Charge les données du personnage depuis le stockage local.
+ */
 export function loadCharacter() {
-    const characterData = localStorage.getItem('playerCharacter');
-    if (!characterData) {
-        return false;
-    }
-    player = JSON.parse(characterData);
-    if (!player.unlockedSkills) {
-        player.unlockedSkills = ['fist_attack'];
-    }
-    if (!player.equipment) {
-        player.equipment = { weapon: null, armor: null };
-    }
-    if (!player.quests) {
-        player.quests = { ...questsData };
-    }
-    if (!player.element) {
-        player.element = 'neutre';
-    }
-    return true;
-}
-
-
-
-export function levelUp() {
-    player.level++;
-    player.xp = player.xp - player.xpToNextLevel;
-    player.xpToNextLevel = Math.floor(player.xpToNextLevel * 1.5);
-    player.statPoints += 3;
-    player.skillPoints += 1;
-    showNotification(`Félicitations ! Vous êtes passé au niveau ${player.level} !`, 'success');
-    recalculateDerivedStats();
-    player.hp = player.maxHp; 
-    player.mana = player.maxMana;
-}
-
-
-
-export function giveXP(amount) {
-    player.xp += amount;
-    showNotification(`Vous avez gagné ${amount} points d'expérience !`, 'info');
-    if (player.xp >= player.xpToNextLevel) {
-        levelUp();
-    }
-    saveCharacter(player);
-}
-
-
-
-export function recalculateDerivedStats() {
-    const baseStats = classBases[player.class].stats;
-    let tempPlayer = {
-        stats: { ...baseStats },
-        passiveEffect: {},
-        resistances: {}
-    };
-
-    let equippedItems = [];
-    if (player.equipment.weapon) equippedItems.push(player.equipment.weapon);
-    if (player.equipment.armor) equippedItems.push(player.equipment.armor);
-
-    let setPiecesCount = {};
-
-    equippedItems.forEach(item => {
-        if (item.stats) {
-            for (const stat in item.stats) {
-                tempPlayer.stats[stat] = (tempPlayer.stats[stat] || 0) + item.stats[stat];
-            }
+    try {
+        const savedData = JSON.parse(localStorage.getItem('playerCharacter'));
+        if (savedData) {
+            player = new Character(
+                savedData.name,
+                savedData.playerClass,
+                savedData.level,
+                savedData.xp,
+                savedData.gold,
+                savedData.stats,
+                savedData.quests,
+                savedData.inventory,
+                savedData.equipment,
+                savedData.abilities,
+                savedData.hp,
+                savedData.maxHp,
+                savedData.mana,
+                savedData.maxMana
+            );
+            console.log("Personnage chargé :", player);
+            updateStatsDisplay();
+            return true;
         }
-        if (item.passiveEffect) {
-            for (const effect in item.passiveEffect) {
-                tempPlayer.passiveEffect[effect] = (tempPlayer.passiveEffect[effect] || 0) + item.passiveEffect[effect];
-            }
-        }
-        if (item.resistances) {
-            for (const element in item.resistances) {
-                tempPlayer.resistances[element] = (tempPlayer.resistances[element] || 0) + item.resistances[element];
-            }
-        }
-        if (item.set) {
-            setPiecesCount[item.set] = (setPiecesCount[item.set] || 0) + 1;
-        }
-    });
-
-    for (const setId in setPiecesCount) {
-        const set = itemSets[setId];
-        if (set && setPiecesCount[setId] === set.pieces.length) {
-            if (set.bonus.stats) {
-                for (const stat in set.bonus.stats) {
-                    tempPlayer.stats[stat] += set.bonus.stats[stat];
-                }
-            }
-            if (set.bonus.passiveEffect) {
-                for (const effect in set.bonus.passiveEffect) {
-                     tempPlayer.passiveEffect[effect] = (tempPlayer.passiveEffect[effect] || 0) + set.bonus.passiveEffect[effect];
-                }
-            }
-            if (set.bonus.resistances) {
-                 for (const element in set.bonus.resistances) {
-                    tempPlayer.resistances[element] = (tempPlayer.resistances[element] || 0) + set.bonus.resistances[element];
-                }
-            }
-        }
+    } catch (error) {
+        console.error("Erreur lors du chargement du personnage:", error);
     }
-    
-    player.maxHp = 100 + (tempPlayer.stats.strength * 10);
-    player.maxMana = 50 + (tempPlayer.stats.intelligence * 5);
-    player.attackDamage = 5 + (tempPlayer.stats.strength * 2);
-    player.defense = 0 + (tempPlayer.stats.strength * 1.5);
-    player.critChance = 0.05; 
-    player.evasionChance = 0;
-    player.armorPenetration = 0;
-
-    if (tempPlayer.passiveEffect.critChance) player.critChance += tempPlayer.passiveEffect.critChance;
-    if (tempPlayer.passiveEffect.evasionChance) player.evasionChance += tempPlayer.passiveEffect.evasionChance;
-    if (tempPlayer.passiveEffect.armorPenetration) player.armorPenetration += tempPlayer.passiveEffect.armorPenetration;
-
-    player.stats = tempPlayer.stats;
-    player.resistances = tempPlayer.resistances;
-}
-
-
-// --- Fonctions d'inventaire ---
-
-/**
- * Gère l'obtention d'un objet.
- * @param {string} itemId L'ID de l'objet.
- */
-export function obtainItem(itemId) {
-    const item = itemsData.weapons[itemId] || itemsData.armors[itemId] || itemsData.consumables[itemId];
-    if (item) {
-        player.inventory.push(item);
-        showNotification(`Vous avez trouvé un(e) ${item.name} !`, 'success');
-        saveCharacter(player);
-    }
+    return false;
 }
 
 /**
- * Trouve une compétence par son ID.
+ * Sauvegarde les données du personnage dans le stockage local.
+ * Nous créons une copie sans les méthodes pour éviter les erreurs de sérialisation.
  */
-export function getSkillById(skillId) {
-    const classTree = skillTreeData[player.class];
-    if (classTree && classTree.skills[skillId]) {
-        return classTree.skills[skillId];
-    }
-    
-    for (const classId in abilitiesData) {
-        const ability = abilitiesData[classId].find(a => a.id === skillId);
-        if (ability) {
-            return ability;
+export function saveCharacter() {
+    if (player) {
+        try {
+            const dataToSave = {
+                name: player.name,
+                playerClass: player.playerClass,
+                level: player.level,
+                xp: player.xp,
+                gold: player.gold,
+                stats: player.stats,
+                quests: player.quests,
+                inventory: player.inventory,
+                equipment: player.equipment,
+                abilities: player.abilities,
+                hp: player.hp,
+                maxHp: player.maxHp,
+                mana: player.mana,
+                maxMana: player.maxMana
+            };
+            localStorage.setItem('playerCharacter', JSON.stringify(dataToSave));
+            console.log("Personnage sauvegardé.");
+            updateStatsDisplay();
+        } catch (error) {
+            console.error("Erreur lors de la sauvegarde du personnage:", error);
         }
     }
-    
-    return null;
 }
+
+// Fonction pour mettre à jour l'affichage des statistiques
+export function updateStatsDisplay() {
+    if (!player) return;
+    const hpElement = document.getElementById('player-hp');
+    const manaElement = document.getElementById('player-mana');
+    const goldElement = document.getElementById('player-gold');
+
+    if (hpElement) hpElement.textContent = `${player.hp}/${player.maxHp}`;
+    if (manaElement) manaElement.textContent = `${player.mana}/${player.maxMana}`;
+    if (goldElement) goldElement.textContent = player.gold;
+}
+
+// Réinitialise le donjon en cours
+export function resetDungeon() {
+    localStorage.removeItem('currentDungeon');
+    currentDungeon = null;
+}
+
+// Applique les récompenses d'une quête au joueur
+export function applyRewards(rewards) {
+    if (!player) return;
+    if (rewards.xp) {
+        player.addXp(rewards.xp);
+    }
+    if (rewards.gold) {
+        player.addGold(rewards.gold);
+    }
+    if (rewards.item) {
+        player.addItemToInventory(rewards.item, 1);
+    }
+    saveCharacter();
+}
+
+// Crée et initialise un nouveau personnage
+export function createCharacter(name, playerClass) {
+    player = new Character(name, playerClass);
+    saveCharacter();
+}
+
+// Chargement initial du personnage
+loadCharacter();

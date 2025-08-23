@@ -149,117 +149,43 @@ export const monstersData = {
     'creature_lacustre': { id: 'creature_lacustre', name: 'Créature lacustre', hp: 70, attack: 20, defense: 12, xpReward: 28, goldReward: 18, element: 'eau' },
     'rat_des_egouts': { id: 'rat_des_egouts', name: 'Rat des égouts', hp: 20, attack: 5, defense: 2, xpReward: 5, goldReward: 2, element: 'neutre' },
     'corbeau_enrage': { id: 'corbeau_enrage', name: 'Corbeau enragé', hp: 25, attack: 7, defense: 3, xpReward: 8, goldReward: 4, element: 'air' },
-    'momie_reveillee': { id: 'momie_reveillee', name: 'Momie réveillée', hp: 50, attack: 15, defense: 10, xpReward: 20, goldReward: 12, element: 'terre' },
-    'scarabee_geants': { id: 'scarabee_geants', name: 'Scarabée géant', hp: 45, attack: 18, defense: 6, xpReward: 18, goldReward: 9, element: 'terre' },
-    'guerrier_fantome': { id: 'guerrier_fantome', name: 'Guerrier fantôme', hp: 80, attack: 25, defense: 10, xpReward: 30, goldReward: 15, element: 'neutre' },
-    'dragon_ancestral': { id: 'dragon_ancestral', name: 'Dragon ancestral', hp: 120, attack: 40, defense: 20, xpReward: 50, goldReward: 30, element: 'feu' }
+    'momie_reveillee': { id: 'momie_reveillee', name: 'Momie réveillée', hp: 50, attack: 15, defense: 9, xpReward: 20, goldReward: 12, element: 'terre' },
+    'mannequin_dentrainement': { id: 'mannequin_dentrainement', name: 'Mannequin d\'entraînement', hp: 10, attack: 1, defense: 10, xpReward: 0, goldReward: 0, element: 'neutre', isTutorial: true }
 };
 
-export const skillsData = {
-    'fist_attack': {
-        id: 'fist_attack',
-        name: 'Coup de poing',
-        description: 'Une attaque de base avec le poing.',
-        manaCost: 0,
-        damage: 5
-    }
+export const bossesData = {
+    'chef_des_gobelins': { id: 'chef_des_gobelins', name: 'Chef des gobelins', hp: 120, attack: 30, defense: 15, xpReward: 100, goldReward: 50, element: 'terre' },
+    'gardien_des_tombes': { id: 'gardien_des_tombes', name: 'Gardien des tombes', hp: 150, attack: 40, defense: 20, xpReward: 150, goldReward: 75, element: 'terre' },
+    'chef_des_corbeaux': { id: 'chef_des_corbeaux', name: 'Chef des corbeaux', hp: 100, attack: 35, defense: 10, xpReward: 120, goldReward: 60, element: 'air' },
+    'dragon_ancestral': { id: 'dragon_ancestral', name: 'Dragon ancestral', hp: 200, attack: 50, defense: 25, xpReward: 250, goldReward: 120, element: 'feu' },
+    'mannequin_dentrainement': { id: 'mannequin_dentrainement', name: 'Mannequin d\'entraînement', hp: 10, attack: 1, defense: 10, xpReward: 0, goldReward: 0, element: 'neutre', isTutorial: true }
 };
 
-export const skillTreeData = {
-    'guerrier': {
-        name: "Arbre de compétences du guerrier",
-        skills: {
-            'frappe_puissante': {
-                id: 'frappe_puissante',
-                name: 'Frappe puissante',
-                description: 'Une attaque qui inflige des dégâts massifs.',
-                cost: 1,
-                prerequisites: [],
-                damage: 50,
-                manaCost: 20,
-                type: 'ability',
-                element: 'neutre'
-            },
-            'peau_de_fer': {
-                id: 'peau_de_fer',
-                name: 'Peau de fer',
-                description: 'Augmente la défense de 5 de manière permanente.',
-                cost: 1,
-                prerequisites: ['frappe_puissante'],
-                effect: { defense: 5 },
-                type: 'passive',
-                element: 'neutre'
-            }
-        }
+export const dungeonTypes = {
+    'forest': { name: 'Forêt sinistre', description: 'Une forêt sombre où se cachent des créatures dangereuses.', monsterPool: ['gobelin', 'loup', 'sanglier', 'ours'], bossPool: ['chef_des_gobelins', 'ours'], rewards: { gold: 50, xp: 50 } },
+    'cave': { name: 'Grotte humide', description: 'Une grotte remplie de créatures des profondeurs.', monsterPool: ['rat_des_egouts', 'serpent_eau', 'grenouille_toxique'], bossPool: ['chef_des_gobelins', 'creature_lacustre'], rewards: { gold: 60, xp: 60 } },
+    'ruin': { name: 'Ruine oubliée', description: 'Les vestiges d\'une civilisation perdue, hantés par les esprits.', monsterPool: ['guerrier_fantome', 'momie_reveillee', 'corbeau_enrage'], bossPool: ['gardien_des_tombes', 'chef_des_corbeaux'], rewards: { gold: 75, xp: 75 } },
+    'volcano': { name: 'Volcan en fusion', description: 'Un donjon à haut risque, rempli de monstres de feu.', monsterPool: ['scorpion_geant', 'golem_sable', 'dragon_ancestral'], bossPool: ['dragon_ancestral'], rewards: { gold: 100, xp: 100 } },
+    'tutoriel': { name: 'Donjon de tutoriel', description: 'Un lieu sûr pour apprendre les bases du combat. Vainquez le mannequin d\'entraînement!', monsterPool: ['mannequin_dentrainement'], bossPool: ['mannequin_dentrainement'], isTutorial: true }
+};
+
+export const pointsOfInterest = {
+    'tutorial_dungeon_poi': {
+        id: 'tutorial_dungeon_poi',
+        name: 'Camp d\'entraînement',
+        location: { lat: 48.8566, lng: 2.3522 }, // Coordonnées de test, non liées à un lieu réel
+        dungeonType: 'tutoriel',
+        difficulty: 0,
+        questId: 'premiers_pas',
+        isTutorial: true,
     },
-    'mage': {
-        name: "Arbre de compétences du mage",
-        skills: {
-            'eclair_de_foudre': {
-                id: 'eclair_de_foudre',
-                name: 'Éclair de foudre',
-                description: 'Un puissant éclair qui frappe la cible.',
-                cost: 1,
-                prerequisites: [],
-                damage: 60,
-                manaCost: 20,
-                type: 'ability',
-                element: 'foudre'
-            },
-            'bouclier_arcanique': {
-                id: 'bouclier_arcanique',
-                name: 'Bouclier Arcanique',
-                description: 'Augmente le mana max de 10 de manière permanente.',
-                cost: 1,
-                prerequisites: ['eclair_de_foudre'],
-                effect: { maxMana: 10 },
-                type: 'passive',
-                element: 'neutre'
-            }
-        }
-    },
-    'voleur': {
-        name: "Arbre de compétences du voleur",
-        skills: {
-            'attaque_rapide': {
-                id: 'attaque_rapide',
-                name: 'Attaque rapide',
-                description: 'Une attaque rapide qui a une chance d\'attaquer deux fois.',
-                cost: 1,
-                prerequisites: [],
-                damage: 25,
-                manaCost: 10,
-                type: 'ability',
-                element: 'neutre'
-            },
-            'agilite_superieure': {
-                id: 'agilite_superieure',
-                name: 'Agilité supérieure',
-                description: 'Augmente la vitesse et la dextérité de 2 de manière permanente.',
-                cost: 1,
-                prerequisites: ['attaque_rapide'],
-                effect: { speed: 2, dexterity: 2 },
-                type: 'passive',
-                element: 'neutre'
-            }
-        }
-    },
-    'explorateur': {
-        name: "Arbre de compétences de l'explorateur",
-        skills: {
-            'sucer_glaçons': {
-                id: 'sucer_glaçons',
-                name: 'Sucer des glaçons',
-                description: 'Se mettre assis et suçer des glaçons...',
-                cost: 0,
-                prerequisites: [],
-                damage: 0,
-                manaCost: 0,
-                effect: { hp: 5 },
-                type: 'ability',
-                element: 'neutre'
-            },
-        }
+    'pyramides_de_gizeh_poi': {
+        id: 'pyramides_de_gizeh_poi',
+        name: 'Pyramides de Gizeh',
+        location: { lat: 29.9792, lng: 31.1342 },
+        dungeonType: 'ruin',
+        difficulty: 5,
+        questId: 'pyramides_de_gizeh_quest'
     }
 };
 
@@ -270,14 +196,14 @@ export const questsData = {
         description: 'Rends toi dans le donjon de tutoriel pour vaincre un mannequin d\'entraînement.',
         objective: {
             type: 'kill_monster',
-            target: 'Mannequin',
+            target: 'mannequin_dentrainement',
             required: 1,
             current: 0
         },
         reward: {
             xp: 50,
             gold: 20,
-            item: 'potion_de_soin'
+            item: 'epee_rouillee'
         },
         nextQuestId: 'lart_devoluer'
     },
@@ -360,156 +286,6 @@ export const questsData = {
             gold: 250
         },
         nextQuestId: null
-    }
-};
-
-export const locationTypes = {
-    'foret': {
-        name: 'Forêt mystérieuse',
-        monsters: [
-            { id: 'gobelin', chance: 0.6 },
-            { id: 'loup', chance: 0.3 },
-            { id: 'ours', chance: 0.1 }
-        ]
-    },
-    'plaine': {
-        name: 'Plaines verdoyantes',
-        monsters: [
-            { id: 'lapin_furieux', chance: 0.7 },
-            { id: 'sanglier', chance: 0.2 },
-            { id: 'bandit', chance: 0.1 }
-        ]
-    },
-    'desert': {
-        name: 'Désert aride',
-        monsters: [
-            { id: 'scorpion_geant', chance: 0.6 },
-            { id: 'cobra_royal', chance: 0.3 },
-            { id: 'golem_sable', chance: 0.1 }
-        ]
-    },
-    'lac': {
-        name: 'Bord du lac',
-        monsters: [
-            { id: 'grenouille_toxique', chance: 0.5 },
-            { id: 'serpent_eau', chance: 0.4 },
-            { id: 'creature_lacustre', chance: 0.1 }
-        ]
-    }
-};
-
-export const elements = {
-    'feu': {
-        name: 'Feu',
-        strongAgainst: ['terre', 'poison'],
-        weakAgainst: ['eau', 'foudre']
-    },
-    'eau': {
-        name: 'Eau',
-        strongAgainst: ['feu'],
-        weakAgainst: ['foudre', 'terre']
-    },
-    'terre': {
-        name: 'Terre',
-        strongAgainst: ['foudre', 'poison'],
-        weakAgainst: ['feu', 'eau']
-    },
-    'foudre': {
-        name: 'Foudre',
-        strongAgainst: ['eau'],
-        weakAgainst: ['terre']
-    },
-    'poison': {
-        name: 'Poison',
-        strongAgainst: ['eau'],
-        weakAgainst: ['feu', 'terre']
-    },
-    'neutre': {
-        name: 'Neutre',
-        strongAgainst: [],
-        weakAgainst: []
-    }
-};
-
-export const itemSets = {
-    'set_du_guerrier_debout': {
-        name: "Set du Guerrier Debout",
-        pieces: ['epee_du_guerrier_debout', 'armure_du_guerrier_debout'],
-        bonus: {
-            stats: {
-                strength: 5,
-            }
-        }
-    }
-};
-
-export const pointsOfInterest = {
-    'tour_eiffel': {
-        name: 'Tour Eiffel',
-        location: { x: 48.8584, y: 2.2945 },
-        difficulty: 'facile',
-        dungeonType: 'tour',
-        monsterPool: ['rat_des_egouts', 'corbeau_enrage'],
-        questId: 'tour_eiffel_quest'
-    },
-    'pyramides_de_gizeh': {
-        name: 'Pyramides de Gizeh',
-        location: { x: 29.9792, y: 31.1342 },
-        difficulty: 'intermediaire',
-        dungeonType: 'tombeau',
-        monsterPool: ['momie_reveillee', 'scarabee_geants'],
-        questId: 'pyramides_de_gizeh_quest'
-    },
-    'grande_muraille_de_chine': {
-        name: 'Grande Muraille de Chine',
-        location: { x: 40.4319, y: 116.5704 },
-        difficulty: 'difficile',
-        dungeonType: 'muraille',
-        monsterPool: ['guerrier_fantome', 'dragon_ancestral'],
-        questId: 'grande_muraille_de_chine_quest'
-    }
-};
-
-export const dungeonTypes = {
-    'tour': {
-        description: 'Une ancienne tour infestée de créatures volantes et d\'esprits tourmentés.',
-        boss: 'chef_des_corbeaux',
-        rewards: { gold: 50, item: 'plume_rare' }
-    },
-    'tombeau': {
-        description: 'Les couloirs sinueux et sombres d\'un tombeau antique gardé par des âmes perdues.',
-        boss: 'gardien_des_tombes',
-        rewards: { gold: 150, item: 'amulette_du_sable' }
-    },
-    'muraille': {
-        description: 'Les vestiges d\'une muraille défensive où des guerriers fantômes patrouillent inlassablement.',
-        boss: 'dragon_ancestral',
-        rewards: { gold: 500, item: 'epee_du_dragon' }
-    }
-};
-
-export const bossesData = {
-    'chef_des_corbeaux': { name: 'Chef des Corbeaux', hp: 50, damage: 15 },
-    'gardien_des_tombes': { name: 'Gardien des Tombes', hp: 100, damage: 30 },
-    'dragon_ancestral': { name: 'Dragon Ancestral', hp: 200, damage: 50 }
-};
-
-export const poiQuests = {
-    'tour_eiffel_quest': {
-        id: 'tour_eiffel_quest',
-        name: 'L\'esprit de fer de la Tour',
-        description: 'L\'esprit de Gustave Eiffel a été corrompu par la brume. Vainquez-le pour ramener la paix à Paris.',
-        objective: {
-            type: 'kill_monster',
-            target: 'chef_des_corbeaux', 
-            required: 1,
-            current: 0
-        },
-        reward: {
-            xp: 200,
-            gold: 100,
-            item: 'epee_de_feu'
-        }
     },
     'pyramides_de_gizeh_quest': {
         id: 'pyramides_de_gizeh_quest',
@@ -526,21 +302,190 @@ export const poiQuests = {
             gold: 250,
             item: 'amulette_du_sable'
         }
-    },
-    'grande_muraille_de_chine_quest': {
-        id: 'grande_muraille_de_chine_quest',
-        name: 'La défense de l\'Empereur',
-        description: 'L\'esprit protecteur de la Grande Muraille s\'est retourné contre son peuple. Affrontez le dragon ancestral pour libérer son âme.',
-        objective: {
-            type: 'kill_monster',
-            target: 'dragon_ancestral',
-            required: 1,
-            current: 0
-        },
-        reward: {
-            xp: 800,
-            gold: 500,
-            item: 'epee_du_dragon'
+    }
+};
+
+export const skillsData = {
+    'fist_attack': { id: 'fist_attack', name: 'Coup de poing', description: 'Une attaque de base avec le poing.', manaCost: 0, damage: 5 },
+    'frappe_puissante': { id: 'frappe_puissante', name: 'Frappe puissante', description: 'Une attaque qui inflige des dégâts massifs.', manaCost: 20, damage: 50 },
+    'peau_de_fer': { id: 'peau_de_fer', name: 'Peau de fer', description: 'Augmente la défense de 5 de manière permanente.', manaCost: 0, effect: { defense: 5 } },
+    'double_attaque': { id: 'double_attaque', name: 'Double attaque', description: 'Attaque deux fois en une seule action.', manaCost: 15, damage: 20, numberOfHits: 2 },
+    'lame_de_feu': { id: 'lame_de_feu', name: 'Lame de feu', description: 'Enflamme votre arme pour infliger des dégâts de feu supplémentaires.', manaCost: 10, damage: 10, element: 'feu' },
+    'soin_leger': { id: 'soin_leger', name: 'Soin léger', description: 'Restaure une petite quantité de points de vie.', manaCost: 10, effect: { hp: 30 } },
+    'sort_de_foudre': { id: 'sort_de_foudre', name: 'Sort de foudre', description: 'Invoque un éclair pour frapper l\'ennemi.', manaCost: 25, damage: 60, element: 'foudre' },
+    'vol_de_vie': { id: 'vol_de_vie', name: 'Vol de vie', description: 'Vole des points de vie à l\'ennemi.', manaCost: 15, damage: 15, effect: { selfHeal: 15 } },
+    'frappe_chirurgicale': { id: 'frappe_chirurgicale', name: 'Frappe chirurgicale', description: 'Une attaque rapide et précise.', manaCost: 5, damage: 15 },
+};
+
+export const skillTreeData = {
+    'guerrier': {
+        name: "Arbre de compétences du guerrier",
+        skills: {
+            'frappe_puissante': {
+                id: 'frappe_puissante',
+                name: 'Frappe puissante',
+                description: 'Une attaque qui inflige des dégâts massifs.',
+                cost: 1,
+                prerequisites: [],
+                damage: 50,
+                manaCost: 20,
+                type: 'ability',
+                element: 'neutre'
+            },
+            'peau_de_fer': {
+                id: 'peau_de_fer',
+                name: 'Peau de fer',
+                description: 'Augmente la défense de 5 de manière permanente.',
+                cost: 1,
+                prerequisites: ['frappe_puissante'],
+                effect: { defense: 5 },
+                manaCost: 0,
+                type: 'ability'
+            },
+            'double_attaque': {
+                id: 'double_attaque',
+                name: 'Double attaque',
+                description: 'Attaque deux fois en une seule action.',
+                cost: 2,
+                prerequisites: ['frappe_puissante'],
+                damage: 20,
+                manaCost: 15,
+                type: 'ability',
+                numberOfHits: 2,
+                element: 'neutre'
+            }
         }
+    },
+    'mage': {
+        name: "Arbre de compétences du mage",
+        skills: {
+            'boule_de_feu': {
+                id: 'boule_de_feu',
+                name: 'Boule de feu',
+                description: 'Une boule de feu infligeant des dégâts élémentaires.',
+                cost: 1,
+                prerequisites: [],
+                damage: 25,
+                manaCost: 10,
+                type: 'ability',
+                element: 'feu'
+            },
+            'soin_leger': {
+                id: 'soin_leger',
+                name: 'Soin léger',
+                description: 'Restaure une petite quantité de points de vie.',
+                cost: 1,
+                prerequisites: ['boule_de_feu'],
+                effect: { hp: 30 },
+                manaCost: 10,
+                type: 'ability'
+            },
+            'sort_de_foudre': {
+                id: 'sort_de_foudre',
+                name: 'Sort de foudre',
+                description: 'Invoque un éclair pour frapper l\'ennemi.',
+                cost: 2,
+                prerequisites: ['soin_leger'],
+                damage: 60,
+                manaCost: 25,
+                type: 'ability',
+                element: 'foudre'
+            }
+        }
+    },
+    'voleur': {
+        name: "Arbre de compétences du voleur",
+        skills: {
+            'attaque_sournoise': {
+                id: 'attaque_sournoise',
+                name: 'Attaque sournoise',
+                description: 'Une attaque rapide qui a une chance d\'infliger des dégâts supplémentaires.',
+                cost: 1,
+                prerequisites: [],
+                damage: 22,
+                manaCost: 8,
+                type: 'ability',
+                element: 'neutre'
+            },
+            'jet_de_dague': {
+                id: 'jet_de_dague',
+                name: 'Jet de dague',
+                description: 'Lance une dague sur l\'ennemi.',
+                cost: 1,
+                prerequisites: ['attaque_sournoise'],
+                damage: 18,
+                manaCost: 5,
+                type: 'ability',
+                element: 'neutre'
+            },
+            'vol_de_vie': {
+                id: 'vol_de_vie',
+                name: 'Vol de vie',
+                description: 'Vole des points de vie à l\'ennemi.',
+                cost: 2,
+                prerequisites: ['jet_de_dague'],
+                damage: 15,
+                manaCost: 15,
+                type: 'ability',
+                effect: { selfHeal: 15 },
+                element: 'neutre'
+            }
+        }
+    },
+    'explorateur': {
+        name: "Arbre de compétences de l'explorateur",
+        skills: {
+            'frappe_puissante': {
+                id: 'frappe_puissante',
+                name: 'Frappe puissante',
+                description: 'Une attaque qui inflige des dégâts massifs.',
+                cost: 1,
+                prerequisites: [],
+                damage: 50,
+                manaCost: 20,
+                type: 'ability',
+                element: 'neutre'
+            },
+            'peau_de_fer': {
+                id: 'peau_de_fer',
+                name: 'Peau de fer',
+                description: 'Augmente la défense de 5 de manière permanente.',
+                cost: 1,
+                prerequisites: ['frappe_puissante'],
+                effect: { defense: 5 },
+                manaCost: 0,
+                type: 'ability'
+            }
+        }
+    }
+};
+
+export const elements = {
+    'feu': { name: 'Feu', strongAgainst: ['terre', 'poison'], weakAgainst: ['eau', 'foudre'] },
+    'eau': { name: 'Eau', strongAgainst: ['feu'], weakAgainst: ['foudre', 'terre'] },
+    'terre': { name: 'Terre', strongAgainst: ['foudre', 'poison'], weakAgainst: ['feu', 'eau'] },
+    'foudre': { name: 'Foudre', strongAgainst: ['eau'], weakAgainst: ['terre'] },
+    'poison': { name: 'Poison', strongAgainst: ['eau'], weakAgainst: ['feu', 'terre'] },
+    'neutre': { name: 'Neutre', strongAgainst: [], weakAgainst: [] }
+};
+
+export const itemSets = {
+    'set_du_guerrier_debout': {
+        name: "Set du Guerrier Debout",
+        pieces: ['epee_du_guerrier_debout', 'armure_du_guerrier_debout'],
+        bonus: {
+            stats: { strength: 5, defense: 5 },
+            special: 'immunite_a_la_peur'
+        }
+    }
+};
+
+export const itemQuests = {
+    'potion_de_soin': {
+        id: 'potion_de_soin',
+        name: 'Potion de soin',
+        description: 'Une potion qui restaure des points de vie.',
+        effect: { hp: 50 },
+        type: 'consumable'
     }
 };
