@@ -6,7 +6,7 @@ notificationContainer.id = 'notification-container';
 document.body.appendChild(notificationContainer);
 
 document.addEventListener('DOMContentLoaded', function() {
-    const boutonCreer = document.getElementById('popup-overlay');
+    const boutonCreer = document.getElementById('creer');
     const popupOverlay = document.getElementById('popup-overlay');
     const boutonContinuer = document.getElementById('continuer');
     const boutonAnnuler = document.getElementById('annuler');
