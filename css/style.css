@@ -408,30 +408,10 @@ body {
 }
 
 .popup-content {
-    background: var(--bg-color-medium); /* Utilise la couleur de fond de votre jeu */
+    background: white;
     padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    border: 2px solid var(--border-color);
-    max-width: 500px; /* Limite la largeur pour une meilleure lisibilité */
-    display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.continuer {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.annuler {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
+    border-radius: 8px;
+    text-align: center;
 }
 
 .fermer-bouton:hover,
