@@ -18,7 +18,7 @@
         <h2>Création de personnage</h2>
         <form id="character-form">
             <div class="form-group">
-                <label for="char-name">Nom du personnage :</label>
+                <label for="char-name">Pseudo :</label>
                 <input type="text" id="char-name" required placeholder="Saisissez un nom">
             </div>
 
@@ -44,7 +44,14 @@
                 </select>
             </div>
 
-            <button type="submit" class="btn-primary">Créer</button>
+            <button type="submit" id="creer" class="btn-primary">Créer</button>
+        <div id="popup-overlay">
+    <div id="popup-content">
+        <p>Voulez-vous vraiment créer ce personnage ?</p>
+        <button id="continuer" class="btn">Continuer</button>
+        <button id="annuler" class="btn">Annuler</button>
+    </div>
+</div>
         </form>
     </main>
 
@@ -78,5 +85,6 @@
             window.location.href = 'stats.html';
         });
     </script>
+     <script src="/explorateur de la brume fichiers separé/html/js/core/notifications.js"></script>
 </body>
 </html>
