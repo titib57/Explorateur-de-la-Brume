@@ -5,23 +5,35 @@ const notificationContainer = document.createElement('div');
 notificationContainer.id = 'notification-container';
 document.body.appendChild(notificationContainer);
 
+// Ajout d'un écouteur d'événement pour s'assurer que le DOM est prêt
 document.addEventListener('DOMContentLoaded', function() {
     const boutonCreer = document.getElementById('creer');
     const popupOverlay = document.getElementById('popup-overlay');
     const boutonContinuer = document.getElementById('continuer');
     const boutonAnnuler = document.getElementById('annuler');
 
-    boutonCreer.addEventListener('click', function() {
-        popupOverlay.style.display = 'flex';
-    });
+    // Vérifier si les éléments existent avant d'ajouter des écouteurs
+    if (boutonCreer && popupOverlay) {
+        boutonCreer.addEventListener('click', function(e) {
+            // Empêcher la soumission du formulaire si le bouton est dans un formulaire
+            e.preventDefault(); 
+            popupOverlay.style.display = 'flex';
+        });
+    }
 
-    boutonContinuer.addEventListener('click', function() {
-        window.location.href = 'stats.html';
-    });
+    if (boutonContinuer) {
+        boutonContinuer.addEventListener('click', function() {
+            window.location.href = 'stats.html';
+        });
+    }
 
-    boutonAnnuler.addEventListener('click', function() {
-        popupOverlay.style.display = 'none';
-    });
+    if (boutonAnnuler) {
+        boutonAnnuler.addEventListener('click', function() {
+            if (popupOverlay) {
+                popupOverlay.style.display = 'none';
+            }
+        });
+    }
 });
 
 /**

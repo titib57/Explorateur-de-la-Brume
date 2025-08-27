@@ -393,6 +393,7 @@ body {
     right: 20px;
     z-index: 1001;
 }
+
 .popup-overlay {
   display: none; /* Cache la popup par défaut */
   justify-content: center; /* Centre horizontalement le contenu */
