@@ -43,20 +43,22 @@
                     <option value="explorateur">Explorateur</option>
                 </select>
             </div>
-
-            <button type="submit" id="creer" class="btn-primary">Créer</button>
-        <div id="popup-overlay">
-    <div id="popup-content">
-        <p>Voulez-vous vraiment créer ce personnage ?</p>
-        <button id="continuer" class="btn">Continuer</button>
+<button type="submit" id="creer" class="btn-primary">Créer</button>
+        <div id="popup-overlay" class="popup-overlay">
+    <div id="popup-content" class="popup-overlay">
+        <p>Très bien! <br> Ton personnage est créé! <br> Nous allons maintenant utiliser tes 5 points de stats supplementaires!</p>
+        <button id="continuer" class="btn-primary">Continuer</button>
         <button id="annuler" class="btn">Annuler</button>
     </div>
+           </div> 
 </div>
         </form>
     </main>
+
     <footer class="game-footer">
         <p>© 2025 Explorateur de la Brume. Tous droits réservés.</p>
     </footer>
+
     <div id="notification-container"></div>
     
     <script type="module" src="js/core/notifications.js"></script>
@@ -83,10 +85,9 @@
             // Création du personnage avec toutes les données du formulaire
             createCharacter(name, charClass, age, height, weight);
 
-            // Redirection vers la page des statistiques
-            window.location.href = 'stats.html';
+
         });
     </script>
-     <script src="./js/core/notifications.js"></script>
+    
 </body>
 </html>

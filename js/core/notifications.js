@@ -6,17 +6,17 @@ notificationContainer.id = 'notification-container';
 document.body.appendChild(notificationContainer);
 
 document.addEventListener('DOMContentLoaded', function() {
-    const monBouton = document.getElementById('monBouton');
+    const boutonCreer = document.getElementById('creer');
     const popupOverlay = document.getElementById('popup-overlay');
     const boutonContinuer = document.getElementById('continuer');
     const boutonAnnuler = document.getElementById('annuler');
 
-    monBouton.addEventListener('click', function() {
+    boutonCreer.addEventListener('click', function() {
         popupOverlay.style.display = 'flex';
     });
 
     boutonContinuer.addEventListener('click', function() {
-        window.location.href = 'nouvelle-page.html';
+        window.location.href = 'stats.html';
     });
 
     boutonAnnuler.addEventListener('click', function() {
