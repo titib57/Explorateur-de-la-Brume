@@ -61,18 +61,21 @@
         <div class="map-container">
             <div id="map"></div>
             <div class="map-info">
-                <p>Zone actuelle : <span id="current-area"></span></p>
+                
+               
             </div>
             <button id="toggle-fullscreen-btn" class="btn-primary">Plein écran</button>
+            <button id="recenter-btn" class="btn-primary">Recentrer la carte</button>
+            <button id="set-safe-place-btn" class="btn-primary" style="display: none;">Définir le lieu sûr</button>
         </div>
         <div class="action-buttons">
             <button id="tutorial-btn" class="btn-primary" style="display: none;">Lancer le tutoriel</button>
             <button id="start-battle-btn" class="btn-primary" style="display: none;">Entrer dans le donjon</button>
-            <a id="class-tree-btn" href="class_tree.html" class="btn-primary" style="display: none;">Quête...</a>
-        </div>
+            </div>
     </main>
 
     <script src="js/modules/map.js" type="module"></script>
     <script src="js/core/notifications.js" type="module"></script>
+    <script src="js/modules/quests.js" type="module"></script>
 </body>
 </html>

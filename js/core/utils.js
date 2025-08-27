@@ -1,7 +1,6 @@
 ﻿// Fichier : js/core/utils.js
 
 import { showNotification } from './notifications.js';
-import { loadCharacter } from './state.js';
 
 export function checkCharacter() {
     if (!localStorage.getItem('playerCharacter')) {

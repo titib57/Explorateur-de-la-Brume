@@ -1,141 +1,182 @@
 ﻿// Fichier : js/core/state.js
+// Ce module gère l'état global du jeu, y compris l'objet joueur, le donjon et les monstres.
 
 import { itemsData } from './gameData.js';
+import { showNotification } from './notifications.js';
+import { initializeCharacter } from '../modules/character.js';
 
+// Objets d'état globaux
 export let player = null;
 export let currentDungeon = null;
+export let currentMonster = null;
+
+/**
+ * Définit le monstre actuellement en combat.
+ * @param {object} monster L'objet monstre.
+ */
+export function setCurrentMonster(monster) {
+    currentMonster = monster;
+}
 
 // Classe de base pour un personnage
 class Character {
-    constructor(name, playerClass, level, xp, gold, stats, quests, inventory, equipment, abilities, hp, maxHp, mana, maxMana) {
+    constructor(name, playerClass, level, xp, gold, stats, quests, inventory, equipment, abilities, hp, maxHp, mana, maxMana, age, height, weight) {
         this.name = name;
         this.playerClass = playerClass;
         this.level = level || 1;
         this.xp = xp || 0;
+        this.xpToNextLevel = this.level * 100;
         this.gold = gold || 0;
         this.stats = stats || { strength: 1, intelligence: 1, speed: 1, dexterity: 1 };
         this.quests = quests || {};
         this.inventory = inventory || {};
         this.equipment = equipment || {};
         this.abilities = abilities || [];
-        this.hp = hp || 100 + (this.level - 1) * 10;
-        this.maxHp = maxHp || 100 + (this.level - 1) * 10;
-        this.mana = mana || 50 + (this.level - 1) * 5;
-        this.maxMana = maxMana || 50 + (this.level - 1) * 5;
+        this.hp = hp || 0;
+        this.maxHp = maxHp || 0;
+        this.mana = mana || 0;
+        this.maxMana = maxMana || 0;
+        this.age = age || null;
+        this.height = height || null;
+        this.weight = weight || null;
+        this.statPoints = 0;
     }
 
+    /**
+     * Ajoute de l'expérience au joueur et gère les montées de niveau.
+     * @param {number} amount La quantité d'XP à ajouter.
+     */
     addXp(amount) {
         this.xp += amount;
-        while (this.xp >= this.level * 100) {
-            this.xp -= this.level * 100;
+        if (this.xp >= this.xpToNextLevel) {
             this.levelUp();
         }
     }
 
+    /**
+     * Gère la montée de niveau du personnage.
+     */
     levelUp() {
         this.level++;
-        this.stats.strength += 1;
-        this.stats.intelligence += 1;
-        this.stats.speed += 1;
-        this.stats.dexterity += 1;
-        this.maxHp += 10;
-        this.hp = this.maxHp;
-        this.maxMana += 5;
-        this.mana = this.maxMana;
-        saveCharacter();
+        this.xp -= this.xpToNextLevel;
+        this.xpToNextLevel = this.level * 100;
+        this.statPoints += 3;
+        recalculateDerivedStats(this);
+        showNotification(`Montée de niveau ! Vous êtes maintenant niveau ${this.level} !`, 'success');
+        showNotification(`Vous avez reçu 3 points de statistique.`, 'info');
     }
 
-    addGold(amount) {
-        this.gold += amount;
-        saveCharacter();
-    }
-
-    addItemToInventory(itemId, quantity = 1) {
-        if (!this.inventory[itemId]) {
-            this.inventory[itemId] = 0;
+    /**
+     * Ajoute un objet à l'inventaire du joueur.
+     * @param {object} item L'objet à ajouter.
+     */
+    addItem(item) {
+        if (!this.inventory[item.id]) {
+            this.inventory[item.id] = { ...item, quantity: 1 };
+        } else {
+            this.inventory[item.id].quantity++;
         }
-        this.inventory[itemId] += quantity;
-        saveCharacter();
-    }
-
-    getStat(statName) {
-        return this.stats[statName] + (this.equipment.weapon ? this.equipment.weapon.stats[statName] || 0 : 0) + (this.equipment.armor ? this.equipment.armor.stats[statName] || 0 : 0);
-    }
-
-    getWeaponDamage() {
-        if (this.equipment.weapon) {
-            return this.equipment.weapon.damage;
-        }
-        return 5;
+        showNotification(`${item.name} a été ajouté à votre inventaire.`, 'info');
     }
 }
 
 /**
- * Charge les données du personnage depuis le stockage local.
+ * Crée un nouvel objet personnage.
+ * @param {string} name Le nom du personnage.
+ * @param {string} playerClass La classe du personnage.
+ * @param {number} age L'âge du personnage.
+ * @param {number} height La taille du personnage.
+ * @param {number} weight Le poids du personnage.
+ * @returns {Character} Le nouvel objet personnage.
+ */
+export function createCharacter(name, playerClass, age, height, weight) {
+    const newPlayer = new Character(name, playerClass, 1, 0, 100, { strength: 1, intelligence: 1, speed: 1, dexterity: 1 }, {}, {}, {}, [], 0, 0, 0, 0, age, height, weight);
+    newPlayer.statPoints = 5; // Points de départ
+    recalculateDerivedStats(newPlayer);
+    player = newPlayer;
+    savePlayer(player);
+    return player;
+}
+
+/**
+ * Charge l'objet joueur depuis le localStorage.
+ * @returns {object|null} L'objet joueur ou null si non trouvé.
  */
 export function loadCharacter() {
-    try {
-        const savedData = JSON.parse(localStorage.getItem('playerCharacter'));
-        if (savedData) {
-            player = new Character(
-                savedData.name,
-                savedData.playerClass,
-                savedData.level,
-                savedData.xp,
-                savedData.gold,
-                savedData.stats,
-                savedData.quests,
-                savedData.inventory,
-                savedData.equipment,
-                savedData.abilities,
-                savedData.hp,
-                savedData.maxHp,
-                savedData.mana,
-                savedData.maxMana
-            );
-            console.log("Personnage chargé :", player);
-            updateStatsDisplay();
-            return true;
-        }
-    } catch (error) {
-        console.error("Erreur lors du chargement du personnage:", error);
+    const savedPlayer = JSON.parse(localStorage.getItem('playerCharacter'));
+    if (savedPlayer) {
+        const char = new Character(
+            savedPlayer.name, savedPlayer.playerClass, savedPlayer.level, savedPlayer.xp, savedPlayer.gold,
+            savedPlayer.stats, savedPlayer.quests, savedPlayer.inventory, savedPlayer.equipment,
+            savedPlayer.abilities, savedPlayer.hp, savedPlayer.maxHp, savedPlayer.mana, savedPlayer.maxMana,
+            savedPlayer.age, savedPlayer.height, savedPlayer.weight
+        );
+        char.statPoints = savedPlayer.statPoints;
+        char.xpToNextLevel = savedPlayer.xpToNextLevel;
+        player = char;
+        return player;
     }
-    return false;
+    return null;
 }
 
 /**
- * Sauvegarde les données du personnage dans le stockage local.
- * Nous créons une copie sans les méthodes pour éviter les erreurs de sérialisation.
+ * Sauvegarde l'objet joueur dans le localStorage.
+ * @param {object} p L'objet joueur à sauvegarder.
  */
-export function saveCharacter() {
-    if (player) {
-        try {
-            const dataToSave = {
-                name: player.name,
-                playerClass: player.playerClass,
-                level: player.level,
-                xp: player.xp,
-                gold: player.gold,
-                stats: player.stats,
-                quests: player.quests,
-                inventory: player.inventory,
-                equipment: player.equipment,
-                abilities: player.abilities,
-                hp: player.hp,
-                maxHp: player.maxHp,
-                mana: player.mana,
-                maxMana: player.maxMana
-            };
-            localStorage.setItem('playerCharacter', JSON.stringify(dataToSave));
-            console.log("Personnage sauvegardé.");
-            updateStatsDisplay();
-        } catch (error) {
-            console.error("Erreur lors de la sauvegarde du personnage:", error);
-        }
-    }
+export function savePlayer(p) {
+    localStorage.setItem('playerCharacter', JSON.stringify(p));
 }
 
-// Fonction pour mettre à jour l'affichage des statistiques
+/**
+ * Recalcule les statistiques dérivées du joueur (PV, Mana, Dégâts, Défense).
+ * @param {object} p L'objet joueur.
+ */
+export function recalculateDerivedStats(p) {
+    // Calcul de la santé et du mana
+    const newMaxHp = 100 + (p.stats.strength * 10);
+    const newMaxMana = 50 + (p.stats.intelligence * 10);
+    
+    // Si la santé et le mana ont déjà été initialisés, on les ajuste proportionnellement
+    if (p.maxHp > 0) {
+        p.hp = Math.floor(p.hp * (newMaxHp / p.maxHp));
+    } else {
+        p.hp = newMaxHp;
+    }
+    if (p.maxMana > 0) {
+        p.mana = Math.floor(p.mana * (newMaxMana / p.maxMana));
+    } else {
+        p.mana = newMaxMana;
+    }
+    
+    p.maxHp = newMaxHp;
+    p.maxMana = newMaxMana;
+
+    // Calcul des dégâts et de la défense en fonction de l'équipement
+    const weaponData = p.equipment.weapon ? itemsData[p.equipment.weapon.id] : null;
+    const armorData = p.equipment.armor ? itemsData[p.equipment.armor.id] : null;
+
+    if (weaponData) {
+        p.attackDamage = (p.stats.strength * 0.8) + (weaponData.attackDamage || 0);
+    } else {
+        p.attackDamage = (p.stats.strength * 0.8);
+    }
+
+    if (armorData) {
+        p.defense = (p.stats.strength * 0.5) + (armorData.defense || 0);
+    } else {
+        p.defense = (p.stats.strength * 0.5);
+    }
+    
+    // Assurer que les PV et le Mana ne dépassent pas leur maximum
+    p.hp = Math.min(p.hp, p.maxHp);
+    p.mana = Math.min(p.mana, p.maxMana);
+    
+    return p;
+}
+
+/**
+ * Met à jour l'affichage des statistiques du joueur.
+ */
 export function updateStatsDisplay() {
     if (!player) return;
     const hpElement = document.getElementById('player-hp');
@@ -147,32 +188,56 @@ export function updateStatsDisplay() {
     if (goldElement) goldElement.textContent = player.gold;
 }
 
-// Réinitialise le donjon en cours
+/**
+ * Réinitialise le donjon en cours.
+ */
 export function resetDungeon() {
     localStorage.removeItem('currentDungeon');
     currentDungeon = null;
 }
 
-// Applique les récompenses d'une quête au joueur
+/**
+ * Applique les récompenses au joueur.
+ * @param {object} rewards L'objet des récompenses (xp, gold, item).
+ */
 export function applyRewards(rewards) {
     if (!player) return;
     if (rewards.xp) {
         player.addXp(rewards.xp);
     }
     if (rewards.gold) {
-        player.addGold(rewards.gold);
+        player.gold += rewards.gold;
+        showNotification(`Vous avez trouvé ${rewards.gold} pièces d'or.`, 'info');
     }
     if (rewards.item) {
-        player.addItemToInventory(rewards.item, 1);
+        player.addItem(rewards.item);
     }
-    saveCharacter();
+    savePlayer(player);
 }
 
-// Crée et initialise un nouveau personnage
-export function createCharacter(name, playerClass) {
-    player = new Character(name, playerClass);
-    saveCharacter();
+/**
+ * Donne une récompense de quête au joueur.
+ * @param {object} reward L'objet des récompenses de quête.
+ */
+export function giveQuestReward(reward) {
+    if (!player) return;
+    applyRewards(reward);
+    savePlayer(player);
 }
 
-// Chargement initial du personnage
-loadCharacter();
+/**
+ * Initialise l'état initial du donjon.
+ * @param {object} dungeon Le donjon à initialiser.
+ */
+export function initDungeon(dungeon) {
+    currentDungeon = dungeon;
+    saveDungeon(currentDungeon);
+}
+
+/**
+ * Sauvegarde l'état du donjon dans le localStorage.
+ * @param {object} dungeon L'objet donjon à sauvegarder.
+ */
+export function saveDungeon(dungeon) {
+    localStorage.setItem('currentDungeon', JSON.stringify(dungeon));
+}

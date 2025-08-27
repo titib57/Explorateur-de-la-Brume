@@ -1,6 +1,6 @@
 ﻿// Fichier : js/modules/inventory.js
 
-import { player, saveCharacter, loadCharacter } from '../core/state.js';
+import { player, savePlayer, loadCharacter } from '../core/state.js';
 import { itemsData, itemSets } from '../core/gameData.js';
 import { showNotification } from '../core/notifications.js';
 import { recalculateDerivedStats } from './character.js';
@@ -72,7 +72,7 @@ export function useItem(itemId) {
         player.inventory.splice(index, 1);
     }
     
-    saveCharacter(player);
+    savePlayer(player);
     updateInventoryPageUI();
     updateConsumablesUI();
 }
@@ -88,7 +88,7 @@ export function equipItem(itemId, type) {
             player.equipment[type] = item;
             player.inventory.splice(itemIndex, 1);
             recalculateDerivedStats();
-            saveCharacter(player);
+            savePlayer(player);
             updateInventoryPageUI();
             showNotification(`${item.name} a été équipé.`, 'success');
         }
@@ -101,7 +101,7 @@ export function unequipItem(type) {
         player.inventory.push(item.id);
         player.equipment[type] = null;
         recalculateDerivedStats();
-        saveCharacter(player);
+        savePlayer(player);
         updateInventoryPageUI();
         showNotification(`${item.name} a été déséquipé.`, 'info');
     }

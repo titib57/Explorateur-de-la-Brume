@@ -19,39 +19,6 @@ export const abilitiesData = {
 };
 
 export const classBases = {
-    'guerrier': {
-        name: "Guerrier",
-        description: "Un combattant robuste spécialisé dans les attaques au corps à corps.",
-        stats: {
-            strength: 5,
-            intelligence: 1,
-            speed: 3,
-            dexterity: 1
-        },
-        skillTree: "guerrier"
-    },
-    'mage': {
-        name: "Mage",
-        description: "Un lanceur de sorts puissant qui maîtrise les éléments.",
-        stats: {
-            strength: 1,
-            intelligence: 5,
-            speed: 2,
-            dexterity: 2
-        },
-        skillTree: "mage"
-    },
-    'voleur': {
-        name: "Voleur",
-        description: "Un expert en furtivité et en attaques rapides.",
-        stats: {
-            strength: 2,
-            intelligence: 2,
-            speed: 4,
-            dexterity: 4
-        },
-        skillTree: "voleur"
-    },
     'explorateur': {
         name: "Explorateur",
         description: "Un aventurier courageux qui débute dans le monde.",
@@ -169,31 +136,29 @@ export const dungeonTypes = {
     'tutoriel': { name: 'Donjon de tutoriel', description: 'Un lieu sûr pour apprendre les bases du combat. Vainquez le mannequin d\'entraînement!', monsterPool: ['mannequin_dentrainement'], bossPool: ['mannequin_dentrainement'], isTutorial: true }
 };
 
-export const pointsOfInterest = {
-    'tutorial_dungeon_poi': {
-        id: 'tutorial_dungeon_poi',
-        name: 'Camp d\'entraînement',
-        location: { lat: 48.8566, lng: 2.3522 }, // Coordonnées de test, non liées à un lieu réel
-        dungeonType: 'tutoriel',
-        difficulty: 0,
-        questId: 'premiers_pas',
-        isTutorial: true,
-    },
-    'pyramides_de_gizeh_poi': {
-        id: 'pyramides_de_gizeh_poi',
-        name: 'Pyramides de Gizeh',
-        location: { lat: 29.9792, lng: 31.1342 },
-        dungeonType: 'ruin',
-        difficulty: 5,
-        questId: 'pyramides_de_gizeh_quest'
-    }
-};
+export const pointsOfInterest = {};
 
 export const questsData = {
-    'premiers_pas': {
+    'lieu_sur': {
+        id: 'lieu_sur',
+        name: 'Lieu sûr',
+        description: 'Pour commencer votre aventure, choisissez un "Lieu sûr" sur la carte. C\'est là que se trouvera le Donjon du Tutoriel.',
+        objective: {
+            type: 'set_safe_place',          
+            target: 'any',
+            required: 1,
+            current: 0
+        },
+        reward: {
+            xp: 0,
+            gold: 0,
+        },
+        nextQuestId: 'premier_pas'
+    },
+        'premiers_pas': {
         id: 'premiers_pas',
         name: 'Premiers pas',
-        description: 'Rends toi dans le donjon de tutoriel pour vaincre un mannequin d\'entraînement.',
+        description: 'Trouver et explorer le donjon du tutoriel.',
         objective: {
             type: 'kill_monster',
             target: 'mannequin_dentrainement',
@@ -210,7 +175,7 @@ export const questsData = {
     'lart_devoluer': {
         id: 'lart_devoluer',
         name: 'L\'art d\'évoluer',
-        description: 'Vainquez les monstres et augmentez votre niveau à 2.',
+        description: 'Tuez 2 monstres pour augmenter votre niveau à 2.',
         objective: {
             type: 'reach_level',
             target: 2,
@@ -489,3 +454,5 @@ export const itemQuests = {
         type: 'consumable'
     }
 };
+// Ajoutez cette ligne pour exporter une valeur pour 'narrativeSteps'
+export const narrativeSteps = {};

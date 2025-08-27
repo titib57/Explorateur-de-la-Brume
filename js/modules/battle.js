@@ -1,9 +1,9 @@
 ﻿// Fichier : js/modules/battle.js
 
-import { player, currentMonster, currentDungeon, saveCharacter, loadCharacter } from '../core/state.js';
+import { player, currentMonster, currentDungeon, savePlayer, loadCharacter } from '../core/state.js';
 import { giveXP } from './character.js';
 import { updateQuestsUI, updateQuestObjective } from './quests.js';
-import { updateBattleUI, updateAbilitiesUI, showActions, updateConsumablesUI, updateWorldMapUI } from './ui.js';
+import { updateBattleUI, updateWorldMapUI } from './ui.js';
 import { calculateElementalDamage } from './elements.js';
 import { addToCombatLog } from '../core/utils.js';
 import { showNotification } from '../core/notifications.js';
@@ -76,7 +76,7 @@ function endBattle(result) {
 
         updateQuestObjective('kill_monster', currentMonster.id);
         
-        saveCharacter(player);
+        savePlayer(player);
         setTimeout(() => {
             document.getElementById('battle-interface').style.display = 'none';
             updateWorldMapUI();
@@ -84,7 +84,7 @@ function endBattle(result) {
     } else {
         addToCombatLog("Vous avez été vaincu ! La fuite est votre seule option !", 'log-error');
         player.hp = player.maxHp;
-        saveCharacter(player);
+        savePlayer(player);
         setTimeout(() => {
             document.getElementById('battle-interface').style.display = 'none';
             updateWorldMapUI();

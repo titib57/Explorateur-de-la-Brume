@@ -46,7 +46,7 @@ const elements = {
  * @param {string} attackElement L'élément de l'attaque (p. ex., 'feu', 'eau').
  * @returns {object} Un objet contenant les dégâts finaux et le modificateur de dégâts.
  */
-function calculateElementalDamage(attacker, target, baseDamage, attackElement) {
+export function calculateElementalDamage(attacker, target, baseDamage, attackElement) {
     let damageMultiplier = 1;
     let message = null;
 

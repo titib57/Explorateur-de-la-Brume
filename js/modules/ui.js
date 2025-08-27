@@ -1,16 +1,20 @@
 ﻿// Fichier : js/modules/ui.js
+// Ce module gère la mise à jour de l'interface utilisateur (UI).
 
-import { showNotification } from "../core/notifications.js";
 import { player, currentMonster } from "../core/state.js";
-import { getAbilityById } from "./skills.js";
-import { useItem } from "./inventory.js";
-import { startBattle, flee } from "./battle.js";
+// Fonctions manquantes, à importer une fois les fichiers correspondants disponibles.
+// import { getAbilityById } from "./skills.js";
+// import { useItem } from "./inventory.js";
+// import { startBattle, flee } from "./battle.js";
 
+/**
+ * Met à jour l'interface de combat.
+ */
 export function updateBattleUI() {
     const battleInterface = document.getElementById('battle-interface');
     if (!battleInterface) return;
 
-    // Player UI
+    // Mise à jour de l'UI du joueur
     document.getElementById('player-name').textContent = player.name;
     document.getElementById('player-hp').textContent = player.hp;
     document.getElementById('player-max-hp').textContent = player.maxHp;
@@ -21,83 +25,62 @@ export function updateBattleUI() {
     document.getElementById('player-weapon-display').textContent = player.equipment.weapon ? player.equipment.weapon.name : 'Aucune';
     document.getElementById('player-armor-display').textContent = player.equipment.armor ? player.equipment.armor.name : 'Aucune';
     
-    // Monster UI
+    // Mise à jour de l'UI du monstre
     document.getElementById('monster-name').textContent = currentMonster.name;
     document.getElementById('monster-hp').textContent = currentMonster.hp;
     document.getElementById('monster-max-hp').textContent = currentMonster.maxHp;
     document.getElementById('monster-hp-bar').style.width = `${(currentMonster.hp / currentMonster.maxHp) * 100}%`;
-    
-    // Add event listeners for battle actions
-    document.getElementById('normal-attack-button').onclick = playerAttack;
-    document.getElementById('flee-button').onclick = flee;
+    document.getElementById('monster-attack-display').textContent = currentMonster.attackDamage;
+    document.getElementById('monster-defense-display').textContent = currentMonster.defense;
 }
 
-export function updateAbilitiesUI() {
-    const abilitiesList = document.getElementById('abilities-list');
-    if (!abilitiesList) return;
-    abilitiesList.innerHTML = '';
+/**
+ * Met à jour l'interface de la page des statistiques.
+ * @param {object} tempPlayer L'objet joueur temporaire avec les stats modifiables.
+ */
+export function updateStatsUI(tempPlayer) {
+    if (!tempPlayer) return;
+
+    const stats = tempPlayer.stats;
+    const statPoints = tempPlayer.statPoints;
+
+    document.getElementById('stat-points-display').textContent = statPoints;
+
+    document.getElementById('strength-display').textContent = stats.strength;
+    document.getElementById('intelligence-display').textContent = stats.intelligence;
+    document.getElementById('speed-display').textContent = stats.speed;
+    document.getElementById('dexterity-display').textContent = stats.dexterity;
     
-    player.unlockedSkills.forEach(skillId => {
-        const skill = getAbilityById(skillId);
-        if (skill && (skill.type === 'ability' || skill.damage || skill.heal)) {
-            const button = document.createElement('button');
-            button.className = 'btn-ability';
-            button.textContent = `${skill.name} (${skill.cost} Mana)`;
-            button.onclick = () => useAbility(skillId);
-            abilitiesList.appendChild(button);
-        }
-    });
+    // Mise à jour des stats dérivées
+    document.getElementById('max-hp-display').textContent = tempPlayer.maxHp;
+    document.getElementById('max-mana-display').textContent = tempPlayer.maxMana;
+    document.getElementById('attack-damage-display').textContent = tempPlayer.attackDamage;
+    document.getElementById('defense-display').textContent = tempPlayer.defense;
 }
 
-export function updateConsumablesUI() {
-    const consumablesList = document.getElementById('consumables-list');
-    if (!consumablesList) return;
-    consumablesList.innerHTML = '';
+/**
+ * Met à jour l'interface de la page d'accueil ou de la page de profil du joueur.
+ * Cette fonction est ajoutée pour afficher les statistiques du joueur global.
+ */
+export function updatePlayerProfileUI() {
+    if (!player) return;
+
+    // Mise à jour des informations de base du personnage sur le profil
+    document.getElementById('player-name-display').textContent = player.name;
+    document.getElementById('player-class-display').textContent = player.playerClass;
+    document.getElementById('player-level-display').textContent = player.level;
+    document.getElementById('player-hp').textContent = `${player.hp}/${player.maxHp}`;
+    document.getElementById('player-mana').textContent = `${player.mana}/${player.maxMana}`;
+    document.getElementById('player-gold').textContent = player.gold;
+    document.getElementById('player-xp').textContent = player.xp;
+
+    // Mise à jour des statistiques de base
+    document.getElementById('player-strength').textContent = player.stats.strength;
+    document.getElementById('player-intelligence').textContent = player.stats.intelligence;
+    document.getElementById('player-speed').textContent = player.stats.speed;
+    document.getElementById('player-dexterity').textContent = player.stats.dexterity;
     
-    const consumables = player.inventory.filter(item => item.type === 'consumable');
-    
-    if (consumables.length === 0) {
-        consumablesList.textContent = 'Aucun consommable.';
-    } else {
-        consumables.forEach(item => {
-            const button = document.createElement('button');
-            button.className = 'btn-item';
-            button.textContent = item.name;
-            button.onclick = () => useItem(item.id);
-            consumablesList.appendChild(button);
-        });
-    }
-}
-
-export function updateStatsUI(currentPlayer, tempStats, tempStatPoints) {
-    document.getElementById('char-name-display').textContent = currentPlayer.name;
-    document.getElementById('char-class-display').textContent = currentPlayer.class;
-    document.getElementById('char-level-display').textContent = currentPlayer.level;
-    document.getElementById('char-age-display').textContent = currentPlayer.age;
-    document.getElementById('char-height-display').textContent = currentPlayer.height;
-    document.getElementById('char-weight-display').textContent = currentPlayer.weight;
-    document.getElementById('char-xp-display').textContent = currentPlayer.xp;
-    document.getElementById('char-xp-to-next-level-display').textContent = currentPlayer.xpToNextLevel;
-    document.getElementById('char-gold-display').textContent = currentPlayer.gold;
-    document.getElementById('stat-points-display').textContent = tempStatPoints;
-
-    document.getElementById('strength-display').textContent = tempStats.strength;
-    document.getElementById('intelligence-display').textContent = tempStats.intelligence;
-    document.getElementById('speed-display').textContent = tempStats.speed;
-    document.getElementById('dexterity-display').textContent = tempStats.dexterity;
-}
-
-export function updateWorldMapUI() {
-    const startBattleBtn = document.getElementById('start-battle-btn');
-    const classTreeBtn = document.getElementById('class-tree-btn');
-
-    if (player.level >= 5 && player.class === 'explorateur') {
-        classTreeBtn.style.display = 'block';
-    } else {
-        classTreeBtn.style.display = 'none';
-    }
-
-    if (startBattleBtn) {
-        startBattleBtn.style.display = 'none';
-    }
+    // Mise à jour des stats dérivées
+    document.getElementById('player-attack').textContent = player.attackDamage;
+    document.getElementById('player-defense').textContent = player.defense;
 }

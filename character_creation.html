@@ -1,9 +1,10 @@
+<!-- Fichier : character_creation.html -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Créer un personnage-Explorateur de la Brume</title>
+    <title>Créer un personnage - Explorateur de la Brume</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -49,24 +50,32 @@
 
     <div id="notification-container"></div>
     
-    <script type="module" src="js/modules/character.js"></script>
+    <script type="module" src="js/core/notifications.js"></script>
     <script type="module">
-        import { createCharacter } from './js/modules/character.js';
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('character-form');
-            if (form) {
-                form.addEventListener('submit', (event) => {
-                    event.preventDefault();
-                    const name = document.getElementById('char-name').value;
-                    const age = parseInt(document.getElementById('char-age').value);
-                    const height = parseInt(document.getElementById('char-height').value);
-                    const weight = parseInt(document.getElementById('char-weight').value);
-                    const charClass = document.getElementById('char-class').value;
-                    
-                    createCharacter(name, age, height, weight, charClass);
-                });
+        import { createCharacter } from './js/core/state.js';
+        import { showNotification } from './js/core/notifications.js';
+
+        // Écouteur d'événement pour la soumission du formulaire de création de personnage
+        document.getElementById('character-form').addEventListener('submit', (e) => {
+            e.preventDefault(); // Empêche le comportement par défaut de soumission du formulaire (rechargement de la page)
+
+            const name = document.getElementById('char-name').value;
+            const charClass = document.getElementById('char-class').value;
+            const age = document.getElementById('char-age').value;
+            const height = document.getElementById('char-height').value;
+            const weight = document.getElementById('char-weight').value;
+
+            // Valider les données avant de créer le personnage
+            if (!name) {
+                showNotification("Veuillez donner un nom à votre personnage.", 'error');
+                return;
             }
+
+            // Création du personnage avec toutes les données du formulaire
+            createCharacter(name, charClass, age, height, weight);
+
+            // Redirection vers la page des statistiques
+            window.location.href = 'stats.html';
         });
     </script>
 </body>

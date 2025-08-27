@@ -1,5 +1,7 @@
 ﻿// js/dungeon_minigames.js
 
+import { showNotification } from './core/notifications.js';
+
 // Mini-jeux textuels basés sur le type de lieu
 const miniGamesData = {
     'castle': {
@@ -16,76 +18,25 @@ const miniGamesData = {
         questions: ["Qu'est-ce qui est 'Veni, vidi, vici' ?", "Quelle est la traduction de 'Alea iacta est' ?", "Quel empereur a construit le Colisée ?"],
         answers: ["je suis venu, j'ai vu, j'ai vaincu", "le sort en est jeté", "vespasien"],
         successMessage: "L'inscription brille, révélant un passage secret sous vos pieds.",
-        failureMessage: "Une dalle s'effondre sous vous, vous tombez dans une fosse. Le gardien des ruines vous attend !",
-        successXP: 40,
-        successGold: 15
+        failureMessage: "Une dalle s'effondre sous vous, vous tombez dans un piège !"
     },
-    'fort': {
-        description: "Un ancien fort, solide et impénétrable. Pour le franchir, vous devez répondre à une question de stratégie militaire.",
-        questions: ["Qui a dit 'La meilleure défense, c'est l'attaque' ?", "Quel est le nom de la tour qui défend l'entrée d'une forteresse ?", "En quelle année Napoléon a-t-il été vaincu à Waterloo ?"],
-        answers: ["frédéric ii", "donjon", "1815"],
-        successMessage: "Une porte secrète glisse silencieusement, vous laissant passer.",
-        failureMessage: "Un piège se déclenche ! Le gardien du fort a été alerté !",
-        successXP: 45,
-        successGold: 18
-    },
-    'chateau': {
-        description: "Vous arrivez devant un somptueux château. Pour y entrer, vous devez résoudre une énigme du majordome.",
-        questions: ["Je n'ai pas de voix mais je raconte toutes les histoires. Qui suis-je ?", "Qu'est-ce qui a des dents mais ne peut pas manger ?", "Plus tu en as, moins tu en vois. Qui suis-je ?"],
-        answers: ["un livre", "un râteau", "le noir"],
-        successMessage: "Le majordome s'incline, le pont-levis s'abaisse. Vous pouvez passer.",
-        failureMessage: "Le majordome s'offusque et le chevalier-gardien du château vous attaque !",
-        successXP: 55,
-        successGold: 25
-    },
-    'tour': {
-        description: "Vous vous trouvez au pied d'une ancienne tour de guet. Pour l'escalader, vous devez répondre à une question sur la hauteur.",
-        questions: ["Quelle est la plus haute tour du monde ?", "Quelle est la tour la plus célèbre de Pise ?", "Qui a construit la tour Eiffel ?"],
-        answers: ["burj khalifa", "la tour penchée", "gustave eiffel"],
-        successMessage: "Une échelle apparaît mystérieusement, vous pouvez monter.",
-        failureMessage: "La pierre se fissure sous votre pied, le gardien des hauteurs vous attaque !",
-        successXP: 35,
-        successGold: 15
-    },
-    'cimetiere': {
-        description: "Un cimetière ancien et lugubre vous barre le chemin. Pour le traverser, vous devez honorer la mémoire des morts en répondant correctement à une question.",
-        questions: ["Quel célèbre compositeur a été enterré au cimetière du Père-Lachaise ?", "Dans quelle ville se trouve le plus grand cimetière du monde ?", "Quel est le plus grand cimetière de Paris ?"],
-        answers: ["chopin", "baghdad", "père-lachaise"],
-        successMessage: "Les âmes apaisées vous ouvrent un passage. Vous pouvez passer.",
-        failureMessage: "Vous avez perturbé les esprits, les morts se lèvent de leurs tombes pour vous affronter !",
-        successXP: 30,
-        successGold: 10
-    },
-    'eglise': {
-        description: "Vous entrez dans une vieille église abandonnée. Pour vous approcher de l'autel, vous devez répondre à une question religieuse.",
-        questions: ["Qui a été le premier pape ?", "Quelle est la ville sainte de l'islam ?", "Quel est le nom de la tour où sont placées les cloches ?"],
-        answers: ["saint pierre", "la mecque", "clocher"],
-        successMessage: "Une lumière divine éclaire votre chemin. Vous pouvez vous approcher de l'autel.",
-        failureMessage: "Le silence est brisé par des cris de fantômes, le démon de l'église vous attaque !",
-        successXP: 40,
-        successGold: 20
-    },
-    'cathedrale': {
-        description: "Une immense cathédrale gothique se dresse devant vous. Pour y entrer, vous devez répondre à une question sur son architecture.",
-        questions: ["Quelle est la cathédrale la plus célèbre de Paris ?", "Qu'est-ce qu'une gargouille ?", "Quel est le nom de la partie d'une église où se trouvent les sièges des chanoines ?"],
-        answers: ["notre-dame", "une créature mythologique", "le chœur"],
-        successMessage: "La grande porte s'ouvre, vous pouvez entrer.",
-        failureMessage: "Une gargouille s'anime sur le toit, le gardien de la cathédrale vous attaque !",
-        successXP: 60,
-        successGold: 30
+    'forest': {
+        description: "Vous traversez une forêt dense, le chemin est obscurci par un épais brouillard. Un vieil esprit de la forêt vous met à l'épreuve avec une devinette.",
+        questions: ["Je n'ai pas de poumons, mais j'ai besoin d'air. Je n'ai pas de bouche, mais j'ai besoin d'eau. Je ne suis pas un être vivant. Que suis-je ?", "Qu'est-ce qui a une tête et une queue, mais pas de corps ?", "Qu'est-ce qui est mou et qui est au fond du lit ?"],
+        answers: ["le feu", "une pièce de monnaie", "une couette"],
+        successMessage: "L'esprit souriant dissipe le brouillard, vous révélant un chemin clair.",
+        failureMessage: "L'esprit furieux fait se refermer les arbres derrière vous, vous avez maintenant un monstre à affronter."
     }
 };
 
 /**
- * Lance un mini-jeu textuel pour un donjon donné.
- * @param {object} dungeon - Les données du donjon
+ * Lance un mini-jeu en fonction du type de donjon.
+ * @param {object} dungeon Le donjon en cours d'exploration.
  * @returns {Promise<boolean>} Une promesse qui se résout en `true` si le joueur réussit, `false` sinon.
  */
-function startMiniGame(dungeon) {
+export function startMiniGame(dungeon) {
     return new Promise((resolve, reject) => {
-        // La clé du mini-jeu est le type de lieu (e.g., 'castle' de 'osm_castle_12345' ou 'static_chateau_versailles')
-        // On prend le deuxième élément après le split pour récupérer le type.
-        const dungeonType = dungeon.id.split('_')[1];
+        const dungeonType = dungeon.type;
         const gameData = miniGamesData[dungeonType];
 
         if (!gameData) {
@@ -113,7 +64,8 @@ function startMiniGame(dungeon) {
 
         document.getElementById('minigame-submit').addEventListener('click', () => {
             const userAnswer = document.getElementById('minigame-answer').value.toLowerCase().trim();
-            if (userAnswer === correctAnswer.toLowerCase()) {
+            // Utiliser includes() pour permettre des réponses partielles ou plus flexibles
+            if (userAnswer.includes(correctAnswer.toLowerCase())) {
                 showNotification(gameData.successMessage, 'success');
                 resolve(true); // Le joueur a réussi le mini-jeu
             } else {
