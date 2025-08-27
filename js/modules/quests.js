@@ -1,8 +1,8 @@
 ﻿// Fichier : js/quests.js
 
 // Importation des dépendances nécessaires pour la gestion des quêtes.
-import { player, savePlayer, loadCharacter } from '../core/state.js';
-import { questsData } from '../core/gameData.js';
+import { player, savePlayer, loadCharacter, giveQuestReward, giveXP } from '../core/state.js';
+import { questsData } from '../core/questsData.js';
 import { showNotification } from '../core/notifications.js';
 
 // =========================================================================
@@ -12,108 +12,136 @@ import { showNotification } from '../core/notifications.js';
 /**
  * Met à jour la progression de l'objectif d'une quête active.
  * Cette fonction est appelée depuis d'autres modules de jeu (par exemple, après avoir vaincu un monstre).
- * @param {string} questName Le nom de la quête à mettre à jour.
+ * @param {string} objectiveType Le type d'objectif de la quête à mettre à jour.
+ * @param {string} target Le nom de la cible de l'objectif (ex: 'mannequin_dentrainement').
  * @param {number} amount Le montant à ajouter à l'objectif (ex: 1 pour un monstre tué).
  */
-export function updateQuestObjective(questName, amount = 1) {
-    if (player.quests.current === questName) {
+export function updateQuestObjective(objectiveType, target, amount = 1) {
+    if (!player || !player.quests.current) {
+        return;
+    }
+
+    const currentQuestData = questsData[player.quests.current];
+    if (!currentQuestData) {
+        console.error(`Erreur: La quête '${player.quests.current}' n'existe pas dans questsData.`);
+        return;
+    }
+
+    // Vérifie si le type d'objectif et la cible correspondent
+    if (currentQuestData.objective.type === objectiveType && currentQuestData.objective.target === target) {
         // Incrémente la progression de la quête active du joueur.
         const currentProgress = player.quests.currentProgress || 0;
         player.quests.currentProgress = currentProgress + amount;
 
-        // Récupère les données de la quête pour vérifier l'objectif.
-        const questData = questsData[questName];
-        if (!questData) {
-            console.error(`Erreur: La quête '${questName}' n'existe pas dans questsData.`);
-            return;
-        }
-
-        const required = questData.objective.required;
+        const required = currentQuestData.objective.required;
         
         // Affiche une notification de l'état de la progression.
-        showNotification(`${questData.name} : ${player.quests.currentProgress} / ${required}`, 'info');
+        showNotification(`Progression de la quête '${currentQuestData.name}' : ${player.quests.currentProgress}/${required}`, 'info');
+
+        // Sauvegarde l'état du joueur après la mise à jour de la progression.
+        savePlayer(player);
 
         // Vérifie si la quête est terminée.
         if (player.quests.currentProgress >= required) {
-            showNotification(`Objectif de la quête "${questData.name}" terminé !`, 'success');
-            
-            // Marque la quête comme terminée.
-            if (!player.quests.completed.includes(questName)) {
-                player.quests.completed.push(questName);
-                player.quests.current = null; // Retire la quête de la liste active.
-                player.quests.currentProgress = 0; // Réinitialise la progression.
-            }
+            checkQuestCompletion();
         }
-        
-        // Sauvegarde l'état du joueur après la modification.
-        savePlayer();
     }
-    
-    // Met à jour l'interface du journal des quêtes pour refléter les changements.
-    updateQuestsUI();
 }
 
 /**
- * Gère l'acceptation d'une quête par le joueur.
- * @param {string} questId L'ID de la quête à accepter.
+ * Vérifie si la quête en cours est terminée et gère la logique de complétion.
  */
-function acceptQuest(questId) {
-    // Vérifie si le joueur n'a pas déjà une quête active.
-    if (player.quests.current) {
-        showNotification("Vous ne pouvez avoir qu'une seule quête active à la fois.", "warning");
+function checkQuestCompletion() {
+    if (!player || !player.quests.current) {
         return;
     }
-    
+
+    const currentQuestId = player.quests.current;
+    const currentQuestData = questsData[currentQuestId];
+
+    if (!currentQuestData) {
+        console.error(`Erreur: La quête '${currentQuestId}' n'existe pas dans questsData.`);
+        return;
+    }
+
+    if (player.quests.currentProgress >= currentQuestData.objective.required) {
+        showNotification(`Quête terminée : '${currentQuestData.name}' !`, 'success');
+        
+        // Donne la récompense au joueur.
+        giveQuestReward(currentQuestData.reward);
+        
+        // Ajoute la quête actuelle à la liste des quêtes terminées.
+        player.quests.completed.push(currentQuestId);
+
+        // Définit la prochaine quête comme quête active, si elle existe.
+        if (currentQuestData.nextQuestId) {
+            player.quests.current = currentQuestData.nextQuestId;
+            player.quests.currentProgress = 0;
+            showNotification(`Nouvelle quête acceptée : '${questsData[currentQuestData.nextQuestId].name}'`, 'info');
+        } else {
+            // S'il n'y a pas de prochaine quête, réinitialise la quête active.
+            player.quests.current = null;
+            player.quests.currentProgress = 0;
+        }
+
+        savePlayer(player);
+        updateQuestsUI(); // Mettre à jour l'UI après la complétion
+    }
+}
+
+/**
+ * Permet au joueur d'accepter une quête.
+ * @param {string} questId L'identifiant de la quête à accepter.
+ */
+export function acceptQuest(questId) {
+    if (!player) {
+        showNotification("Veuillez d'abord créer un personnage.", 'error');
+        return;
+    }
+
     const questData = questsData[questId];
     if (!questData) {
-        console.error(`Erreur: La quête avec l'ID '${questId}' est introuvable.`);
+        showNotification("Cette quête n'existe pas.", 'error');
         return;
     }
 
+    if (player.quests.current) {
+        showNotification("Vous avez déjà une quête en cours. Terminez-la d'abord.", 'error');
+        return;
+    }
+
+    // Réinitialise la quête précédente (si elle existe) et démarre la nouvelle.
     player.quests.current = questId;
     player.quests.currentProgress = 0;
-    savePlayer();
-    showNotification(`Quête "${questData.name}" acceptée !`, "info");
-    updateQuestsUI();
+    savePlayer(player);
+    showNotification(`Quête acceptée : '${questData.name}'`, 'success');
+    updateQuestsUI(); // Mettre à jour l'UI après l'acceptation
 }
 
 /**
- * Met à jour l'affichage de toutes les listes de quêtes (non commencées, actives, terminées).
- * Cette fonction est appelée chaque fois que l'état des quêtes du joueur change.
+ * Met à jour l'interface utilisateur des quêtes.
  */
 export function updateQuestsUI() {
-    const unstartedList = document.getElementById('unstarted-quests-list');
-    const activeList = document.getElementById('active-quests-list');
-    const completedList = document.getElementById('completed-quests-list');
-    const safePlaceBtn = document.getElementById('safe-place-btn');
-    
-    // Vérifie si les éléments UI existent avant de les manipuler pour éviter les erreurs.
-    if (!unstartedList || !activeList || !completedList) {
+    if (!player) {
+        // Redirige si le joueur n'existe pas, ou gère l'état initial.
         return;
     }
 
-    // Vide les listes pour une reconstruction propre de l'UI.
-    unstartedList.innerHTML = '';
-    activeList.innerHTML = '';
-    completedList.innerHTML = '';
+    const activeList = document.getElementById('active-quests-list');
+    const unstartedList = document.getElementById('unstarted-quests-list');
+    const completedList = document.getElementById('completed-quests-list');
     
-    // Affiche ou masque le bouton "Aller au Lieu Sûr" en fonction de la progression du joueur.
-    if (safePlaceBtn) {
-        if (player.quests.completed.includes('lieu_sur')) {
-            safePlaceBtn.style.display = 'block';
-        } else {
-            safePlaceBtn.style.display = 'none';
-        }
-    }
+    // Réinitialise les listes pour éviter les doublons.
+    if (activeList) activeList.innerHTML = '';
+    if (unstartedList) unstartedList.innerHTML = '';
+    if (completedList) completedList.innerHTML = '';
 
-    // Boucle sur toutes les quêtes pour déterminer leur statut et les afficher correctement.
     for (const questId in questsData) {
         const questData = questsData[questId];
         const li = document.createElement('li');
         li.className = 'quest-item';
 
-        const title = document.createElement('p');
-        title.className = 'quest-title';
+        const title = document.createElement('h4');
         title.textContent = questData.name;
         li.appendChild(title);
 
@@ -121,23 +149,28 @@ export function updateQuestsUI() {
         description.textContent = questData.description;
         li.appendChild(description);
 
-        // Détermine si la quête est active, terminée ou non commencée.
         if (player.quests.current === questId) {
+            // Affiche la quête en cours.
             const progress = document.createElement('p');
             progress.textContent = `Progression : ${player.quests.currentProgress || 0} / ${questData.objective.required}`;
             li.appendChild(progress);
-            activeList.appendChild(li);
+            if (activeList) activeList.appendChild(li);
         } else if (player.quests.completed.includes(questId)) {
+            // Affiche les quêtes terminées.
             li.classList.add('completed');
-            completedList.appendChild(li);
+            const status = document.createElement('p');
+            status.textContent = 'Terminée';
+            status.className = 'quest-status completed';
+            li.appendChild(status);
+            if (completedList) completedList.appendChild(li);
         } else {
-            // Ajoute un bouton "Accepter" pour les quêtes non commencées.
+            // Affiche les quêtes non commencées et le bouton "Accepter".
             const acceptBtn = document.createElement('button');
             acceptBtn.textContent = "Accepter la quête";
             acceptBtn.className = 'btn-primary';
             acceptBtn.addEventListener('click', () => acceptQuest(questId));
             li.appendChild(acceptBtn);
-            unstartedList.appendChild(li);
+            if (unstartedList) unstartedList.appendChild(li);
         }
     }
 }

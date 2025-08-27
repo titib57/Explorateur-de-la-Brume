@@ -32,7 +32,32 @@ body {
     min-height: 100vh;
     margin: 0;
 }
-
+        .quest-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--secondary-color);
+        }
+        .quest-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .quest-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: var(--tertiary-color);
+        }
+        .quest-title {
+            font-weight: bold;
+            color: var(--primary-text-color);
+        }
+        .quest-item.completed {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
 .game-header {
     background-color: var(--bg-color-medium);
     padding: 20px;
@@ -409,7 +434,7 @@ body {
 }
 
 .popup-content {
-    background: white;
+    background: rgb(0, 0, 0, 0.6); /* Fond semi-transparent */
     padding: 20px;
     border-radius: 8px;
     text-align: center;
