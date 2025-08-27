@@ -395,6 +395,8 @@ body {
 }
 .popup-overlay {
   display: none; /* Cache la popup par défaut */
+  justify-content: center; /* Centre horizontalement le contenu */
+  align-items: center; /* Centre verticalement le contenu */
   position: fixed; /* Reste en place lors du défilement */
   z-index: 1; /* S'affiche au-dessus des autres éléments */
   left: 0;
@@ -406,10 +408,13 @@ body {
 }
 
 .popup-content {
-    background: white;
+    background: var(--bg-color-medium); /* Utilise la couleur de fond de votre jeu */
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--border-color);
     text-align: center;
+    max-width: 500px; /* Limite la largeur pour une meilleure lisibilité */
 }
 
 .continuer {
