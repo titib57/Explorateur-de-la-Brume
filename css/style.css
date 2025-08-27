@@ -393,8 +393,7 @@ body {
     right: 20px;
     z-index: 1001;
 }
-
-#popup-overlay {
+.popup-overlay {
   display: none; /* Cache la popup par défaut */
   position: fixed; /* Reste en place lors du défilement */
   z-index: 1; /* S'affiche au-dessus des autres éléments */
