@@ -1,20 +1,25 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-// Votre configuration Firebase (à remplacer !)
-const firebaseConfig = {
-  apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
-  authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
-  projectId: "rpg---explorateur-de-la-brume",
-  storageBucket: "rpg---explorateur-de-la-brume.firebasestorage.app",
-  messagingSenderId: "855919886618",
-  appId: "1:855919886618:web:933180441fa6f29dd26ca3",
-  measurementId: "G-139GQZWKTC"
-};
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
+    authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
+    projectId: "rpg---explorateur-de-la-brume",
+    storageBucket: "rpg---explorateur-de-la-brume.firebasestorage.app",
+    messagingSenderId: "855919886618",
+    appId: "1:855919886618:web:933180441fa6f29dd26ca3",
+    measurementId: "G-139GQZWKTC"
+  };
 
-// Initialisation de Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+
 
 // Récupération des éléments du DOM
 const signupForm = document.getElementById('signupForm');
@@ -44,7 +49,7 @@ signupForm.addEventListener('submit', async (e) => {
 
         // Redirection après un court délai
         setTimeout(() => {
-            window.location.href = "world_map.html"; // Redirigez vers votre page de carte
+            window.location.href = "stats.html"; // Redirigez vers votre page de carte
         }, 1500);
 
     } catch (error) {
