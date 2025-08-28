@@ -1,77 +1,4 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion</title>
-    <!-- Le lien vers le CDN de Tailwind CSS pour les styles -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-    </style>
-</head>
-<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
 
-    <!-- Conteneur principal de la carte de connexion -->
-    <div class="bg-gray-800 p-8 md:p-10 rounded-xl shadow-2xl w-full max-w-sm border border-gray-700">
-        
-        <!-- Titre -->
-        <h2 class="text-3xl font-bold text-center text-teal-400 mb-6">Connexion</h2>
-        
-        <!-- Formulaire de connexion -->
-        <form id="loginForm" class="space-y-6">
-            
-            <!-- Champ pour l'adresse e-mail -->
-            <div>
-                <label for="email" class="block text-sm font-medium text-gray-300">Adresse e-mail</label>
-                <input 
-                    type="email" 
-                    id="email" 
-                    name="email" 
-                    placeholder="Entrez votre e-mail"
-                    class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 transition duration-300"
-                    required
-                >
-            </div>
-            
-            <!-- Champ pour le mot de passe -->
-            <div>
-                <label for="password" class="block text-sm font-medium text-gray-300">Mot de passe</label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    name="password" 
-                    placeholder="Entrez votre mot de passe"
-                    class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 transition duration-300"
-                    required
-                >
-            </div>
-            
-            <!-- Zone pour afficher les messages d'erreur ou de succès -->
-            <div id="message" class="text-sm font-medium text-center text-red-400"></div>
-
-            <!-- Bouton de soumission du formulaire -->
-            <button 
-                type="submit" 
-                class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
-            >
-                Se connecter
-            </button>
-        </form>
-        
-        <!-- Section pour créer un compte ou réinitialiser le mot de passe -->
-        <div class="mt-6 text-center text-sm">
-            <p class="text-gray-400">
-                Vous n'avez pas de compte ? 
-                <a href="signup.html" class="text-teal-400 hover:text-teal-300 font-medium transition duration-300">Créez-en un</a>
-            </p>
-        </div>
-    </div>
-
-    <!-- Les liens vers les fichiers JavaScript de Firebase -->
-    <script type="module">
         // Importation des modules nécessaires de Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -173,6 +100,3 @@
                 messageDiv.className = "text-sm font-medium text-center text-red-400";
             }
         });
-    </script>
-</body>
-</html>
