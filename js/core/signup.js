@@ -1,13 +1,13 @@
-  // Import the functions you need from the SDKs you need
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
-  import { initializeApp } from "firebase/app";
-  import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+// Import the functions you need from the SDKs you need
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+import { initializeApp } from "firebase/app";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
     apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
     authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
     projectId: "rpg---explorateur-de-la-brume",
@@ -15,11 +15,14 @@
     messagingSenderId: "855919886618",
     appId: "1:855919886618:web:933180441fa6f29dd26ca3",
     measurementId: "G-139GQZWKTC"
-  };
+};
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+// Initialisez Firebase Auth et stockez l'objet dans une constante appelée auth
+const auth = getAuth(app);
 
 
 // Récupération des éléments du DOM
