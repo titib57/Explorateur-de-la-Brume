@@ -53,7 +53,7 @@ signupForm.addEventListener('submit', async (e) => {
 
         // Redirection après un court délai
         setTimeout(() => {
-            window.location.href = "stats.html"; // Redirigez vers votre page de carte
+            window.location.href = "character.html"; // Redirigez vers votre page de carte
         }, 1500);
 
     } catch (error) {
