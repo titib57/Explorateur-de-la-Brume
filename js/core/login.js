@@ -1,3 +1,4 @@
+// Fichier : js/core/login.js
 
         // Importation des modules nécessaires de Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
