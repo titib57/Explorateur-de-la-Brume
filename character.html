@@ -1,98 +1,79 @@
-<!-- Fichier : character_creation.html -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Créer un personnage - Explorateur de la Brume</title>
-    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
     <header class="game-header">
         <h1>Explorateur de la Brume</h1>
+        <p>ID utilisateur : <span id="user-id-display"></span></p>
         <nav></nav>
     </header>
 
     <main class="game-container">
-        <h2>Création de personnage</h2>
-         <div class="action-buttons">
-            <!-- Les autres boutons sont cachés par défaut -->
-            <a id="continue-adventure-btn" href="world_map.html" class="btn-primary" style="display:none;">Continuer</a>
-            <br>
-            <a id="delete-char-btn" class="btn-primary" style="display:none;">Supprimer le personnage</a>
-        </div>
-        <form id="character-form">
-            <div class="form-group">
-                <label for="char-name">Pseudo :</label>
-                <input type="text" id="char-name" required placeholder="Saisissez un nom">
-            </div>
-
-            <div class="form-group">
-                <label for="char-age">Âge :</label>
-                <input type="number" id="char-age" min="15" max="100" value="20">
-            </div>
-
-            <div class="form-group">
-                <label for="char-height">Taille (cm) :</label>
-                <input type="number" id="char-height" min="150" max="220" value="175">
-            </div>
-
-            <div class="form-group">
-                <label for="char-weight">Poids (kg) :</label>
-                <input type="number" id="char-weight" min="50" max="150" value="70">
+        <div class="game-card">
+            <h2 id="form-title">Création de personnage</h2>
+            <div id="loading-message" style="display:none;">
+                <span>Chargement de vos données...</span>
             </div>
             
-            <div class="form-group">
-                <label for="char-class">Classe :</label>
-                <select id="char-class">
-                    <option value="explorateur">Explorateur</option>
-                </select>
+            <div id="action-buttons" style="display:none;">
+                <a id="continue-adventure-btn" href="world_map.html">Continuer l'aventure</a>
+                <a id="delete-char-btn" class="cursor-pointer">Supprimer le personnage</a>
             </div>
-<button type="submit" id="creer" class="btn-primary">Créer</button>
-        <div id="popup-overlay" class="popup-overlay">
-    <div id="popup-content" class="popup-content">
-        <p>Félicitation, ton personnage est pret à étre créé!</p>
-        <button id="continuer" class="btn-primary">Continuer</button>
-        <button id="annuler" class="btn-primary">Annuler</button>
-    </div>
-           </div> 
-</div>
-        </form>
+
+            <form id="character-form">
+                <div class="form-group">
+                    <label for="char-name">Pseudo :</label>
+                    <input type="text" id="char-name" required placeholder="Saisissez un nom">
+                </div>
+
+                <div class="form-group">
+                    <label for="char-age">Âge :</label>
+                    <input type="number" id="char-age" min="15" max="100" value="20">
+                </div>
+
+                <div class="form-group">
+                    <label for="char-height">Taille (cm) :</label>
+                    <input type="number" id="char-height" min="150" max="220" value="175">
+                </div>
+
+                <div class="form-group">
+                    <label for="char-weight">Poids (kg) :</label>
+                    <input type="number" id="char-weight" min="50" max="150" value="70">
+                </div>
+                
+                <div class="form-group">
+                    <label for="char-class">Classe :</label>
+                    <select id="char-class">
+                        <option value="explorateur">Explorateur</option>
+                    </select>
+                </div>
+                <button type="submit" id="creer">Créer</button>
+            </form>
+        </div>
     </main>
 
     <footer class="game-footer">
         <p>© 2025 Explorateur de la Brume. Tous droits réservés.</p>
     </footer>
 
+    <!-- Overlay de popup pour la confirmation de suppression -->
+    <div id="popup-overlay" style="display:none;">
+        <div id="popup-content">
+            <p>Êtes-vous sûr de vouloir supprimer votre personnage ?</p>
+            <div>
+                <button id="confirm-delete">Confirmer</button>
+                <button id="cancel-delete">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteneur pour les notifications -->
     <div id="notification-container"></div>
-    
-    <script type="module">
-        import { createCharacter } from './js/core/state.js';
-        import { showNotification } from './js/core/notifications.js';
-
-        // Écouteur d'événement pour la soumission du formulaire de création de personnage
-        document.getElementById('character-form').addEventListener('submit', (e) => {
-            e.preventDefault(); // Empêche le comportement par défaut de soumission du formulaire (rechargement de la page)
-
-            const name = document.getElementById('char-name').value;
-            const charClass = document.getElementById('char-class').value;
-            const age = document.getElementById('char-age').value;
-            const height = document.getElementById('char-height').value;
-            const weight = document.getElementById('char-weight').value;
-
-            // Valider les données avant de créer le personnage
-            if (!name) {
-                showNotification("Veuillez donner un nom à votre personnage.", 'error');
-                return;
-            }
-
-            // Création du personnage avec toutes les données du formulaire
-            createCharacter(name, charClass, age, height, weight);
-
-
-        });
-    </script>
     
 </body>
 </html>
