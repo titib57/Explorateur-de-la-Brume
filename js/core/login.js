@@ -1,16 +1,33 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // Les variables globales pour la configuration Firebase
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
+  authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
+  projectId: "rpg---explorateur-de-la-brume",
+  storageBucket: "rpg---explorateur-de-la-brume.firebasestorage.app",
+  messagingSenderId: "855919886618",
+  appId: "1:855919886618:web:933180441fa6f29dd26ca3",
+  measurementId: "G-139GQZWKTC"
+};
 
 // Récupération des éléments du DOM
 const form = document.getElementById('loginForm');
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const messageDiv = document.getElementById('message');
+const storage = getStorage(app);
+
+// Télécharger un fichier
+async function uploadFile(file) {
+  const storageRef = ref(storage, 'images/' + file.name);
+  const snapshot = await uploadBytes(storageRef, file);
+  console.log('Fichier téléchargé !', snapshot);
+}
 
 // Initialisation de Firebase
 let auth;
