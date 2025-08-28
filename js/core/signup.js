@@ -1,4 +1,3 @@
-// Import the functions you need from the SDKs you need
 // Importez les fonctions depuis les CDN
 // import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
