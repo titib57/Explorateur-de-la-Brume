@@ -69,7 +69,7 @@ loginForm.addEventListener('submit', async (e) => {
         
         // Redirection vers la carte du monde ou une autre page après un court délai
         setTimeout(() => {
-            window.location.href = "character_creation.html";
+            window.location.href = "world_map.html";
         }, 1500);
 
     } catch (error) {
