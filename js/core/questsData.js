@@ -15,7 +15,7 @@ export const questsData = {
             xp: 0,
             gold: 0,
         },
-        nextQuestId: 'premier_pas'
+        nextQuestId: 'premiers_pas'
     },
         'premiers_pas': {
         id: 'premiers_pas',
