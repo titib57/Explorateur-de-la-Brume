@@ -67,9 +67,9 @@ loginForm.addEventListener('submit', async (e) => {
         messageDiv.textContent = `Connexion réussie ! Redirection...`;
         messageDiv.className = "text-sm font-medium text-center text-green-400";
         
-        // Redirection vers la carte du monde ou une autre page après un court délai
+        // Redirection vers la page de personnage ou une autre page après un court délai
         setTimeout(() => {
-            window.location.href = "character.html";
+            window.location.href = "/modules/character.html";
         }, 1500);
 
     } catch (error) {
