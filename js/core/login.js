@@ -1,10 +1,10 @@
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // Les variables globales pour la configuration Firebase
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// AVERTISSEMENT DE SÉCURITÉ : Ne jamais mettre les clés API en clair dans le code de production.
+// Utilisez des variables d'environnement ou une autre méthode sécurisée.
 const firebaseConfig = {
   apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
   authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
@@ -20,30 +20,26 @@ const form = document.getElementById('loginForm');
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const messageDiv = document.getElementById('message');
-const storage = getStorage(app);
-
-// Télécharger un fichier
-async function uploadFile(file) {
-  const storageRef = ref(storage, 'images/' + file.name);
-  const snapshot = await uploadBytes(storageRef, file);
-  console.log('Fichier téléchargé !', snapshot);
-}
 
 // Initialisation de Firebase
 let auth;
-if (Object.keys(firebaseConfig).length > 0) {
+let db;
+let app;
+
+// Vérifier si la configuration est présente avant d'initialiser l'application
+if (Object.keys(firebaseConfig).length > 0 && firebaseConfig.apiKey !== "YOUR_API_KEY") {
     try {
-        const app = initializeApp(firebaseConfig);
+        app = initializeApp(firebaseConfig);
         auth = getAuth(app);
-        // Ajout de la base de données Firestore pour une utilisation future
-        const db = getFirestore(app);
+        db = getFirestore(app); // Initialisation de Firestore
     } catch (error) {
         console.error("Erreur lors de l'initialisation de Firebase :", error);
-        messageDiv.textContent = "Erreur de configuration Firebase. Veuillez vérifier votre clé API.";
+        messageDiv.textContent = "Erreur de configuration Firebase. Veuillez vérifier vos clés API.";
     }
 } else {
-    messageDiv.textContent = "La configuration Firebase est manquante.";
+    messageDiv.textContent = "La configuration Firebase est manquante ou incomplète.";
 }
+
 
 // Écouteur d'événement pour la soumission du formulaire
 form.addEventListener('submit', async (e) => {
