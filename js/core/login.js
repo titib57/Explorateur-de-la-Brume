@@ -1,101 +1,178 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-// Les variables globales pour la configuration Firebase
-// AVERTISSEMENT DE SÉCURITÉ : Ne jamais mettre les clés API en clair dans le code de production.
-// Utilisez des variables d'environnement ou une autre méthode sécurisée.
-const firebaseConfig = {
-  apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
-  authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
-  projectId: "rpg---explorateur-de-la-brume",
-  storageBucket: "rpg---explorateur-de-la-brume.firebasestorage.app",
-  messagingSenderId: "855919886618",
-  appId: "1:855919886618:web:933180441fa6f29dd26ca3",
-  measurementId: "G-139GQZWKTC"
-};
-
-// Récupération des éléments du DOM
-const form = document.getElementById('loginForm');
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
-const messageDiv = document.getElementById('message');
-
-// Initialisation de Firebase
-let auth;
-let db;
-let app;
-
-// Vérifier si la configuration est présente avant d'initialiser l'application
-if (Object.keys(firebaseConfig).length > 0 && firebaseConfig.apiKey !== "YOUR_API_KEY") {
-    try {
-        app = initializeApp(firebaseConfig);
-        auth = getAuth(app);
-        db = getFirestore(app); // Initialisation de Firestore
-    } catch (error) {
-        console.error("Erreur lors de l'initialisation de Firebase :", error);
-        messageDiv.textContent = "Erreur de configuration Firebase. Veuillez vérifier vos clés API.";
-    }
-} else {
-    messageDiv.textContent = "La configuration Firebase est manquante ou incomplète.";
-}
-
-
-// Écouteur d'événement pour la soumission du formulaire
-form.addEventListener('submit', async (e) => {
-    e.preventDefault(); // Empêche le rechargement de la page
-
-    if (!auth) {
-        messageDiv.textContent = "Service d'authentification non disponible.";
-        return;
-    }
-
-    const email = emailInput.value;
-    const password = passwordInput.value;
-
-    // Affichage d'un message de chargement
-    messageDiv.textContent = "Connexion en cours...";
-    messageDiv.className = "text-sm font-medium text-center text-blue-400";
-
-    try {
-        // Tentative de connexion avec l'e-mail et le mot de passe
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        // Affichage d'un message de succès et redirection
-        messageDiv.textContent = `Connexion réussie ! Redirection...`;
-        messageDiv.className = "text-sm font-medium text-center text-green-400";
-        
-        // Redirection vers la carte du monde ou une autre page après un court délai
-        setTimeout(() => {
-            window.location.href = "character_creation.html";
-        }, 1500);
-
-    } catch (error) {
-        console.error("Erreur de connexion :", error.code, error.message);
-        let errorMessage = "Erreur de connexion. Veuillez réessayer.";
-
-        // Traduction des codes d'erreur de Firebase pour un message plus clair
-        switch (error.code) {
-            case 'auth/user-not-found':
-                errorMessage = "Aucun utilisateur trouvé avec cette adresse e-mail.";
-                break;
-            case 'auth/wrong-password':
-                errorMessage = "Mot de passe incorrect.";
-                break;
-            case 'auth/invalid-email':
-                errorMessage = "Le format de l'adresse e-mail est invalide.";
-                break;
-            case 'auth/too-many-requests':
-                errorMessage = "Trop de tentatives de connexion échouées. Veuillez réessayer plus tard.";
-                break;
-            default:
-                errorMessage = "Erreur de connexion. Veuillez vérifier votre e-mail et votre mot de passe.";
-                break;
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion</title>
+    <!-- Le lien vers le CDN de Tailwind CSS pour les styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
         }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Conteneur principal de la carte de connexion -->
+    <div class="bg-gray-800 p-8 md:p-10 rounded-xl shadow-2xl w-full max-w-sm border border-gray-700">
         
-        // Affichage de l'erreur
-        messageDiv.textContent = errorMessage;
-        messageDiv.className = "text-sm font-medium text-center text-red-400";
-    }
-});
+        <!-- Titre -->
+        <h2 class="text-3xl font-bold text-center text-teal-400 mb-6">Connexion</h2>
+        
+        <!-- Formulaire de connexion -->
+        <form id="loginForm" class="space-y-6">
+            
+            <!-- Champ pour l'adresse e-mail -->
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-300">Adresse e-mail</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    placeholder="Entrez votre e-mail"
+                    class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 transition duration-300"
+                    required
+                >
+            </div>
+            
+            <!-- Champ pour le mot de passe -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-300">Mot de passe</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    placeholder="Entrez votre mot de passe"
+                    class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 transition duration-300"
+                    required
+                >
+            </div>
+            
+            <!-- Zone pour afficher les messages d'erreur ou de succès -->
+            <div id="message" class="text-sm font-medium text-center text-red-400"></div>
+
+            <!-- Bouton de soumission du formulaire -->
+            <button 
+                type="submit" 
+                class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
+            >
+                Se connecter
+            </button>
+        </form>
+        
+        <!-- Section pour créer un compte ou réinitialiser le mot de passe -->
+        <div class="mt-6 text-center text-sm">
+            <p class="text-gray-400">
+                Vous n'avez pas de compte ? 
+                <a href="signup.html" class="text-teal-400 hover:text-teal-300 font-medium transition duration-300">Créez-en un</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Les liens vers les fichiers JavaScript de Firebase -->
+    <script type="module">
+        // Importation des modules nécessaires de Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Récupération des variables globales de l'environnement Canvas
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
+
+        // Récupération des éléments du DOM
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const messageDiv = document.getElementById('message');
+
+        // Initialisation de Firebase
+        let auth;
+        let db;
+        let app;
+
+        // Vérifier si la configuration est présente avant d'initialiser l'application
+        if (Object.keys(firebaseConfig).length > 0) {
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app); // Initialisation de Firestore
+                
+                // S'authentifier avec le token initial pour que les autres services fonctionnent
+                if (initialAuthToken) {
+                    signInWithCustomToken(auth, initialAuthToken).catch((error) => {
+                        console.error("Erreur d'authentification initiale :", error);
+                    });
+                }
+
+            } catch (error) {
+                console.error("Erreur lors de l'initialisation de Firebase :", error);
+                messageDiv.textContent = "Erreur de configuration Firebase. Veuillez vérifier vos clés API.";
+            }
+        } else {
+            messageDiv.textContent = "La configuration Firebase est manquante ou incomplète.";
+        }
+
+
+        // Écouteur d'événement pour la soumission du formulaire
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Empêche le rechargement de la page
+
+            if (!auth) {
+                messageDiv.textContent = "Service d'authentification non disponible.";
+                return;
+            }
+
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            // Affichage d'un message de chargement
+            messageDiv.textContent = "Connexion en cours...";
+            messageDiv.className = "text-sm font-medium text-center text-blue-400";
+
+            try {
+                // Tentative de connexion avec l'e-mail et le mot de passe
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Affichage d'un message de succès et redirection
+                messageDiv.textContent = `Connexion réussie ! Redirection...`;
+                messageDiv.className = "text-sm font-medium text-center text-green-400";
+                
+                // Redirection vers la carte du monde ou une autre page après un court délai
+                setTimeout(() => {
+                    window.location.href = "character_creation.html";
+                }, 1500);
+
+            } catch (error) {
+                console.error("Erreur de connexion :", error.code, error.message);
+                let errorMessage = "Erreur de connexion. Veuillez réessayer.";
+
+                // Traduction des codes d'erreur de Firebase pour un message plus clair
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = "Aucun utilisateur trouvé avec cette adresse e-mail.";
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = "Mot de passe incorrect.";
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = "Le format de l'adresse e-mail est invalide.";
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = "Trop de tentatives de connexion échouées. Veuillez réessayer plus tard.";
+                        break;
+                    default:
+                        errorMessage = "Erreur de connexion. Veuillez vérifier votre e-mail et votre mot de passe.";
+                        break;
+                }
+                
+                // Affichage de l'erreur
+                messageDiv.textContent = errorMessage;
+                messageDiv.className = "text-sm font-medium text-center text-red-400";
+            }
+        });
+    </script>
+</body>
+</html>
