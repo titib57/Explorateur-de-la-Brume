@@ -3,12 +3,13 @@ import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com
 
 // Votre configuration Firebase (à remplacer !)
 const firebaseConfig = {
-    apiKey: "VOTRE_CLE_API_ICI",
-    authDomain: "VOTRE_DOMAINE.firebaseapp.com",
-    projectId: "VOTRE_PROJET",
-    storageBucket: "VOTRE_STOCKAGE.appspot.com",
-    messagingSenderId: "VOTRE_ID_SENDER",
-    appId: "VOTRE_ID_APP"
+  apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
+  authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
+  projectId: "rpg---explorateur-de-la-brume",
+  storageBucket: "rpg---explorateur-de-la-brume.firebasestorage.app",
+  messagingSenderId: "855919886618",
+  appId: "1:855919886618:web:933180441fa6f29dd26ca3",
+  measurementId: "G-139GQZWKTC"
 };
 
 // Initialisation de Firebase
