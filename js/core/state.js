@@ -26,7 +26,7 @@ class Character {
         this.level = level || 1;
         this.xp = xp || 0;
         this.xpToNextLevel = this.level * 100;
-        this.gold = gold || 0;
+        this.gold = gold || 3;
         this.stats = stats || { strength: 1, intelligence: 1, speed: 1, dexterity: 1 };
         this.quests = quests || {};
         this.inventory = inventory || {};
