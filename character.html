@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Créer un personnage - Explorateur de la Brume</title>
-        <!-- Le lien vers la feuille de style externe -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -24,33 +23,39 @@
             
             <div id="action-buttons" class="hidden">
                 <a id="continue-adventure-btn" href="personnage.html">Continuer l'aventure</a>
+                <button id="delete-char-btn">Supprimer le personnage</button>
             </div>
 
             <form id="character-form" class="hidden">
-                <div class="form-group">
-                    <label for="char-name">Pseudo :</label>
-                    <input type="text" id="char-name" required placeholder="Saisissez un nom">
-                </div>
+                <fieldset>
+                    <legend>Informations de base</legend>
+                    <div class="form-group">
+                        <label for="char-name">Pseudo :</label>
+                        <input type="text" id="char-name" required placeholder="Saisissez un nom">
+                    </div>
 
-                <div class="form-group">
-                    <label for="char-age">Âge :</label>
-                    <input type="number" id="char-age" min="15" max="100" value="20">
-                </div>
+                    <div class="form-group">
+                        <label for="char-age">Âge :</label>
+                        <input type="number" id="char-age" min="15" max="100" value="20">
+                    </div>
 
-                <div class="form-group">
-                    <label for="char-height">Taille (cm) :</label>
-                    <input type="number" id="char-height" min="150" max="220" value="175">
-                </div>
+                    <div class="form-group">
+                        <label for="char-height">Taille (cm) :</label>
+                        <input type="number" id="char-height" min="150" max="220" value="175">
+                    </div>
 
-                <div class="form-group">
-                    <label for="char-weight">Poids (kg) :</label>
-                    <input type="number" id="char-weight" min="50" max="150" value="70">
-                </div>
+                    <div class="form-group">
+                        <label for="char-weight">Poids (kg) :</label>
+                        <input type="number" id="char-weight" min="50" max="150" value="70">
+                    </div>
+                </fieldset>
                 
                 <div class="form-group">
                     <label for="char-class">Classe :</label>
                     <select id="char-class">
                         <option value="explorateur">Explorateur</option>
+                        <option value="guerrier">Guerrier</option>
+                        <option value="mage">Mage</option>
                     </select>
                 </div>
                 <button type="submit" id="creer">Créer</button>
@@ -58,9 +63,6 @@
         </div>
     </main>
 
-
-
-    <!-- Overlay de popup pour la confirmation de suppression -->
     <div id="popup-overlay" class="hidden">
         <div id="popup-content">
             <p>Êtes-vous sûr de vouloir supprimer votre personnage ?</p>
@@ -71,7 +73,6 @@
         </div>
     </div>
 
-    <!-- Conteneur pour les notifications -->
     <div id="notification-container"></div>
 
     <script type="module">
@@ -79,7 +80,6 @@
 
         // --- Fonctions de l'application ---
 
-        // Affiche un message de notification
         function showNotification(message, type) {
             const container = document.getElementById('notification-container');
             const notification = document.createElement('div');
@@ -95,7 +95,6 @@
             }, 3000);
         }
 
-        // Met à jour l'état de l'interface
         function updateUI(hasCharacter) {
             const loadingMessage = document.getElementById('loading-message');
             const formContainer = document.getElementById('character-form');
@@ -114,7 +113,6 @@
             }
         }
 
-        // Peuple le formulaire avec les données existantes
         function populateForm(playerData) {
             document.getElementById('char-name').value = playerData.name || '';
             document.getElementById('char-age').value = playerData.age || 20;
@@ -142,7 +140,6 @@
                 document.getElementById('loading-message').classList.add('hidden');
             }
 
-            // Gère la soumission du formulaire
             document.getElementById('character-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const playerData = {
@@ -166,13 +163,12 @@
                 }
             });
             
-            // Gère l'affichage du popup de suppression
             document.getElementById('delete-char-btn').addEventListener('click', () => {
                 document.getElementById('popup-overlay').classList.remove('hidden');
             });
             
-            // Gère les boutons du popup
-            document.getElementById('confirm-delete').addEventListener('click', none () => {
+            // Correction de la fonction : suppression de `none` et utilisation de `async`
+            document.getElementById('confirm-delete').addEventListener('click', async () => {
                 try {
                     await deleteGameData();
                     showNotification("Personnage supprimé avec succès.", 'success');
@@ -183,12 +179,13 @@
                     showNotification("Erreur de suppression.", 'error');
                 }
             });
+
             document.getElementById('cancel-delete').addEventListener('click', () => {
                 document.getElementById('popup-overlay').classList.add('hidden');
             });
         });
     </script>
-        <footer class="game-footer">
+    <footer class="game-footer">
         <p>© 2025 Explorateur de la Brume. Tous droits réservés.</p>
     </footer>
 </body>
