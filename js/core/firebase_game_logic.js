@@ -3,7 +3,7 @@
 // Importations des fonctions nécessaires depuis les librairies Firebase.
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // Déclaration des variables globales. Elles seront accessibles une fois l'initialisation terminée.
 let firebaseApp = null;
@@ -117,6 +117,26 @@ export async function updateGameData(dataToUpdate) {
         console.log("Données du joueur mises à jour avec succès.");
     } catch (e) {
         console.error("Erreur de mise à jour : ", e);
+        throw e;
+    }
+}
+
+/**
+ * Supprime le document du personnage dans Firestore.
+ * @returns {Promise<void>}
+ */
+export async function deleteGameData() {
+    if (!currentUserId) {
+        console.error("Erreur de suppression : l'utilisateur n'est pas authentifié.");
+        throw new Error("Erreur de suppression : l'utilisateur n'est pas authentifié.");
+    }
+    try {
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const docRef = doc(firestoreDb, `artifacts/${appId}/users/${currentUserId}/game_data/player_state`);
+        await deleteDoc(docRef);
+        console.log("Personnage supprimé avec succès.");
+    } catch (e) {
+        console.error("Erreur de suppression :", e);
         throw e;
     }
 }

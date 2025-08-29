@@ -76,14 +76,7 @@
     <div id="notification-container"></div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Déclaration des variables globales
-        let firestoreDb = null;
-        let firebaseAuth = null;
-        let currentUserId = null;
+        import { initFirebase, loadGameData, saveGameData, deleteGameData } from './firebase_game_logic.js';
 
         // --- Fonctions de l'application ---
 
@@ -131,99 +124,21 @@
             document.getElementById('char-class').value = playerData.class || 'explorateur';
         }
 
-        // Sauvegarde les données complètes du joueur dans Firestore
-        async function saveGameData(playerData) {
-            if (!currentUserId) {
-                showNotification("Erreur de sauvegarde : l'utilisateur n'est pas authentifié.", 'error');
-                return;
-            }
-            try {
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-                const docRef = doc(firestoreDb, `artifacts/${appId}/users/${currentUserId}/game_data/player_state`);
-                await setDoc(docRef, playerData);
-                showNotification("Personnage créé avec succès !", 'success');
-                updateUI(true);
-            } catch (e) {
-                console.error("Erreur de sauvegarde :", e);
-                showNotification("Erreur de sauvegarde.", 'error');
-            }
-        }
-
-        // Charge les données du joueur depuis Firestore
-        async function loadGameData() {
-            if (!currentUserId) {
-                showNotification("Erreur de chargement : l'utilisateur n'est pas authentifié.", 'error');
-                return;
-            }
-            try {
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-                const docRef = doc(firestoreDb, `artifacts/${appId}/users/${currentUserId}/game_data/player_state`);
-                const docSnap = await getDoc(docRef);
-                
-                if (docSnap.exists()) {
-                    const playerData = docSnap.data();
-                    populateForm(playerData);
-                    updateUI(true);
-                    return playerData;
-                } else {
-                    updateUI(false);
-                    return null;
-                }
-            } catch (e) {
-                console.error("Erreur de chargement :", e);
-                showNotification("Erreur de chargement.", 'error');
-                updateUI(false);
-                return null;
-            }
-        }
-
-        // Supprime le document du personnage dans Firestore
-        async function deleteGameData() {
-            if (!currentUserId) {
-                showNotification("Erreur de suppression : l'utilisateur n'est pas authentifié.", 'error');
-                return;
-            }
-            try {
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-                const docRef = doc(firestoreDb, `artifacts/${appId}/users/${currentUserId}/game_data/player_state`);
-                await deleteDoc(docRef);
-                showNotification("Personnage supprimé avec succès.", 'success');
-                // Réinitialise le formulaire et l'interface
-                document.getElementById('character-form').reset();
-                updateUI(false);
-                document.getElementById('popup-overlay').classList.add('hidden');
-            } catch (e) {
-                console.error("Erreur de suppression :", e);
-                showNotification("Erreur de suppression.", 'error');
-            }
-        }
-
         // --- Initialisation et gestion des événements ---
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-                const firebaseApp = initializeApp(firebaseConfig);
-                firestoreDb = getFirestore(firebaseApp);
-                firebaseAuth = getAuth(firebaseApp);
-                
-                // Gère l'authentification et le chargement initial
-                onAuthStateChanged(firebaseAuth, async (user) => {
-                    if (user) {
-                        currentUserId = user.uid;
-                        document.getElementById('user-id-display').textContent = currentUserId;
-                        await loadGameData();
-                    } else {
-                        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(firebaseAuth, initialAuthToken);
-                        } else {
-                            await signInAnonymously(firebaseAuth);
-                        }
-                    }
-                });
+                const userId = await initFirebase();
+                document.getElementById('user-id-display').textContent = userId;
+                const playerData = await loadGameData();
+                if (playerData) {
+                    populateForm(playerData);
+                    updateUI(true);
+                } else {
+                    updateUI(false);
+                }
             } catch (error) {
-                console.error("Erreur lors de l'initialisation de l'application :", error);
+                console.error("Erreur d'initialisation de l'application :", error);
                 showNotification("Erreur d'initialisation de l'application.", 'error');
                 document.getElementById('loading-message').classList.add('hidden');
             }
@@ -243,7 +158,13 @@
                     health: 100,
                     inventory: []
                 };
-                await saveGameData(playerData);
+                try {
+                    await saveGameData(playerData);
+                    showNotification("Personnage créé avec succès !", 'success');
+                    updateUI(true);
+                } catch (e) {
+                    showNotification("Erreur de sauvegarde.", 'error');
+                }
             });
             
             // Gère l'affichage du popup de suppression
@@ -252,7 +173,17 @@
             });
             
             // Gère les boutons du popup
-            document.getElementById('confirm-delete').addEventListener('click', deleteGameData);
+            document.getElementById('confirm-delete').addEventListener('click', async () => {
+                try {
+                    await deleteGameData();
+                    showNotification("Personnage supprimé avec succès.", 'success');
+                    document.getElementById('character-form').reset();
+                    updateUI(false);
+                    document.getElementById('popup-overlay').classList.add('hidden');
+                } catch (e) {
+                    showNotification("Erreur de suppression.", 'error');
+                }
+            });
             document.getElementById('cancel-delete').addEventListener('click', () => {
                 document.getElementById('popup-overlay').classList.add('hidden');
             });
