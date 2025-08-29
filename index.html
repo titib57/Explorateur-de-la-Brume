@@ -8,93 +8,61 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <main class="game-container">
-        <h2>Bienvenue dans le monde de la Brume !</h2>
-        <p>
-        <center>
-Préparez-vous à une aventure d'un nouveau genre. Votre terrain de jeu n'est pas qu'un écran, mais le monde qui vous entoure. Que vous soyez dans votre ville, votre quartier ou en voyage, chaque lieu a le potentiel de révéler un secret. Les donjons que vous allez explorer ne sont pas sortis de notre imagination, mais sont directement inspirés de lieux bien réels.
-<br><br>
-Chaque pas que vous ferez dans la vie réelle pourra avoir un impact sur votre quête.
-<br><br>
-Votre courage et votre sens de l'observation seront vos meilleurs atouts. J'espère que vous êtes prêts à voir le monde d'une nouvelle manière.
-<br><br>
-L'aventure est à votre porte. Amusez-vous bien !
-        </center>
-        </p>
-        <div class="action-buttons">
-            <!-- Le bouton "Se connecter" est maintenant visible par défaut -->
-            <a id="start-adventure-btn" href="login.html" class="btn-primary">Se connecter</a>
-            <!-- Les autres boutons sont cachés par défaut -->
-            <a id="continue-adventure-btn" href="world_map.html" class="btn-primary" style="display:none;">Continuer</a>
-            <br>
-            <a id="delete-char-btn" class="btn-primary" style="display:none;">Supprimer le personnage</a>
+
+    <!-- Section principale de la page d'accueil -->
+    <header>
+        <h1>Explorateur de la Brume</h1>
+        <p>Plongez dans un monde de magie et d'aventures épiques !</p>
+        
+        <!-- Image ou espace réservé pour une image -->
+        <!-- Remplacez l'URL ci-dessous par celle de votre propre image d'ambiance -->
+        <img src="https://placehold.co/1200x600/505050/FFFFFF?text=Image+principale+du+jeu" alt="Image principale du jeu, une scène de combat ou un personnage épique." style="max-width: 100%; height: auto;">
+    </header>
+
+    <main>
+        <!-- Boutons d'action principaux -->
+        <div>
+            <a href="/inscription.html">
+                <button>S'inscrire et jouer gratuitement</button>
+            </a>
+            <a href="/a-propos.html">
+                <button>Découvrir l'univers</button>
+            </a>
         </div>
+
+        <!-- Courte description du jeu -->
+        <section>
+            <h2>Bienvenue dans le monde de [Nom du Jeu]</h2>
+            <p>
+                [Nom du Jeu] est un RPG web fantastique où vous incarnez un héros qui doit explorer un vaste continent, combattre des créatures mythiques et accomplir des quêtes pour devenir une légende. Développez votre personnage, rejoignez une guilde et écrivez votre propre histoire dans ce monde persistant.
+            </p>
+        </section>
+
+        <!-- Liste des fonctionnalités clés -->
+        <section>
+            <h2>Les points forts</h2>
+            <ul>
+                <li>
+                    <h3>Classes de personnages</h3>
+                    <p>Choisissez parmi plusieurs classes uniques comme le Guerrier intrépide, le Mage puissant ou le Voleur agile.</p>
+                </li>
+                <li>
+                    <h3>Combats épiques</h3>
+                    <p>Affrontez des boss légendaires et d'autres joueurs dans des combats stratégiques au tour par tour.</p>
+                </li>
+                <li>
+                    <h3>Artisanat</h3>
+                    <p>Récoltez des ressources pour forger des armes et des armures surpuissantes.</p>
+                </li>
+            </ul>
+        </section>
+
     </main>
 
+    <!-- Section du pied de page -->
     <footer class="game-footer">
-        <p>© 2025 Explorateur de la Brume. Tous droits réservés. Une création de Titib :P</p>
+        <p>© 2025 Explorateur de la Brume. Tous droits réservés.</p>
     </footer>
 
-    <!-- Boîte de dialogue de confirmation de suppression (initialement masquée) -->
-    <div id="delete-modal" class="modal" style="display:none;">
-        <div class="modal-content">
-            <p>Êtes-vous sûr de vouloir supprimer votre personnage ? Cette action est irréversible.</p>
-            <div class="modal-buttons">
-                <button id="confirm-delete-btn" class="btn-danger">Confirmer</button>
-                <br>
-                <button id="cancel-delete-btn" class="btn-secondary">Annuler</button>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { loadCharacter } from './js/core/state.js';
-        import { showNotification } from './js/core/notifications.js';
-        
-        window.onload = function() {
-            // Récupération des éléments du DOM
-            const startBtn = document.getElementById('start-adventure-btn');
-            const continueBtn = document.getElementById('continue-adventure-btn');
-            const deleteBtn = document.getElementById('delete-char-btn');
-            const modal = document.getElementById('delete-modal');
-            const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-            const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-
-            // Fonction pour mettre à jour l'interface en fonction de l'état du personnage
-            function updateUI() {
-                const existingCharacter = loadCharacter();
-                if (existingCharacter) {
-                    // Un personnage existe : afficher les boutons "Continuer" et "Supprimer"
-                    startBtn.style.display = 'none';
-                    continueBtn.style.display = 'block';
-                    deleteBtn.style.display = 'block';
-                } else {
-                    // Aucun personnage n'existe : afficher le bouton "Commencer"
-                    startBtn.style.display = 'block';
-                    continueBtn.style.display = 'none';
-                    deleteBtn.style.display = 'none';
-                }
-            }
-
-            // Gérer la suppression du personnage
-            deleteBtn.addEventListener('click', () => {
-                modal.style.display = 'flex'; // Afficher le modal de confirmation
-            });
-
-            confirmDeleteBtn.addEventListener('click', () => {
-                localStorage.removeItem('playerCharacter');
-                modal.style.display = 'none';
-                updateUI(); // Mettre à jour l'interface après la suppression
-                showNotification("Votre personnage a été supprimé.", 'success');
-            });
-
-            cancelDeleteBtn.addEventListener('click', () => {
-                modal.style.display = 'none'; // Cacher le modal
-            });
-            
-            // Lancer la vérification initiale au chargement de la page
-            updateUI();
-        };
-    </script>
 </body>
 </html>
