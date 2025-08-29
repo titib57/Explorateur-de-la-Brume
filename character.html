@@ -57,9 +57,7 @@
         </div>
     </main>
 
-    <footer class="game-footer">
-        <p>© 2025 Explorateur de la Brume. Tous droits réservés.</p>
-    </footer>
+
 
     <!-- Overlay de popup pour la confirmation de suppression -->
     <div id="popup-overlay" class="hidden">
@@ -173,7 +171,7 @@
             });
             
             // Gère les boutons du popup
-            document.getElementById('confirm-delete').addEventListener('click', async () => {
+            document.getElementById('confirm-delete').addEventListener('click', none () => {
                 try {
                     await deleteGameData();
                     showNotification("Personnage supprimé avec succès.", 'success');
@@ -189,5 +187,8 @@
             });
         });
     </script>
+        <footer class="game-footer">
+        <p>© 2025 Explorateur de la Brume. Tous droits réservés.</p>
+    </footer>
 </body>
 </html>
