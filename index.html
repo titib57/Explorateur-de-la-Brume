@@ -10,7 +10,7 @@
 <body>
 
     <!-- Section principale de la page d'accueil -->
-    <header>
+    <header class="game-header">
         <h1>Explorateur de la Brume</h1>
         <p>Plongez dans un monde de magie et d'aventures épiques !</p>
         
@@ -19,15 +19,12 @@
         <img src="assets/img/accueil02.png" alt="Image principale du jeu, une scène de combat ou un personnage épique." style="max-width: 100%; height: auto;">
     </header>
 
-    <main>
+    <main class="game-container">
+        
         <!-- Boutons d'action principaux -->
-        <div>
-            <a href="login.html">
-                <button>S'inscrire et jouer gratuitement</button>
-            </a>
-            <a href="a-propos.html">
-                <button>Découvrir l'univers</button>
-            </a>
+        <div id="action-buttons" class="hidden">
+            <a id=".btn-primary" href="login.html">S'inscrire et jouer gratuitemente</a>
+            <a id=".btn-primary" href="a-propos.html">Découvrir l'univers</a>
         </div>
 
         <!-- Courte description du jeu -->
