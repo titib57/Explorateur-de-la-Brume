@@ -53,7 +53,7 @@ signupForm.addEventListener('submit', async (e) => {
 
         // Redirection après un court délai
         setTimeout(() => {
-            window.location.href = "character.html"; // Redirigez vers votre page de carte
+            window.location.href = "gestion_personnage.html"; // Redirigez vers votre page gestion de personnage
         }, 1500);
 
     } catch (error) {
