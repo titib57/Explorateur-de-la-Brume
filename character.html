@@ -23,7 +23,6 @@
             
             <div id="action-buttons" class="hidden">
                 <a id="continue-adventure-btn" href="personnage.html">Continuer l'aventure</a>
-                <button id="delete-char-btn">Supprimer le personnage</button>
             </div>
 
             <form id="character-form" class="hidden">
@@ -63,20 +62,10 @@
         </div>
     </main>
 
-    <div id="popup-overlay" class="hidden">
-        <div id="popup-content">
-            <p>Êtes-vous sûr de vouloir supprimer votre personnage ?</p>
-            <div class="flex justify-center space-x-4">
-                <button id="confirm-delete">Confirmer</button>
-                <button id="cancel-delete">Annuler</button>
-            </div>
-        </div>
-    </div>
-
     <div id="notification-container"></div>
 
     <script type="module">
-        import { initFirebase, loadGameData, saveGameData, deleteGameData } from './firebase_game_logic.js';
+        import { initFirebase, loadGameData, saveGameData } from './firebase_game_logic.js';
 
         // --- Fonctions de l'application ---
 
@@ -161,27 +150,6 @@
                 } catch (e) {
                     showNotification("Erreur de sauvegarde.", 'error');
                 }
-            });
-            
-            document.getElementById('delete-char-btn').addEventListener('click', () => {
-                document.getElementById('popup-overlay').classList.remove('hidden');
-            });
-            
-            // Correction de la fonction : suppression de `none` et utilisation de `async`
-            document.getElementById('confirm-delete').addEventListener('click', async () => {
-                try {
-                    await deleteGameData();
-                    showNotification("Personnage supprimé avec succès.", 'success');
-                    document.getElementById('character-form').reset();
-                    updateUI(false);
-                    document.getElementById('popup-overlay').classList.add('hidden');
-                } catch (e) {
-                    showNotification("Erreur de suppression.", 'error');
-                }
-            });
-
-            document.getElementById('cancel-delete').addEventListener('click', () => {
-                document.getElementById('popup-overlay').classList.add('hidden');
             });
         });
     </script>
