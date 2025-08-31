@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion de Personnages</title>
-            <!-- Le lien vers la feuille de style externe -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -15,11 +14,10 @@
     </header>
 
     <main class="game-container">
-        
         <section id="no-character-section" class="hidden">
             <h2>Préparez-vous à l'aventure</h2>
             <p>Vous n'avez pas encore de personnage. Créez-en un pour commencer à jouer !</p>
-            <a href="character.html">Créer mon premier personnage</a>
+            <a href="character.html" class="button">Créer mon premier personnage</a>
         </section>
 
         <section id="character-section" class="hidden">
@@ -31,20 +29,24 @@
                 <button id="play-btn" class="hidden">
                     Commencer l'aventure
                 </button>
-                <button id="delete-character-btn" class="hidden">
+                <button id="delete-btn" class="hidden">
                     Supprimer le personnage
+                </button>
+                <button id="update-btn" class="hidden">
+                    Mettre à jour
                 </button>
             </div>
         </section>
 
+        <div id="notification-container" class="notification-container"></div>
         <div id="progress-bar" class="progress-bar hidden"></div>
     </main>
 
-    <!-- Section du pied de page -->
     <footer class="game-footer">
         <p>© 2025 Explorateur de la Brume. Tous droits réservés. Titib.</p>
     </footer>
 
     <script type="module" src="js/core/firebase_game_logic.js"></script>
+    <script type="module" src="js/core/login.js"></script>
 </body>
 </html>
