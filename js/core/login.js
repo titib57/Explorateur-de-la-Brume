@@ -72,7 +72,7 @@ loginForm.addEventListener('submit', async (e) => {
         
         // Redirection vers la page de personnage ou une autre page après un court délai
         setTimeout(() => {
-            window.location.href = "world_map.html";
+            window.location.href = "gestion_personnage.html";
         }, 1500);
 
     } catch (error) {
