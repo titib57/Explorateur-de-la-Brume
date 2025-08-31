@@ -5,6 +5,17 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
+// Récupération des variables globales de l'environnement Canvas
+export const firebaseConfig = {
+    apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
+    authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
+    projectId: "rpg---explorateur-de-la-brume",
+    storageBucket: "rpg---explorateur-de-la-brume.firebasestorage.app",
+    messagingSenderId: "855919886618",
+    appId: "1:855919886618:web:933180441fa6f29dd26ca3",
+    measurementId: "G-139GQZWKTC"
+};
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
@@ -16,16 +27,7 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// Récupération des variables globales de l'environnement Canvas
-export const firebaseConfig = {
-    apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
-    authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
-    projectId: "rpg---explorateur-de-la-brume",
-    storageBucket: "rpg---explorateur-de-la-brume.firebasestorage.app",
-    messagingSenderId: "855919886618",
-    appId: "1:855919886618:web:933180441fa6f29dd26ca3",
-    measurementId: "G-139GQZWKTC"
-};
+
 
 // Récupération des éléments du DOM
 document.addEventListener('DOMContentLoaded', () => {
