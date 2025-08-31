@@ -6,9 +6,9 @@
     <title>Gestion de Personnages</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="flex flex-col min-h-screen">
-    <header class="header-bg shadow-md py-4">
-        <div class="container mx-auto px-4 flex justify-between items-center">
+<body>
+    <header class="game-header">
+        <div>
             <h1 class="text-2xl font-bold">Gestion de Personnages</h1>
             <nav>
                 <a href="character.html" class="text-white hover:text-gray-300 transition-colors">Créer un personnage</a>
@@ -16,10 +16,10 @@
         </div>
     </header>
 
-    <main class="flex-grow container mx-auto px-4 py-8">
+    <main class="game-container">
         <!-- Section de liste des personnages -->
         <section class="bg-white p-6 rounded-lg shadow-lg">
-            <h2 class="text-2xl font-semibold mb-4">Mes personnages</h2>
+            <h2>Mes personnages</h2>
             <div id="character-list" class="space-y-4">
                 <p id="loading-message" class="text-center text-gray-500">Chargement des personnages...</p>
                 <!-- Les personnages seront insérés ici par le JS -->
