@@ -126,7 +126,7 @@ async function loadDungeons(player, playerLatLng) {
     const isSetSafePlaceQuest = currentQuest && currentQuest.objective.type === 'set_safe_place';
     
     if (!isSetSafePlaceQuest && player.safePlaceLocation) {
-        const searchRadius = 0.2;
+        const searchRadius = ;
         const overpassQuery = `
 [out:json][timeout:25];
 (
