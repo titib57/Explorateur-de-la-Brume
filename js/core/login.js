@@ -17,10 +17,12 @@ export const firebaseConfig = {
 };
 
 // Récupération des éléments du DOM
-const loginForm = document.getElementById('loginForm');
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
-const messageDiv = document.getElementById('message');
+document.addEventListener('DOMContentLoaded', () => {
+    // Tout le code qui manipule les éléments HTML doit être ici
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const messageDiv = document.getElementById('message');
 
 // Initialisation de Firebase
 let auth;
