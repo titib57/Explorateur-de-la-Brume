@@ -12,12 +12,6 @@ let firebaseAuth = null;
 let currentUserId = null;
 let unsubscribeFromCharacter = null; // Pour désabonner le listener en temps réel
 
-// VARIABLES GLOBALES FOURNIES PAR L'ENVIRONNEMENT - NE PAS MODIFIER !
-// La configuration de Firebase et l'ID de l'application sont fournis par l'environnement de la plateforme
-// où le code s'exécute.
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
 // SÉLECTION DES ÉLÉMENTS DU DOM POUR LES GÉRER DANS LE CODE
 const noCharacterSection = document.getElementById("no-character-section");
 const characterSection = document.getElementById("character-section");
