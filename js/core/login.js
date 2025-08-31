@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const messageDiv = document.getElementById('message');
+});
 
 // Initialisation de Firebase
 let auth;
