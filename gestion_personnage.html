@@ -4,58 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion de Personnages</title>
-    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header class="game-header">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold">Mon Aventure</h1>
-            <nav>
-                <a id="create-character-link" href="character.html" class="text-white hover:text-gray-300 transition-colors hidden">Créer un personnage</a>
-                <button id="logout-btn" class="text-white hover:text-gray-300 transition-colors hidden">Se déconnecter</button>
-            </nav>
+        <div class="container">
+            <h1>Gestion de Personnages</h1>
         </div>
     </header>
 
     <main class="game-container">
-        <section id="login-section" class="bg-white p-6 rounded-lg shadow-lg text-center">
-            <h2>Bienvenue !</h2>
-            <p class="mt-2 text-lg">Veuillez vous connecter pour commencer votre aventure.</p>
-            <a href="login.html" class="mt-4 inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">Se connecter</a>
-        </section>
         
-        <section id="no-character-section" class="bg-white p-6 rounded-lg shadow-lg text-center hidden">
+        <section id="no-character-section" class="hidden">
             <h2>Préparez-vous à l'aventure</h2>
-            <p class="mt-2 text-lg">Vous n'avez pas encore de personnage. Créez-en un pour commencer à jouer !</p>
-            <a href="character.html" class="mt-4 inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">Créer mon premier personnage</a>
+            <p>Vous n'avez pas encore de personnage. Créez-en un pour commencer à jouer !</p>
+            <a href="character.html">Créer mon premier personnage</a>
         </section>
 
-        <section id="character-section" class="bg-white p-6 rounded-lg shadow-lg hidden">
+        <section id="character-section" class="hidden">
             <h2>Mon personnage</h2>
             <div id="character-display">
-                <p id="loading-message" class="text-center text-gray-500">Chargement des données...</p>
+                <p id="loading-message">Chargement des données...</p>
             </div>
-            <div class="mt-6 flex justify-between items-center">
-                <button id="play-btn" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+            <div class="flex">
+                <button id="play-btn" class="hidden">
                     Commencer l'aventure
                 </button>
-                <button id="delete-character-btn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                <button id="delete-character-btn" class="hidden">
                     Supprimer le personnage
                 </button>
             </div>
         </section>
 
-        <div id="progress-bar" class="fixed inset-x-0 bottom-0 bg-blue-500 h-1 hidden"></div>
-        <div id="message-box" class="fixed inset-x-0 bottom-4 flex justify-center z-50 hidden">
-            <div class="bg-gray-800 text-white text-center p-4 rounded-lg shadow-xl max-w-sm">
-                <span id="message-content"></span>
-                <button onclick="document.getElementById('message-box').classList.add('hidden')" class="ml-4 text-sm font-bold opacity-75 hover:opacity-100">OK</button>
-            </div>
-        </div>
+        <div id="progress-bar" class="progress-bar hidden"></div>
     </main>
 
-    <footer class="footer-bg py-4 mt-8">
-        <div class="container mx-auto px-4 text-center text-sm">
+    <footer class="footer-bg">
+        <div class="container">
             <p>&copy; 2025 Mon Aventure. Tous droits réservés.</p>
         </div>
     </footer>
