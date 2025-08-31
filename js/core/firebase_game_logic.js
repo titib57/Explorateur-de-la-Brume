@@ -196,28 +196,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         firestoreDb = getFirestore(firebaseApp);
         firebaseAuth = getAuth(firebaseApp);
 
-        // onAuthStateChanged est une écoute qui se déclenche à chaque changement d'état d'authentification (connexion, déconnexion).
-        onAuthStateChanged(firebaseAuth, async (user) => {
-            hideAllSections();
-            if (user) {
-                // État 1 : Utilisateur connecté.
-                currentUserId = user.uid;
-                if (userIdDisplay) {
-                    userIdDisplay.textContent = currentUserId;
-                    document.getElementById('user-info').classList.remove('hidden');
+        // Vérifie que l'objet d'authentification est valide avant d'attacher le listener.
+        // Cela permet de prévenir une erreur si le service d'authentification ne s'initialise pas correctement.
+        if (firebaseAuth) {
+            // onAuthStateChanged est une écoute qui se déclenche à chaque changement d'état d'authentification (connexion, déconnexion).
+            onAuthStateChanged(firebaseAuth, async (user) => {
+                hideAllSections();
+                if (user) {
+                    // État 1 : Utilisateur connecté.
+                    currentUserId = user.uid;
+                    if (userIdDisplay) {
+                        userIdDisplay.textContent = currentUserId;
+                        document.getElementById('user-info').classList.remove('hidden');
+                    }
+                    console.log("Utilisateur authentifié :", currentUserId);
+                    await handleUserLoggedIn();
+                    if (logoutBtn) logoutBtn.classList.remove('hidden');
+                } else {
+                    // État 2 : Utilisateur non connecté.
+                    console.log("Utilisateur non connecté.");
+                    currentUserId = null;
+                    if (loginSection) loginSection.classList.remove('hidden');
+                    if (logoutBtn) logoutBtn.classList.add('hidden');
+                    if (userIdDisplay) document.getElementById('user-info').classList.add('hidden');
                 }
-                console.log("Utilisateur authentifié :", currentUserId);
-                await handleUserLoggedIn();
-                if (logoutBtn) logoutBtn.classList.remove('hidden');
-            } else {
-                // État 2 : Utilisateur non connecté.
-                console.log("Utilisateur non connecté.");
-                currentUserId = null;
-                if (loginSection) loginSection.classList.remove('hidden');
-                if (logoutBtn) logoutBtn.classList.add('hidden');
-                if (userIdDisplay) document.getElementById('user-info').classList.add('hidden');
-            }
-        });
+            });
+        } else {
+            console.error("Firebase Auth n'a pas pu être initialisé.");
+            showNotification("Erreur d'authentification. L'application ne peut pas démarrer.", 'error');
+        }
 
         // Tente de se connecter avec le jeton fourni par l'environnement
         if (initialAuthToken) {
