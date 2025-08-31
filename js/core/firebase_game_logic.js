@@ -180,10 +180,15 @@ export async function deleteGameData() {
 // Ajout des écouteurs d'événements et de la logique d'initialisation
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        firebaseApp = initializeApp(firebaseConfig);
-        firestoreDb = getFirestore(firebaseApp);
-        firebaseAuth = getAuth(firebaseApp);
+const firebaseConfig = {
+  apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
+  authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
+  projectId: "rpg---explorateur-de-la-brume",
+  storageBucket: "rpg---explorateur-de-la-brume.firebasestorage.app",
+  messagingSenderId: "855919886618",
+  appId: "1:855919886618:web:933180441fa6f29dd26ca3",
+  measurementId: "G-139GQZWKTC"
+};
 
         // onAuthStateChanged est une écoute qui se déclenche à chaque changement d'état d'authentification (connexion, déconnexion).
         onAuthStateChanged(firebaseAuth, async (user) => {
