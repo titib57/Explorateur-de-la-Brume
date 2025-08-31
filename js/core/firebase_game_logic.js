@@ -2,14 +2,20 @@
 
 // Importations des fonctions nécessaires depuis les librairies Firebase.
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // Déclaration des variables globales.
 let firebaseApp = null;
 let firestoreDb = null;
 let firebaseAuth = null;
 let currentUserId = null;
+let unsubscribeFromCharacter = null; // Pour désabonner le listener en temps réel
+
+// VARIABLES GLOBALES FOURNIES PAR L'ENVIRONNEMENT - NE PAS MODIFIER !
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
 // SÉLECTION DES ÉLÉMENTS DU DOM POUR LES GÉRER DANS LE CODE
 const loginSection = document.getElementById("login-section");
@@ -17,11 +23,11 @@ const noCharacterSection = document.getElementById("no-character-section");
 const characterSection = document.getElementById("character-section");
 const characterDisplay = document.getElementById("character-display");
 const logoutBtn = document.getElementById("logout-btn");
-// Ajout de la sélection des éléments pour les nouvelles fonctions
 const userIdDisplay = document.getElementById("user-id-display");
 const notificationContainer = document.getElementById("notification-container");
 const characterForm = document.getElementById('character-form');
-const formTitle = document.getElementById('form-title');
+const updateBtn = document.getElementById('update-btn');
+const deleteBtn = document.getElementById('delete-btn');
 
 // Fonctions de l'interface utilisateur
 function showNotification(message, type) {
@@ -54,15 +60,19 @@ function populateForm(playerData) {
  * @param {object} characterData - Les données du personnage à afficher.
  */
 function displayCharacter(characterData) {
-    if (!characterDisplay) return;
+    if (!characterDisplay || !characterData) return;
     characterDisplay.innerHTML = `
         <div class="character-card p-4 border rounded-lg shadow-md">
-            <h3 class="text-xl font-bold">${characterData.character_name || characterData.name}</h3>
-            <p><strong>Niveau :</strong> ${characterData.level}</p>
-            <p><strong>Classe :</strong> ${characterData.class}</p>
-            <div class="mt-2">
-                <strong>Statistiques :</strong>
-                <ul>
+            <h3 class="text-xl font-bold">${characterData.name}</h3>
+            <div class="grid grid-cols-2 mt-2 gap-2 text-sm text-gray-700">
+                <p><strong class="font-medium">Niveau :</strong> ${characterData.level}</p>
+                <p><strong class="font-medium">Classe :</strong> ${characterData.class}</p>
+                <p><strong class="font-medium">Âge :</strong> ${characterData.age} ans</p>
+                <p><strong class="font-medium">Santé :</strong> ${characterData.health}</p>
+            </div>
+            <div class="mt-4">
+                <strong class="text-gray-800">Statistiques :</strong>
+                <ul class="mt-1 text-sm text-gray-600 space-y-1">
                     <li>Force : ${characterData.stats?.strength || 0}</li>
                     <li>Dextérité : ${characterData.stats?.dexterity || 0}</li>
                     <li>Intelligence : ${characterData.stats?.intelligence || 0}</li>
@@ -87,8 +97,11 @@ function hideAllSections() {
 async function handleLogout() {
     try {
         await signOut(firebaseAuth);
-        // onAuthStateChanged se déclenchera et gérera l'affichage de la section de connexion.
         console.log("Déconnexion réussie.");
+        if (unsubscribeFromCharacter) {
+            unsubscribeFromCharacter();
+            unsubscribeFromCharacter = null;
+        }
     } catch (error) {
         console.error("Erreur lors de la déconnexion :", error);
         showNotification("Erreur lors de la déconnexion.", 'error');
@@ -100,53 +113,49 @@ async function handleLogout() {
  * Vérifie l'existence d'un personnage et affiche la section appropriée.
  */
 async function handleUserLoggedIn() {
-    try {
-        const characterData = await loadGameData();
-        if (characterData) {
-            // État 3 : L'utilisateur a un personnage.
+    // Utiliser onSnapshot pour écouter les données en temps réel.
+    const characterDocRef = doc(firestoreDb, `artifacts/${appId}/users/${currentUserId}/players/character-doc`);
+    
+    // Si un listener existe déjà, le désabonner pour éviter les doublons.
+    if (unsubscribeFromCharacter) {
+        unsubscribeFromCharacter();
+    }
+
+    unsubscribeFromCharacter = onSnapshot(characterDocRef, (docSnap) => {
+        hideAllSections();
+        if (docSnap.exists()) {
+            // L'utilisateur a un personnage, afficher la section du personnage.
+            const characterData = docSnap.data();
             if (characterSection) characterSection.classList.remove('hidden');
             displayCharacter(characterData);
-            populateForm(characterData);
+            populateForm(characterData); // Pré-remplir le formulaire pour les mises à jour
+            console.log("Données du personnage chargées en temps réel.");
         } else {
-            // État 4 : L'utilisateur n'a pas de personnage.
+            // L'utilisateur n'a pas de personnage, afficher la section de création.
             if (noCharacterSection) noCharacterSection.classList.remove('hidden');
             if (characterForm) characterForm.reset();
+            console.log("Aucun personnage trouvé. Redirection vers la création.");
         }
-    } catch (error) {
-        console.error("Erreur lors de la gestion de l'état utilisateur :", error);
+    }, (error) => {
+        console.error("Erreur lors de l'écoute des données :", error);
         showNotification("Erreur lors du chargement des données.", 'error');
-    }
+    });
 }
 
-// MISE À JOUR DES FONCTIONS DE GESTION DES DONNÉES
-// Suppression de la logique `appId` redondante, la collection `players` est plus simple
-// car elle est sécurisée par les règles Firestore.
 
 /**
  * Sauvegarde les données complètes du joueur.
  * @param {object} playerData L'objet contenant les données.
  * @returns {Promise<void>}
  */
-export async function saveGameData(playerData) {
+async function saveGameData(playerData) {
     if (!currentUserId) {
         throw new Error("Erreur de sauvegarde : l'utilisateur n'est pas authentifié.");
     }
-    const docRef = doc(firestoreDb, `players/${currentUserId}`);
+    // Le chemin du document est maintenant spécifique à l'utilisateur et à l'application
+    const docRef = doc(firestoreDb, `artifacts/${appId}/users/${currentUserId}/players/character-doc`);
     await setDoc(docRef, playerData);
     console.log("Données du joueur sauvegardées avec succès.");
-}
-
-/**
- * Charge les données du joueur.
- * @returns {Promise<object|null>} L'objet des données du joueur ou null.
- */
-export async function loadGameData() {
-    if (!currentUserId) {
-        throw new Error("Erreur de chargement : l'utilisateur n'est pas authentifié.");
-    }
-    const docRef = doc(firestoreDb, `players/${currentUserId}`);
-    const docSnap = await getDoc(docRef);
-    return docSnap.exists() ? docSnap.data() : null;
 }
 
 /**
@@ -154,11 +163,11 @@ export async function loadGameData() {
  * @param {object} dataToUpdate L'objet contenant les champs et leurs nouvelles valeurs.
  * @returns {Promise<void>}
  */
-export async function updateGameData(dataToUpdate) {
+async function updateGameData(dataToUpdate) {
     if (!currentUserId) {
         throw new Error("Erreur de mise à jour : l'utilisateur n'est pas authentifié.");
     }
-    const docRef = doc(firestoreDb, `players/${currentUserId}`);
+    const docRef = doc(firestoreDb, `artifacts/${appId}/users/${currentUserId}/players/character-doc`);
     await updateDoc(docRef, dataToUpdate);
     console.log("Données du joueur mises à jour avec succès.");
 }
@@ -167,47 +176,55 @@ export async function updateGameData(dataToUpdate) {
  * Supprime le document du personnage.
  * @returns {Promise<void>}
  */
-export async function deleteGameData() {
+async function deleteGameData() {
     if (!currentUserId) {
         throw new Error("Erreur de suppression : l'utilisateur n'est pas authentifié.");
     }
-    const docRef = doc(firestoreDb, `players/${currentUserId}`);
+    const docRef = doc(firestoreDb, `artifacts/${appId}/users/${currentUserId}/players/character-doc`);
     await deleteDoc(docRef);
     console.log("Personnage supprimé avec succès.");
 }
 
-
 // Ajout des écouteurs d'événements et de la logique d'initialisation
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-const firebaseConfig = {
-  apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
-  authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
-  projectId: "rpg---explorateur-de-la-brume",
-  storageBucket: "rpg---explorateur-de-la-brume.firebasestorage.app",
-  messagingSenderId: "855919886618",
-  appId: "1:855919886618:web:933180441fa6f29dd26ca3",
-  measurementId: "G-139GQZWKTC"
-};
+        if (!firebaseConfig) {
+            throw new Error("La configuration Firebase est manquante. Assurez-vous d'avoir bien initialisé l'environnement.");
+        }
+        
+        firebaseApp = initializeApp(firebaseConfig);
+        firestoreDb = getFirestore(firebaseApp);
+        firebaseAuth = getAuth(firebaseApp);
 
         // onAuthStateChanged est une écoute qui se déclenche à chaque changement d'état d'authentification (connexion, déconnexion).
         onAuthStateChanged(firebaseAuth, async (user) => {
+            hideAllSections();
             if (user) {
                 // État 1 : Utilisateur connecté.
                 currentUserId = user.uid;
-                if (userIdDisplay) userIdDisplay.textContent = currentUserId;
+                if (userIdDisplay) {
+                    userIdDisplay.textContent = currentUserId;
+                    document.getElementById('user-info').classList.remove('hidden');
+                }
                 console.log("Utilisateur authentifié :", currentUserId);
-                hideAllSections();
                 await handleUserLoggedIn();
-                if (logoutBtn) logoutBtn.classList.remove('hidden'); // Affiche le bouton de déconnexion
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
             } else {
                 // État 2 : Utilisateur non connecté.
                 console.log("Utilisateur non connecté.");
-                hideAllSections();
-                if (loginSection) loginSection.classList.remove('hidden'); // Affiche la section de connexion
-                if (logoutBtn) logoutBtn.classList.add('hidden'); // Cache le bouton de déconnexion
+                currentUserId = null;
+                if (loginSection) loginSection.classList.remove('hidden');
+                if (logoutBtn) logoutBtn.classList.add('hidden');
+                if (userIdDisplay) document.getElementById('user-info').classList.add('hidden');
             }
         });
+
+        // Tente de se connecter avec le jeton fourni par l'environnement
+        if (initialAuthToken) {
+            await signInWithCustomToken(firebaseAuth, initialAuthToken);
+        } else {
+            await signInAnonymously(firebaseAuth);
+        }
 
         // Ajout de l'écouteur d'événement pour le bouton de déconnexion
         if (logoutBtn) {
@@ -229,23 +246,50 @@ const firebaseConfig = {
                     gold: 100,
                     health: 100,
                     inventory: [],
-                    stats: { strength: 10, dexterity: 10, intelligence: 10 } // Exemple de statistiques initiales
+                    stats: { strength: 10, dexterity: 10, intelligence: 10 }
                 };
                 try {
                     await saveGameData(playerData);
                     showNotification("Personnage créé avec succès !", 'success');
-                    displayCharacter(playerData);
-                    hideAllSections();
-                    if (characterSection) characterSection.classList.remove('hidden');
                 } catch (e) {
                     console.error("Erreur de sauvegarde:", e);
                     showNotification("Erreur de sauvegarde.", 'error');
                 }
             });
         }
+        
+        // Ajout des écouteurs pour la mise à jour et la suppression
+        if (updateBtn) {
+            updateBtn.addEventListener('click', async () => {
+                const newName = prompt("Nouveau nom pour votre personnage ?");
+                if (newName) {
+                    try {
+                        await updateGameData({ name: newName });
+                        showNotification("Nom du personnage mis à jour !", 'success');
+                    } catch(e) {
+                        console.error("Erreur de mise à jour:", e);
+                        showNotification("Erreur de mise à jour.", 'error');
+                    }
+                }
+            });
+        }
 
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', async () => {
+                if (window.confirm("Êtes-vous sûr de vouloir supprimer votre personnage ?")) {
+                    try {
+                        await deleteGameData();
+                        showNotification("Personnage supprimé avec succès !", 'success');
+                    } catch(e) {
+                        console.error("Erreur de suppression:", e);
+                        showNotification("Erreur de suppression.", 'error');
+                    }
+                }
+            });
+        }
+        
     } catch (error) {
         console.error("Erreur d'initialisation de l'application Firebase :", error);
-        showNotification("Erreur d'initialisation de l'application.", 'error');
+        showNotification("Erreur d'initialisation de l'application. Veuillez vérifier la console.", 'error');
     }
 });
