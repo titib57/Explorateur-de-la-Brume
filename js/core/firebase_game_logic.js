@@ -12,10 +12,19 @@ let firebaseAuth = null;
 let currentUserId = null;
 let unsubscribeFromCharacter = null; // Pour désabonner le listener en temps réel
 
-// VARIABLES GLOBALES FOURNIES PAR L'ENVIRONNEMENT - NE PAS MODIFIER !
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+// **CONFIGURATION FIREBASE**
+// Remplacez ces valeurs par celles de votre projet.
+const appId = "votre_app_id_complet"; // Exemple : "1:1234567890:web:abcdefghijklmn"
+const firebaseConfig = {
+    apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
+    authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
+    projectId: "rpg---explorateur-de-la-brume",
+    storageBucket: "rpg---explorateur-de-la-brume.firebasestorage.app",
+    messagingSenderId: "855919886618",
+    appId: "1:855919886618:web:933180441fa6f29dd26ca3",
+    measurementId: "G-139GQZWKTC"
+};
+const initialAuthToken = null; // Laissez-le à null pour une authentification anonyme.
 
 // SÉLECTION DES ÉLÉMENTS DU DOM POUR LES GÉRER DANS LE CODE
 const loginSection = document.getElementById("login-section");
@@ -31,7 +40,6 @@ const playBtn = document.getElementById('play-btn');
 const updateBtn = document.getElementById('update-btn');
 const deleteBtn = document.getElementById('delete-btn');
 // Suppression des sélecteurs de formulaire car le formulaire a été déplacé vers une autre page
-// const characterForm = document.getElementById('character-form');
 
 // Fonctions de l'interface utilisateur
 function showNotification(message, type) {
@@ -203,10 +211,6 @@ export async function deleteGameData() {
 // Ajout des écouteurs d'événements et de la logique d'initialisation
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        if (!firebaseConfig) {
-            throw new Error("La configuration Firebase est manquante. Assurez-vous d'avoir bien initialisé l'environnement.");
-        }
-
         firebaseApp = initializeApp(firebaseConfig);
         firestoreDb = getFirestore(firebaseApp);
         firebaseAuth = getAuth(firebaseApp);
@@ -282,14 +286,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         }
-        // Suppression de l'écouteur du formulaire de création, car il a été déplacé
-        /* if (characterForm) {
-            characterForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                ...
-            });
-        } */
-        
     } catch (error) {
         console.error("Erreur d'initialisation de l'application Firebase :", error);
         showNotification("Erreur d'initialisation de l'application. Veuillez vérifier la console.", 'error');
