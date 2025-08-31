@@ -1,152 +1,158 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Créer un personnage - Explorateur de la Brume</title>
-    <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un personnage - Explorateur de la Brume</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <header class="game-header">
-        <h1>Explorateur de la Brume</h1>
-        <p class="text-xs text-gray-400">ID utilisateur : <span id="user-id-display"></span></p>
-    </header>
+    <header class="game-header">
+        <h1>Explorateur de la Brume</h1>
+        <p class="text-xs text-gray-400">ID utilisateur : <span id="user-id-display"></span></p>
+    </header>
 
-    <main class="game-container">
-        <div class="game-card">
-            <h2 id="form-title">Création de personnage</h2>
+    <main class="game-container">
+        <div class="game-card">
+            <h2 id="form-title">Création de personnage</h2>
 
-            <form id="character-form" class="hidden">
-                <fieldset>
-                    <legend>Informations de base</legend>
-                    <div class="form-group">
-                        <label for="char-name">Pseudo :</label>
-                        <input type="text" id="char-name" required placeholder="Saisissez un nom">
-                    </div>
+                        <p id="loading-message">Chargement de votre profil...</p>
 
-                    <div class="form-group">
-                        <label for="char-age">Âge :</label>
-                        <input type="number" id="char-age" min="15" max="100" value="20">
-                    </div>
+            <form id="character-form" class="hidden">
+                <fieldset>
+                    <legend>Informations de base</legend>
+                    <div class="form-group">
+                        <label for="char-name">Pseudo :</label>
+                        <input type="text" id="char-name" required placeholder="Saisissez un nom">
+                    </div>
 
-                    <div class="form-group">
-                        <label for="char-height">Taille (cm) :</label>
-                        <input type="number" id="char-height" min="150" max="220" value="175">
-                    </div>
+                    <div class="form-group">
+                        <label for="char-age">Âge :</label>
+                        <input type="number" id="char-age" min="15" max="100" value="20">
+                    </div>
 
-                    <div class="form-group">
-                        <label for="char-weight">Poids (kg) :</label>
-                        <input type="number" id="char-weight" min="50" max="150" value="70">
-                    </div>
-                </fieldset>
-                
-                <div class="form-group">
-                    <label for="char-class">Classe :</label>
-                    <select id="char-class">
-                        <option value="explorateur">Explorateur</option>
-                    </select>
-                </div>
-                <button type="submit" id="creer">Créer</button>
-            </form>
-        </div>
-    </main>
+                    <div class="form-group">
+                        <label for="char-height">Taille (cm) :</label>
+                        <input type="number" id="char-height" min="150" max="220" value="175">
+                    </div>
 
-    <div id="notification-container"></div>
+                    <div class="form-group">
+                        <label for="char-weight">Poids (kg) :</label>
+                        <input type="number" id="char-weight" min="50" max="150" value="70">
+                    </div>
+                </fieldset>
+                
+                <div class="form-group">
+                    <label for="char-class">Classe :</label>
+                    <select id="char-class">
+                        <option value="explorateur">Explorateur</option>
+                    </select>
+                </div>
+                <button type="submit" id="creer">Créer</button>
+            </form>
+            
+                        <div id="action-buttons" class="hidden">
+                <p>Votre personnage est prêt. Que souhaitez-vous faire ?</p>
+                <button id="start-game">Continuer l'aventure</button>
+            </div>
+        </div>
+    </main>
 
-    <script type="module">
-        import { initFirebase, loadGameData, saveGameData } from '/js/firebase_game_logic.js';
+    <div id="notification-container"></div>
 
-        // --- Fonctions de l'application ---
+    <script type="module">
+        import { initFirebase, loadGameData, saveGameData } from '/js/firebase_game_logic.js';
 
-        function showNotification(message, type) {
-            const container = document.getElementById('notification-container');
-            const notification = document.createElement('div');
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            container.appendChild(notification);
-            setTimeout(() => {
-                notification.classList.add('show');
-            }, 10);
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
+        // --- Fonctions de l'application ---
 
-        function updateUI(hasCharacter) {
-            const loadingMessage = document.getElementById('loading-message');
-            const formContainer = document.getElementById('character-form');
-            const actionButtons = document.getElementById('action-buttons');
-            const formTitle = document.getElementById('form-title');
+        function showNotification(message, type) {
+            const container = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            container.appendChild(notification);
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
 
-            loadingMessage.classList.add('hidden');
-            if (hasCharacter) {
-                formContainer.classList.add('hidden');
-                actionButtons.classList.remove('hidden');
-                formTitle.textContent = "Votre personnage";
-            } else {
-                formContainer.classList.remove('hidden');
-                actionButtons.classList.add('hidden');
-                formTitle.textContent = "Création de personnage";
-            }
-        }
+        function updateUI(hasCharacter) {
+            const loadingMessage = document.getElementById('loading-message');
+            const formContainer = document.getElementById('character-form');
+            const actionButtons = document.getElementById('action-buttons');
+            const formTitle = document.getElementById('form-title');
 
-        function populateForm(playerData) {
-            document.getElementById('char-name').value = playerData.name || '';
-            document.getElementById('char-age').value = playerData.age || 20;
-            document.getElementById('char-height').value = playerData.height || 175;
-            document.getElementById('char-weight').value = playerData.weight || 70;
-            document.getElementById('char-class').value = playerData.class || 'explorateur';
-        }
+            loadingMessage.classList.add('hidden');
+            if (hasCharacter) {
+                formContainer.classList.add('hidden');
+                actionButtons.classList.remove('hidden');
+                formTitle.textContent = "Votre personnage";
+            } else {
+                formContainer.classList.remove('hidden');
+                actionButtons.classList.add('hidden');
+                formTitle.textContent = "Création de personnage";
+            }
+        }
 
-        // --- Initialisation et gestion des événements ---
+        function populateForm(playerData) {
+            document.getElementById('char-name').value = playerData.name || '';
+            document.getElementById('char-age').value = playerData.age || 20;
+            document.getElementById('char-height').value = playerData.height || 175;
+            document.getElementById('char-weight').value = playerData.weight || 70;
+            document.getElementById('char-class').value = playerData.class || 'explorateur';
+        }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const userId = await initFirebase();
-                document.getElementById('user-id-display').textContent = userId;
-                const playerData = await loadGameData();
-                if (playerData) {
-                    populateForm(playerData);
-                    updateUI(true);
-                } else {
-                    updateUI(false);
-                }
-            } catch (error) {
-                console.error("Erreur d'initialisation de l'application :", error);
-                showNotification("Erreur d'initialisation de l'application.", 'error');
-                document.getElementById('loading-message').classList.add('hidden');
-            }
+        // --- Initialisation et gestion des événements ---
 
-            document.getElementById('character-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const playerData = {
-                    name: document.getElementById('char-name').value,
-                    age: parseInt(document.getElementById('char-age').value),
-                    height: parseInt(document.getElementById('char-height').value),
-                    weight: parseInt(document.getElementById('char-weight').value),
-                    class: document.getElementById('char-class').value,
-                    experience: 0,
-                    level: 1,
-                    gold: 100,
-                    health: 100,
-                    inventory: []
-                };
-                try {
-                    await saveGameData(playerData);
-                    showNotification("Personnage créé avec succès !", 'success');
-                    updateUI(true);
-                } catch (e) {
-                    showNotification("Erreur de sauvegarde.", 'error');
-                }
-            });
-        });
-    </script>
-    <!-- Section du pied de page -->
-    <footer class="game-footer">
-        <p>© 2025 Explorateur de la Brume. Tous droits réservés. Titib.</p>
-    </footer>
-        <script type="module" src="js/core/firebase_game_logic.js"></script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const userId = await initFirebase();
+                document.getElementById('user-id-display').textContent = userId;
+                const playerData = await loadGameData();
+                if (playerData) {
+                    populateForm(playerData);
+                    updateUI(true);
+                } else {
+                    updateUI(false);
+                }
+            } catch (error) {
+                console.error("Erreur d'initialisation de l'application :", error);
+                showNotification("Erreur d'initialisation de l'application.", 'error');
+                document.getElementById('loading-message').classList.add('hidden');
+            }
+
+            document.getElementById('character-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const playerData = {
+                    name: document.getElementById('char-name').value,
+                    age: parseInt(document.getElementById('char-age').value),
+                    height: parseInt(document.getElementById('char-height').value),
+                    weight: parseInt(document.getElementById('char-weight').value),
+                    class: document.getElementById('char-class').value,
+                    experience: 0,
+                    level: 1,
+                    gold: 100,
+                    health: 100,
+                    inventory: []
+                };
+                try {
+                    await saveGameData(playerData);
+                    showNotification("Personnage créé avec succès !", 'success');
+                    updateUI(true);
+                } catch (e) {
+                    showNotification("Erreur de sauvegarde.", 'error');
+                }
+            });
+        });
+    </script>
+        <footer class="game-footer">
+        <p>© 2025 Explorateur de la Brume. Tous droits réservés. Titib.</p>
+    </footer>
+        <script type="module" src="/js/firebase_game_logic.js"></script>
 </body>
 </html>
