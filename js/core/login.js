@@ -6,7 +6,7 @@ import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/fir
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 // Récupération des variables globales de l'environnement Canvas
-const firebaseConfig = {
+export const firebaseConfig = {
     apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
     authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
     projectId: "rpg---explorateur-de-la-brume",

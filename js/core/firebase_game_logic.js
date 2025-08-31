@@ -4,7 +4,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+import { firebaseConfig,  } from "/js/core/login.js"
 // Déclaration des variables globales.
 let firebaseApp = null;
 let firestoreDb = null;
@@ -16,7 +16,6 @@ let unsubscribeFromCharacter = null; // Pour désabonner le listener en temps r�
 // La configuration de Firebase et l'ID de l'application sont fournis par l'environnement de la plateforme
 // où le code s'exécute.
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
 // SÉLECTION DES ÉLÉMENTS DU DOM POUR LES GÉRER DANS LE CODE
