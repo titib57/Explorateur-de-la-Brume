@@ -5,38 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion de Personnages</title>
     <link rel="stylesheet" href="styles.css">
-   </head>
+</head>
 <body class="flex flex-col min-h-screen">
     <header class="header-bg shadow-md py-4">
         <div class="container mx-auto px-4 flex justify-between items-center">
             <h1 class="text-2xl font-bold">Gestion de Personnages</h1>
             <nav>
-                <a href="#creation-section" class="text-white hover:text-gray-300 transition-colors">Créer un personnage</a>
+                <a href="character.html" class="text-white hover:text-gray-300 transition-colors">Créer un personnage</a>
             </nav>
         </div>
     </header>
 
     <main class="flex-grow container mx-auto px-4 py-8">
-        <!-- Section de création de personnage -->
-        <section id="creation-section" class="bg-white p-6 rounded-lg shadow-lg mb-8">
-            <h2 class="text-2xl font-semibold mb-4">Créer un nouveau personnage</h2>
-            <form id="character-form" class="space-y-4">
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700">Nom</label>
-                    <input type="text" id="name" name="name" class="form-input mt-1" required>
-                </div>
-                <div>
-                    <label for="classe" class="block text-sm font-medium text-gray-700">Classe</label>
-                    <input type="text" id="classe" name="classe" class="form-input mt-1" required>
-                </div>
-                <div>
-                    <label for="level" class="block text-sm font-medium text-gray-700">Niveau</label>
-                    <input type="number" id="level" name="level" class="form-input mt-1" min="1" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Créer le personnage</button>
-            </form>
-        </section>
-
         <!-- Section de liste des personnages -->
         <section class="bg-white p-6 rounded-lg shadow-lg">
             <h2 class="text-2xl font-semibold mb-4">Mes personnages</h2>
