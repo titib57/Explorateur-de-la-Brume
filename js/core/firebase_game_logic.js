@@ -25,9 +25,13 @@ const characterDisplay = document.getElementById("character-display");
 const logoutBtn = document.getElementById("logout-btn");
 const userIdDisplay = document.getElementById("user-id-display");
 const notificationContainer = document.getElementById("notification-container");
-const characterForm = document.getElementById('character-form');
+
+// Ajout des sélecteurs pour les nouveaux boutons
+const playBtn = document.getElementById('play-btn');
 const updateBtn = document.getElementById('update-btn');
 const deleteBtn = document.getElementById('delete-btn');
+// Suppression des sélecteurs de formulaire car le formulaire a été déplacé vers une autre page
+// const characterForm = document.getElementById('character-form');
 
 // Fonctions de l'interface utilisateur
 function showNotification(message, type) {
@@ -45,6 +49,7 @@ function showNotification(message, type) {
     }, 3000);
 }
 
+// Cette fonction n'est plus pertinente pour cette page, mais elle est conservée pour d'autres pages.
 function populateForm(playerData) {
     if (playerData) {
         if (document.getElementById('char-name')) document.getElementById('char-name').value = playerData.name || '';
@@ -115,7 +120,7 @@ async function handleLogout() {
 async function handleUserLoggedIn() {
     // Utiliser onSnapshot pour écouter les données en temps réel.
     const characterDocRef = doc(firestoreDb, `artifacts/${appId}/users/${currentUserId}/players/character-doc`);
-    
+
     // Si un listener existe déjà, le désabonner pour éviter les doublons.
     if (unsubscribeFromCharacter) {
         unsubscribeFromCharacter();
@@ -128,12 +133,22 @@ async function handleUserLoggedIn() {
             const characterData = docSnap.data();
             if (characterSection) characterSection.classList.remove('hidden');
             displayCharacter(characterData);
-            populateForm(characterData); // Pré-remplir le formulaire pour les mises à jour
+            
+            // Rendre les boutons "jouer" et "supprimer" visibles
+            if (playBtn) playBtn.classList.remove('hidden');
+            if (deleteBtn) deleteBtn.classList.remove('hidden');
+            if (updateBtn) updateBtn.classList.remove('hidden');
+
             console.log("Données du personnage chargées en temps réel.");
         } else {
             // L'utilisateur n'a pas de personnage, afficher la section de création.
             if (noCharacterSection) noCharacterSection.classList.remove('hidden');
-            if (characterForm) characterForm.reset();
+            
+            // Masquer les boutons "jouer", "supprimer" et "mettre à jour" si aucun personnage n'existe
+            if (playBtn) playBtn.classList.add('hidden');
+            if (deleteBtn) deleteBtn.classList.add('hidden');
+            if (updateBtn) updateBtn.classList.add('hidden');
+            
             console.log("Aucun personnage trouvé. Redirection vers la création.");
         }
     }, (error) => {
@@ -148,7 +163,7 @@ async function handleUserLoggedIn() {
  * @param {object} playerData L'objet contenant les données.
  * @returns {Promise<void>}
  */
-async function saveGameData(playerData) {
+export async function saveGameData(playerData) {
     if (!currentUserId) {
         throw new Error("Erreur de sauvegarde : l'utilisateur n'est pas authentifié.");
     }
@@ -163,7 +178,7 @@ async function saveGameData(playerData) {
  * @param {object} dataToUpdate L'objet contenant les champs et leurs nouvelles valeurs.
  * @returns {Promise<void>}
  */
-async function updateGameData(dataToUpdate) {
+export async function updateGameData(dataToUpdate) {
     if (!currentUserId) {
         throw new Error("Erreur de mise à jour : l'utilisateur n'est pas authentifié.");
     }
@@ -176,7 +191,7 @@ async function updateGameData(dataToUpdate) {
  * Supprime le document du personnage.
  * @returns {Promise<void>}
  */
-async function deleteGameData() {
+export async function deleteGameData() {
     if (!currentUserId) {
         throw new Error("Erreur de suppression : l'utilisateur n'est pas authentifié.");
     }
@@ -191,7 +206,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!firebaseConfig) {
             throw new Error("La configuration Firebase est manquante. Assurez-vous d'avoir bien initialisé l'environnement.");
         }
-        
+
         firebaseApp = initializeApp(firebaseConfig);
         firestoreDb = getFirestore(firebaseApp);
         firebaseAuth = getAuth(firebaseApp);
@@ -237,35 +252,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (logoutBtn) {
             logoutBtn.addEventListener('click', handleLogout);
         }
-
-        // Ajout de l'écouteur d'événement pour la création de personnage
-        if (characterForm) {
-            characterForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const playerData = {
-                    name: document.getElementById('char-name').value,
-                    age: parseInt(document.getElementById('char-age')?.value) || 20,
-                    height: parseInt(document.getElementById('char-height')?.value) || 175,
-                    weight: parseInt(document.getElementById('char-weight')?.value) || 70,
-                    class: document.getElementById('char-class')?.value,
-                    experience: 0,
-                    level: 1,
-                    gold: 100,
-                    health: 100,
-                    inventory: [],
-                    stats: { strength: 10, dexterity: 10, intelligence: 10 }
-                };
-                try {
-                    await saveGameData(playerData);
-                    showNotification("Personnage créé avec succès !", 'success');
-                } catch (e) {
-                    console.error("Erreur de sauvegarde:", e);
-                    showNotification("Erreur de sauvegarde.", 'error');
-                }
-            });
-        }
         
-        // Ajout des écouteurs pour la mise à jour et la suppression
+        // Ajout des écouteurs d'événements pour les boutons de gestion de personnage
         if (updateBtn) {
             updateBtn.addEventListener('click', async () => {
                 const newName = prompt("Nouveau nom pour votre personnage ?");
@@ -294,6 +282,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         }
+        // Suppression de l'écouteur du formulaire de création, car il a été déplacé
+        /* if (characterForm) {
+            characterForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                ...
+            });
+        } */
         
     } catch (error) {
         console.error("Erreur d'initialisation de l'application Firebase :", error);
