@@ -1,9 +1,9 @@
 // Ce fichier contient toute la logique pour interagir avec Firebase Firestore.
 
 // Importations des fonctions nécessaires depuis les librairies Firebase.
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 // Déclaration des variables globales.
 let firebaseApp = null;
@@ -22,6 +22,19 @@ const userIdDisplay = document.getElementById("user-id-display");
 const notificationContainer = document.getElementById("notification-container");
 const characterForm = document.getElementById('character-form');
 const formTitle = document.getElementById('form-title');
+const createBtn = document.getElementById('creer'); // Sélection du bouton de création
+
+// Définition de la configuration Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
+    authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
+    projectId: "rpg---explorateur-de-la-brume",
+    storageBucket: "rpg---explorateur-de-la-brume.firebasestorage.app",
+    messagingSenderId: "855919886618",
+    appId: "1:855919886618:web:933180441fa6f29dd26ca3",
+    measurementId: "G-139GQZWKTC"
+};
+
 
 // Fonctions de l'interface utilisateur
 function showNotification(message, type) {
@@ -119,8 +132,6 @@ async function handleUserLoggedIn() {
 }
 
 // MISE À JOUR DES FONCTIONS DE GESTION DES DONNÉES
-// Suppression de la logique `appId` redondante, la collection `players` est plus simple
-// car elle est sécurisée par les règles Firestore.
 
 /**
  * Sauvegarde les données complètes du joueur.
@@ -176,19 +187,12 @@ export async function deleteGameData() {
     console.log("Personnage supprimé avec succès.");
 }
 
-
 // Ajout des écouteurs d'événements et de la logique d'initialisation
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-const firebaseConfig = {
-  apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
-  authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
-  projectId: "rpg---explorateur-de-la-brume",
-  storageBucket: "rpg---explorateur-de-la-brume.firebasestorage.app",
-  messagingSenderId: "855919886618",
-  appId: "1:855919886618:web:933180441fa6f29dd26ca3",
-  measurementId: "G-139GQZWKTC"
-};
+        firebaseApp = initializeApp(firebaseConfig);
+        firestoreDb = getFirestore(firebaseApp);
+        firebaseAuth = getAuth(firebaseApp);
 
         // onAuthStateChanged est une écoute qui se déclenche à chaque changement d'état d'authentification (connexion, déconnexion).
         onAuthStateChanged(firebaseAuth, async (user) => {
@@ -218,6 +222,10 @@ const firebaseConfig = {
         if (characterForm) {
             characterForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                // Désactive le bouton pour éviter les soumissions multiples
+                if (createBtn) createBtn.disabled = true;
+                showNotification("Création du personnage en cours...", 'info');
+
                 const playerData = {
                     name: document.getElementById('char-name').value,
                     age: parseInt(document.getElementById('char-age')?.value) || 20,
@@ -231,6 +239,7 @@ const firebaseConfig = {
                     inventory: [],
                     stats: { strength: 10, dexterity: 10, intelligence: 10 } // Exemple de statistiques initiales
                 };
+                
                 try {
                     await saveGameData(playerData);
                     showNotification("Personnage créé avec succès !", 'success');
@@ -240,6 +249,9 @@ const firebaseConfig = {
                 } catch (e) {
                     console.error("Erreur de sauvegarde:", e);
                     showNotification("Erreur de sauvegarde.", 'error');
+                } finally {
+                    // Réactive le bouton
+                    if (createBtn) createBtn.disabled = false;
                 }
             });
         }
