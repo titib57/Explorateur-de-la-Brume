@@ -4,12 +4,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase
 
 // Votre configuration Firebase
 export const firebaseConfig = {
-    apiKey: "VOTRE_API_KEY",
-    authDomain: "VOTRE_AUTH_DOMAIN",
-    projectId: "VOTRE_PROJECT_ID",
-    storageBucket: "VOTRE_STORAGE_BUCKET",
-    messagingSenderId: "VOTRE_MESSAGING_SENDER_ID",
-    appId: "VOTRE_APP_ID"
+    apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
+    authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
+    projectId: "rpg---explorateur-de-la-brume",
+    storageBucket: "rpg---explorateur-de-la-brume.firebasestorage.app",
+    messagingSenderId: "855919886618",
+    appId: "1:855919886618:web:933180441fa6f29dd26ca3",
+    measurementId: "G-139GQZWKTC"
 };
 
 // Initialisation de l'application Firebase
