@@ -5,6 +5,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
+const auth = getAuth(app);
 
 // Si l'utilisateur est déjà connecté, on le redirige immédiatement.
 onAuthStateChanged(auth, (user) => {
