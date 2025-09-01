@@ -6,22 +6,34 @@ notificationContainer.id = 'notification-container';
 document.body.appendChild(notificationContainer);
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Les variables et les écouteurs doivent être DANS ce bloc
     const boutonCreer = document.getElementById('creer');
     const popupOverlay = document.getElementById('popup-overlay');
     const boutonContinuer = document.getElementById('continuer');
     const boutonAnnuler = document.getElementById('annuler');
 
-    boutonCreer.addEventListener('click', function() {
-        popupOverlay.style.display = 'flex';
-    });
+    // On s'assure que les boutons existent avant d'ajouter les écouteurs
+    if (boutonCreer) {
+        boutonCreer.addEventListener('click', function() {
+            if (popupOverlay) {
+                popupOverlay.style.display = 'flex';
+            }
+        });
+    }
 
-    boutonContinuer.addEventListener('click', function() {
-        window.location.href = 'stats.html';
-    });
+    if (boutonContinuer) {
+        boutonContinuer.addEventListener('click', function() {
+            window.location.href = 'stats.html';
+        });
+    }
 
-    boutonAnnuler.addEventListener('click', function() {
-        popupOverlay.style.display = 'none';
-    });
+    if (boutonAnnuler) {
+        boutonAnnuler.addEventListener('click', function() {
+            if (popupOverlay) {
+                popupOverlay.style.display = 'none';
+            }
+        });
+    }
 });
 
 /**
