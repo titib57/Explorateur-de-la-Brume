@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Initialisation de Firebase
-let auth;
 let app;
 let db;
 
