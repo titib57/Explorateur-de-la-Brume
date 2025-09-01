@@ -4,7 +4,8 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/fi
 import { doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { auth, db } from "./firebase_config.js";
 import { showNotification } from './notifications.js';
-import { deleteCharacter as deleteCharModule } from '../modules/character.js';
+import { deleteCharacterData } from './state.js';
+
 
 const noCharacterSection = document.getElementById('no-character-section');
 const characterSection = document.getElementById('character-section');
