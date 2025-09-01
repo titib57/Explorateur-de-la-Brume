@@ -26,7 +26,7 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import { savePlayer, player } from '../core/state.js';
+import { savePlayer, player, saveCharacterData, deleteCharacterData } from '../core/state.js';
 
 let db, auth, userId;
 let unsubscribeFromCharacterListener;
@@ -53,23 +53,6 @@ class Player {
     }
 }
 
-// --- Fonctions Firestore pour la gestion de l'état ---
-async function savePlayer(playerData) {
-    if (!userId) {
-        showNotification("Erreur : Utilisateur non authentifié.", 'error');
-        return;
-    }
-    try {
-        const charRef = doc(db, 'artifacts', appId, 'users', userId, 'characters', userId);
-        await setDoc(charRef, playerData, { merge: true });
-        showNotification("Personnage sauvegardé !", 'success');
-        // Met à jour la variable globale `player` après la sauvegarde
-        player = new Player(playerData);
-    } catch (error) {
-        console.error("Erreur lors de la sauvegarde du personnage : ", error);
-        showNotification("Erreur lors de la sauvegarde.", 'error');
-    }
-}
 
 // --- Fonctions utilitaires du module character.js ---
 function giveXP(amount) {
