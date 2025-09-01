@@ -1,12 +1,12 @@
 ﻿// Fichier : js/modules/battle.js
 
 import { player, currentMonster, currentDungeon, savePlayer, loadCharacter } from '../core/state.js';
-import { giveXP } from './character.js';
-import { updateQuestsUI, updateQuestObjective } from './quests.js';
-import { updateBattleUI, updateWorldMapUI } from './ui.js';
-import { calculateElementalDamage } from './elements.js';
-import { addToCombatLog } from '../core/utils.js';
-import { showNotification } from '../core/notifications.js';
+import { giveXP } from 'js/module/character.js';
+import { updateQuestsUI, updateQuestObjective } from 'js/module/quests.js';
+import { updateBattleUI, updateWorldMapUI } from 'js/module/ui.js';
+import { calculateElementalDamage } from 'js/module/elements.js';
+import { addToCombatLog } from 'js/core/utils.js';
+import { showNotification } from 'js/core/notifications.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!loadCharacter()) {
