@@ -127,20 +127,19 @@ async function loadDungeons(player, playerLatLng) {
     
     if (!isSetSafePlaceQuest && player.safePlaceLocation) {
         const searchRadius = 0.2;
-        const overpassQuery = 
+        const overpassQuery = `
 [out:json][timeout:25];
 (
     node["building"="castle"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
     way["building"="castle"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
     node["historic"="ruins"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
     way["historic"="ruins"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
-     node["landuse"="cemetery"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
+    node["landuse"="cemetery"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
     way["landuse"="cemetery"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
-     node["historic"="monument"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
+    node["historic"="monument"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
     way["historic"="monument"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
-     node["tower:type"="bell_tower"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
+    node["tower:type"="bell_tower"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
     way["tower:type"="bell_tower"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
-
 );
 out body;
 >;
