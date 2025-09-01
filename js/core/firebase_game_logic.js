@@ -1,7 +1,7 @@
 // Fichier : firebase_game_logic.js
 
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { doc, getDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { auth, db } from "./firebase_config.js";
 import { showNotification } from './notifications.js';
 import { deleteCharacterData } from './state.js';
@@ -16,8 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteBtn = document.getElementById('delete-btn');
     const updateBtn = document.getElementById('update-btn');
 
-
     function renderCharacter(character) {
+        if (!characterDisplay) return;
         characterDisplay.innerHTML = `
             <div class="character-card">
                 <h3>${character.name}</h3>
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p>Points de vie : ${character.hp}</p>
             </div>
         `;
-        loadingMessage.classList.add('hidden');
+        if (loadingMessage) loadingMessage.classList.add('hidden');
         if (playBtn) playBtn.classList.remove('hidden');
         if (deleteBtn) deleteBtn.classList.remove('hidden');
         if (updateBtn) updateBtn.classList.remove('hidden');
@@ -69,10 +69,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const characterForm = document.getElementById('characterForm');
     const logoutButton = document.getElementById('logout-button');
 
+    // On retire le "if" en double et on s'assure que le code est correctement encadré
     if (characterForm) {
-        characterForm.addEventListener('submit', (e) => {
+        characterForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = charNameInput.value.trim();
+
+            // 1. Récupération des valeurs du formulaire
+            const userId = auth.currentUser.uid;
+            const name = document.getElementById('char-name').value.trim();
+            const age = parseInt(document.getElementById('char-age').value);
+            const height = parseInt(document.getElementById('char-height').value);
+            const weight = parseInt(document.getElementById('char-weight').value);
+            const charClass = document.getElementById('char-class').value;
+
+            // 2. Validation simple
+            if (!name) {
+                showNotification("Veuillez saisir un pseudo pour votre personnage.", "error");
+                return;
+            }
+
+            // 3. Création de l'objet personnage
+            const characterData = {
+                name: name,
+                age: age,
+                height: height,
+                weight: weight,
+                class: charClass,
+                hp: 100,
+                level: 1,
+                creationDate: new Date()
+            };
+
+            // 4. Enregistrement du personnage dans Firestore
+            const characterRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
+            try {
+                await setDoc(characterRef, characterData);
+                showNotification("Personnage créé avec succès !", "success");
+
+                // 5. Redirection après un court délai pour que la notification soit vue
+                setTimeout(() => {
+                    window.location.href = "gestion_personnage.html";
+                }, 1500);
+
+            } catch (error) {
+                console.error("Erreur lors de la création du personnage :", error);
+                showNotification("Erreur lors de la création. Veuillez réessayer.", "error");
+            }
         });
     }
 
@@ -90,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Ces écouteurs sont maintenant au bon endroit
     if (playBtn) {
         playBtn.addEventListener('click', () => {
             window.location.href = "world_map.html";
@@ -102,4 +143,4 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = "character.html";
         });
     }
-}); // C'est ici que le bloc DOMContentLoaded se termine
+});
