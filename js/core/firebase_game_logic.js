@@ -66,7 +66,34 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // Écouteurs d'événements pour les boutons
-deleteBtn.addEventListener('click', deleteCharacterData);
+const characterForm = document.getElementById('characterForm');
+const deleteBtn = document.getElementById('delete-char-btn');
+const logoutButton = document.getElementById('logout-button');
+
+// On s'assure que le formulaire du personnage existe avant d'ajouter l'écouteur
+if (characterForm) {
+    characterForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = charNameInput.value.trim();
+        // ... le reste de votre logique pour la création de personnage
+    });
+}
+
+// On s'assure que le bouton de suppression existe
+if (deleteBtn) {
+    deleteBtn.addEventListener('click', deleteCharacterData);
+}
+
+// On s'assure que le bouton de déconnexion existe
+if (logoutButton) {
+    logoutButton.addEventListener('click', () => {
+        signOut(auth).then(() => {
+            window.location.href = "login.html";
+        }).catch((error) => {
+            console.error("Erreur de déconnexion :", error);
+        });
+    });
+}
 
 playBtn.addEventListener('click', () => {
     window.location.href = "world_map.html"; // Redirige vers la page de jeu
