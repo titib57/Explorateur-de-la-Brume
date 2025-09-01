@@ -116,6 +116,23 @@ export function createCharacter(name, playerClass, age, height, weight) {
     return player;
 }
 
+export function giveXP(xpAmount) {
+    player.stats.xp += xpAmount;
+    console.log(`Vous gagnez ${xpAmount} XP !`);
+
+    // Vérifie si le joueur monte de niveau
+    while (player.stats.xp >= player.stats.xpToNextLevel) {
+        player.stats.level++;
+        player.stats.xp -= player.stats.xpToNextLevel;
+        player.stats.xpToNextLevel = Math.floor(player.stats.xpToNextLevel * 1.5); // Ajustez cette formule selon vos besoins
+        console.log(`Félicitations ! Vous passez au niveau ${player.stats.level} !`);
+
+        // Vous pouvez également ajouter ici des augmentations de statistiques
+        // player.stats.hpMax += 10;
+        // player.stats.manaMax += 5;
+    }
+}
+
 /**
  * Charge l'objet joueur depuis le localStorage.
  * @returns {object|null} L'objet joueur ou null si non trouvé.
