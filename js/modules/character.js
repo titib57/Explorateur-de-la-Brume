@@ -45,7 +45,7 @@ class Player {
         this.quests = data.quests || {};
     }
 
-// Ajout de la méthode addXp directement dans la classe
+// Ajout de la méthode addXp directement dans la classe  
     addXp(amount) {
         this.xp += amount;
         // La logique pour la montée de niveau serait ici
