@@ -3,6 +3,7 @@ import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "https://www.gstati
 import { app } from "./firebase_config.js"; // Assurez-vous que ce fichier exporte votre app Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 
+const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
