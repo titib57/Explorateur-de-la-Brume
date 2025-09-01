@@ -61,16 +61,7 @@ function giveXP(amount) {
     savePlayer(player);
 }
 
-function initializeCharacter(player) {
-    if (player) {
-        if (!player.quests || !player.quests.current) {
-            player.quests = {
-                current: 'lieu_sur',
-            };
-            savePlayer(player);
-        }
-    }
-}
+
 
 // --- Éléments du DOM ---
 const loadingMessage = document.getElementById('loading-message');
