@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteBtn = document.getElementById('delete-btn');
     const updateBtn = document.getElementById('update-btn');
 
+// NOUVELLE VARIABLE pour la page de carte du monde
+    const characterInfoDisplay = document.getElementById('character-info-display'); 
+
     // Variables pour la page de création de personnage (nouveaux)
     const characterForm = document.getElementById('character-form');
     const characterExistsSection = document.getElementById('character-exists-section');
@@ -41,6 +44,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (deleteBtn) deleteBtn.classList.remove('hidden');
         if (updateBtn) updateBtn.classList.remove('hidden');
     }
+
+// NOUVELLE LOGIQUE pour la page de la carte du monde
+    if (characterInfoDisplay) {
+        characterInfoDisplay.innerHTML = `
+            <div class="player-info">
+                <span>Personnage : **${character.name}**</span>
+                <span>Niveau : **${character.level}**</span>
+                <span>PV : **${character.hp}**</span>
+            </div>
+        `;
+    }
+}
 
     function renderExistingCharacterOnCreationPage(character) {
         if (!existingCharacterDisplay) return;
