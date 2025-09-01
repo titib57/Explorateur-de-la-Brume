@@ -20,13 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const characterForm = document.getElementById('character-form');
     const characterExistsSection = document.getElementById('character-exists-section');
     const existingCharacterDisplay = document.getElementById('existing-character-display');
-    const deleteBtnOnCharacterPage = document.getElementById('delete-btn');
+    // Changement ici : le sélecteur pointe maintenant vers l'ID unique
+    const deleteBtnOnCharacterPage = document.getElementById('delete-btn-creation-page');
 
     // Autres boutons
     const logoutButton = document.getElementById('logout-button');
 
     function renderCharacter(character) {
-        if (!characterDisplay) return; // S'assure d'être sur la bonne page
+        if (!characterDisplay) return;
         characterDisplay.innerHTML = `
             <div class="character-card">
                 <h3>${character.name}</h3>
@@ -147,8 +148,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (deleteBtnOnCharacterPage) {
         deleteBtnOnCharacterPage.addEventListener('click', async () => {
             await deleteCharacterData();
-            showNoCharacterView();
             showNotification("Personnage supprimé. Vous pouvez en créer un nouveau.", "info");
+            // Changement ici : Redirection pour recharger la page
+            setTimeout(() => {
+                window.location.href = "character.html";
+            }, 1500);
         });
     }
 
