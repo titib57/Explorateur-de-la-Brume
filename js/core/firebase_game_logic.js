@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
     }
-}
+});
 
     function renderExistingCharacterOnCreationPage(character) {
         if (!existingCharacterDisplay) return;
