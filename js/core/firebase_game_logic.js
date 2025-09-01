@@ -37,8 +37,7 @@ function showNoCharacterView() {
 }
 
 async function loadCharacterData(user) {
-    // Chemin corrigé pour correspondre à vos règles de sécurité Firestore
-    const characterRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
+    const characterRef = doc(db, "characters", user.uid);
     try {
         const docSnap = await getDoc(characterRef);
         if (docSnap.exists()) {
@@ -61,12 +60,14 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         loadCharacterData(user);
     } else {
+        // Redirige vers la page de connexion si l'utilisateur n'est pas connecté
         window.location.href = "login.html";
     }
 });
 
 // Écouteurs d'événements pour les boutons
 const characterForm = document.getElementById('characterForm');
+const deleteBtn = document.getElementById('delete-char-btn');
 const logoutButton = document.getElementById('logout-button');
 
 // On s'assure que le formulaire du personnage existe avant d'ajouter l'écouteur
@@ -95,9 +96,9 @@ if (logoutButton) {
 }
 
 playBtn.addEventListener('click', () => {
-    window.location.href = "world_map.html";
+    window.location.href = "world_map.html"; // Redirige vers la page de jeu
 });
 
 updateBtn.addEventListener('click', () => {
-    window.location.href = "character.html";
+    window.location.href = "character.html"; // Redirige vers la page de mise à jour du personnage
 });
