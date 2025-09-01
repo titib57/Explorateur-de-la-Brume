@@ -1,11 +1,9 @@
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-import { app } from "./firebase_config.js"; // Assurez-vous que ce fichier exporte votre app Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+// Fichier : firebase_game_logic.js
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { auth, db } from "./firebase_config.js";
+import { showNotification } from './js/core/notifications.js';
 
 const noCharacterSection = document.getElementById('no-character-section');
 const characterSection = document.getElementById('character-section');
@@ -15,17 +13,6 @@ const playBtn = document.getElementById('play-btn');
 const deleteBtn = document.getElementById('delete-btn');
 const updateBtn = document.getElementById('update-btn');
 
-function showNotification(message, type = 'success') {
-    const notificationContainer = document.getElementById('notification-container');
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    notificationContainer.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
 
 function renderCharacter(character) {
     characterDisplay.innerHTML = `
