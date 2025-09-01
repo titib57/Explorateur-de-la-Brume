@@ -3,12 +3,30 @@
 
 import { itemsData } from './gameData.js';
 import { showNotification } from './notifications.js';
-import { initializeCharacter } from '../modules/character.js';
+
+// Importations et initialisation de Firebase pour la gestion de la persistance des données
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { firebaseConfig } from './firebase_config.js';
+
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
 
 // Objets d'état globaux
 export let player = null;
 export let currentDungeon = null;
 export let currentMonster = null;
+export let userId = null;
+
+/**
+ * Définit l'ID de l'utilisateur.
+ * @param {string} newUserId L'ID de l'utilisateur.
+ */
+export function setUserId(newUserId) {
+    userId = newUserId;
+}
 
 /**
  * Définit le monstre actuellement en combat.
@@ -91,7 +109,7 @@ class Character {
  */
 export function createCharacter(name, playerClass, age, height, weight) {
     const newPlayer = new Character(name, playerClass, 1, 0, 100, { strength: 1, intelligence: 1, speed: 1, dexterity: 1 }, {}, {}, {}, [], 0, 0, 0, 0, age, height, weight);
-    newPlayer.statPoints = 5; // Points de départ
+    newPlayer.statPoints = 5;
     recalculateDerivedStats(newPlayer);
     player = newPlayer;
     savePlayer(player);
@@ -128,15 +146,45 @@ export function savePlayer(p) {
 }
 
 /**
+ * Sauvegarde les données du personnage dans Firestore.
+ * @param {object} playerData Les données du personnage à sauvegarder.
+ */
+export async function saveCharacterData(playerData) {
+    if (!userId) {
+        console.error("Erreur : Utilisateur non authentifié.");
+        return;
+    }
+    try {
+        const charRef = doc(db, 'artifacts', 'default-app-id', 'users', userId, 'characters', userId);
+        await setDoc(charRef, playerData, { merge: true });
+        console.log("Personnage sauvegardé sur Firestore !");
+    } catch (error) {
+        console.error("Erreur lors de la sauvegarde du personnage sur Firestore : ", error);
+    }
+}
+
+/**
+ * Supprime le document du personnage de Firestore.
+ */
+export async function deleteCharacterData() {
+    if (!userId) return;
+    try {
+        const charRef = doc(db, 'artifacts', 'default-app-id', 'users', userId, 'characters', userId);
+        await deleteDoc(charRef);
+        console.log("Personnage supprimé sur Firestore !");
+    } catch (error) {
+        console.error("Erreur lors de la suppression du personnage sur Firestore : ", error);
+    }
+}
+
+/**
  * Recalcule les statistiques dérivées du joueur (PV, Mana, Dégâts, Défense).
  * @param {object} p L'objet joueur.
  */
 export function recalculateDerivedStats(p) {
-    // Calcul de la santé et du mana
     const newMaxHp = 100 + (p.stats.strength * 10);
     const newMaxMana = 50 + (p.stats.intelligence * 10);
-    
-    // Si la santé et le mana ont déjà été initialisés, on les ajuste proportionnellement
+
     if (p.maxHp > 0) {
         p.hp = Math.floor(p.hp * (newMaxHp / p.maxHp));
     } else {
@@ -147,11 +195,9 @@ export function recalculateDerivedStats(p) {
     } else {
         p.mana = newMaxMana;
     }
-    
     p.maxHp = newMaxHp;
     p.maxMana = newMaxMana;
 
-    // Calcul des dégâts et de la défense en fonction de l'équipement
     const weaponData = p.equipment.weapon ? itemsData[p.equipment.weapon.id] : null;
     const armorData = p.equipment.armor ? itemsData[p.equipment.armor.id] : null;
 
@@ -166,11 +212,10 @@ export function recalculateDerivedStats(p) {
     } else {
         p.defense = (p.stats.strength * 0.5);
     }
-    
-    // Assurer que les PV et le Mana ne dépassent pas leur maximum
+
     p.hp = Math.min(p.hp, p.maxHp);
     p.mana = Math.min(p.mana, p.maxMana);
-    
+
     return p;
 }
 
