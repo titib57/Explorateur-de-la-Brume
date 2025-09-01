@@ -6,7 +6,7 @@ import { auth, db } from "./firebase_config.js";
 import { showNotification } from './notifications.js';
 import { deleteCharacterData } from './state.js';
 
-
+document.addEventListener('DOMContentLoaded', () => {
 const noCharacterSection = document.getElementById('no-character-section');
 const characterSection = document.getElementById('character-section');
 const characterDisplay = document.getElementById('character-display');
@@ -101,3 +101,4 @@ playBtn.addEventListener('click', () => {
 updateBtn.addEventListener('click', () => {
     window.location.href = "character.html"; // Redirige vers la page de mise à jour du personnage
 });
+}
