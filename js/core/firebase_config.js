@@ -1,6 +1,8 @@
-// js/core/firebase_config.js
+// Fichier : js/core/firebase_config.js
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js"; // Importez getAuth
+import { getFirestore } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js"; // Importez getFirestore
 
 // Votre configuration Firebase
 export const firebaseConfig = {
@@ -16,5 +18,9 @@ export const firebaseConfig = {
 // Initialisation de l'application Firebase
 const app = initializeApp(firebaseConfig);
 
-// Exportation de l'instance de l'application Firebase pour qu'elle puisse être utilisée ailleurs
-export { app };
+// Initialisation des services que vous utiliserez
+const auth = getAuth(app); // Initialisez le service d'authentification
+const db = getFirestore(app); // Initialisez le service Firestore
+
+// Exportation de l'instance de l'application et des services
+export { app, auth, db };
