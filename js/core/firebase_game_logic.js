@@ -7,7 +7,7 @@ import { showNotification } from './notifications.js';
 import { deleteCharacterData } from './state.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Toutes ces variables sont maintenant dans la bonne portée
+    // Variables pour la page de gestion des personnages
     const noCharacterSection = document.getElementById('no-character-section');
     const characterSection = document.getElementById('character-section');
     const characterDisplay = document.getElementById('character-display');
@@ -16,8 +16,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteBtn = document.getElementById('delete-btn');
     const updateBtn = document.getElementById('update-btn');
 
+    // Variables pour la page de création de personnage (nouveaux)
+    const characterForm = document.getElementById('character-form');
+    const characterExistsSection = document.getElementById('character-exists-section');
+    const existingCharacterDisplay = document.getElementById('existing-character-display');
+    const deleteBtnOnCharacterPage = document.getElementById('delete-btn');
+
+    // Autres boutons
+    const logoutButton = document.getElementById('logout-button');
+
     function renderCharacter(character) {
-        if (!characterDisplay) return;
+        if (!characterDisplay) return; // S'assure d'être sur la bonne page
         characterDisplay.innerHTML = `
             <div class="character-card">
                 <h3>${character.name}</h3>
@@ -32,9 +41,31 @@ document.addEventListener('DOMContentLoaded', () => {
         if (updateBtn) updateBtn.classList.remove('hidden');
     }
 
+    function renderExistingCharacterOnCreationPage(character) {
+        if (!existingCharacterDisplay) return;
+        existingCharacterDisplay.innerHTML = `
+            <div class="character-card">
+                <h3>${character.name}</h3>
+                <p>Classe : ${character.class}</p>
+                <p>Niveau : ${character.level}</p>
+                <p>Points de vie : ${character.hp}</p>
+            </div>
+        `;
+        if (loadingMessage) loadingMessage.classList.add('hidden');
+    }
+
     function showNoCharacterView() {
         if (characterSection) characterSection.classList.add('hidden');
         if (noCharacterSection) noCharacterSection.classList.remove('hidden');
+        if (characterExistsSection) characterExistsSection.classList.add('hidden');
+        if (characterForm) characterForm.classList.remove('hidden');
+    }
+
+    function showCharacterExistsView(character) {
+        if (noCharacterSection) noCharacterSection.classList.add('hidden');
+        if (characterForm) characterForm.classList.add('hidden');
+        if (characterExistsSection) characterExistsSection.classList.remove('hidden');
+        renderExistingCharacterOnCreationPage(character);
     }
 
     async function loadCharacterData(user) {
@@ -42,9 +73,14 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const docSnap = await getDoc(characterRef);
             if (docSnap.exists()) {
-                renderCharacter(docSnap.data());
-                if (characterSection) characterSection.classList.remove('hidden');
-                if (noCharacterSection) noCharacterSection.classList.add('hidden');
+                // S'il y a un personnage, affichez la vue appropriée
+                if (characterSection) {
+                    renderCharacter(docSnap.data());
+                    characterSection.classList.remove('hidden');
+                    if (noCharacterSection) noCharacterSection.classList.add('hidden');
+                } else if (characterExistsSection) {
+                    showCharacterExistsView(docSnap.data());
+                }
             } else {
                 showNoCharacterView();
             }
@@ -54,7 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
             showNotification("Erreur lors du chargement des données. Veuillez réessayer.", "error");
         }
     }
-
 
     // Gestion de l'état d'authentification
     onAuthStateChanged(auth, (user) => {
@@ -66,15 +101,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Écouteurs d'événements pour les boutons
-    const characterForm = document.getElementById('character-form');
-    const logoutButton = document.getElementById('logout-button');
-
-    // On retire le "if" en double et on s'assure que le code est correctement encadré
     if (characterForm) {
         characterForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            // 1. Récupération des valeurs du formulaire
+            if (!auth.currentUser) {
+                showNotification("Veuillez vous connecter pour créer un personnage.", "error");
+                setTimeout(() => { window.location.href = "login.html"; }, 1500);
+                return;
+            }
             const userId = auth.currentUser.uid;
             const name = document.getElementById('char-name').value.trim();
             const age = parseInt(document.getElementById('char-age').value);
@@ -82,13 +116,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const weight = parseInt(document.getElementById('char-weight').value);
             const charClass = document.getElementById('char-class').value;
 
-            // 2. Validation simple
             if (!name) {
                 showNotification("Veuillez saisir un pseudo pour votre personnage.", "error");
                 return;
             }
 
-            // 3. Création de l'objet personnage
             const characterData = {
                 name: name,
                 age: age,
@@ -100,17 +132,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 creationDate: new Date()
             };
 
-            // 4. Enregistrement du personnage dans Firestore
             const characterRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
             try {
                 await setDoc(characterRef, characterData);
                 showNotification("Personnage créé avec succès !", "success");
-
-                // 5. Redirection après un court délai pour que la notification soit vue
-                setTimeout(() => {
-                    window.location.href = "gestion_personnage.html";
-                }, 1500);
-
+                setTimeout(() => { window.location.href = "gestion_personnage.html"; }, 1500);
             } catch (error) {
                 console.error("Erreur lors de la création du personnage :", error);
                 showNotification("Erreur lors de la création. Veuillez réessayer.", "error");
@@ -118,10 +144,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (deleteBtnOnCharacterPage) {
+        deleteBtnOnCharacterPage.addEventListener('click', async () => {
+            await deleteCharacterData();
+            showNoCharacterView();
+            showNotification("Personnage supprimé. Vous pouvez en créer un nouveau.", "info");
+        });
+    }
+
     if (deleteBtn) {
         deleteBtn.addEventListener('click', deleteCharacterData);
     }
-
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
             signOut(auth).then(() => {
@@ -131,16 +164,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-
     if (playBtn) {
-        playBtn.addEventListener('click', () => {
-            window.location.href = "world_map.html";
-        });
+        playBtn.addEventListener('click', () => { window.location.href = "world_map.html"; });
     }
-
     if (updateBtn) {
-        updateBtn.addEventListener('click', () => {
-            window.location.href = "character.html";
-        });
+        updateBtn.addEventListener('click', () => { window.location.href = "character.html"; });
     }
 });
