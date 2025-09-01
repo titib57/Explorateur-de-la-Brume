@@ -90,13 +90,18 @@ body {
 }
 
 .game-container {
-    max-width: 800px;
+    /* La max-width est retirée pour permettre l'extension */
     margin: 20px auto;
     padding: 20px;
     background-color: var(--bg-color-medium);
     border-radius: 12px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     border: 2px solid var(--border-color);
+    
+    /* Styles Flexbox pour l'expansion */
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Permet au conteneur de grandir */
 }
 
 .game-container h2 {
@@ -314,6 +319,25 @@ body {
     border: 2px solid transparent;
 }
 
+/* Styles pour la page spécifique de la carte */
+.world-map-page {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.world-map-page .game-container {
+    max-width: none; /* Annule la limitation de largeur */
+    flex-grow: 1; /* Le conteneur prend tout l'espace vertical */
+    display: flex; /* Permet au contenu de s'adapter */
+    flex-direction: column;
+}
+.world-map-page main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
 .skill-node img {
     width: 60px;
     height: 60px;
@@ -390,21 +414,14 @@ body {
     height: 500px;
 }
 
+/* Styles de la carte du monde */
 #map {
-    height: 100%;
-    width: 100%;
+    height: 100%; /* S'étend sur toute la hauteur disponible du parent */
+    width: 100%; /* S'étend sur toute la largeur disponible du parent */
+    flex-grow: 1; /* Important : prend l'espace restant */
     border: 2px solid var(--border-color);
     border-radius: 8px;
     transition: all 0.3s ease-in-out;
-}
-
-#map.fullscreen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 1000;
 }
 
 #toggle-fullscreen-btn {
