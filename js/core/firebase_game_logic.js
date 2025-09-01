@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Écouteurs d'événements pour les boutons
-    const characterForm = document.getElementById('character_form');
+    const characterForm = document.getElementById('character-form');
     const logoutButton = document.getElementById('logout-button');
 
     // On retire le "if" en double et on s'assure que le code est correctement encadré
