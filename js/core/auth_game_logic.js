@@ -3,12 +3,6 @@
 import { onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { auth } from "./firebase_config.js";
 
-// Si l'utilisateur est déjà connecté, on le redirige immédiatement.
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        window.location.href = "gestion_personnage.html";
-    }
-});
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
