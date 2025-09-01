@@ -66,10 +66,10 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // Écouteurs d'événements pour les boutons
-deleteBtn.addEventListener('click', deleteCharacter);
+deleteBtn.addEventListener('click', deleteCharacterData);
 
 playBtn.addEventListener('click', () => {
-    window.location.href = "game.html"; // Redirige vers la page de jeu
+    window.location.href = "world_map.html"; // Redirige vers la page de jeu
 });
 
 updateBtn.addEventListener('click', () => {
