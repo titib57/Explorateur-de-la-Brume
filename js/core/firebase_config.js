@@ -1,6 +1,6 @@
 // js/core/firebase_config.js
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 
 // Votre configuration Firebase
 export const firebaseConfig = {

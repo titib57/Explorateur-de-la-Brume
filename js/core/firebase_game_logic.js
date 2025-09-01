@@ -1,9 +1,10 @@
 // Fichier : firebase_game_logic.js
 
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-import { doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { auth, db } from "./firebase_config.js";
-import { showNotification } from './js/core/notifications.js';
+import { showNotification } from './notifications.js';
+import { deleteCharacter as deleteCharModule } from '../modules/character.js';
 
 const noCharacterSection = document.getElementById('no-character-section');
 const characterSection = document.getElementById('character-section');
@@ -52,20 +53,6 @@ async function loadCharacterData(user) {
     }
 }
 
-async function deleteCharacter() {
-    const user = auth.currentUser;
-    if (user) {
-        const characterRef = doc(db, "characters", user.uid);
-        try {
-            await deleteDoc(characterRef);
-            showNoCharacterView();
-            showNotification("Personnage supprimé avec succès !");
-        } catch (error) {
-            console.error("Erreur lors de la suppression du personnage:", error);
-            showNotification("Erreur lors de la suppression. Veuillez réessayer.", "error");
-        }
-    }
-}
 
 // Gestion de l'état d'authentification
 onAuthStateChanged(auth, (user) => {

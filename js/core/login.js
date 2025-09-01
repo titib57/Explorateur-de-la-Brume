@@ -1,7 +1,7 @@
 // Fichier : js/core/login.js
 
 // Importation des modules nécessaires de Firebase
-import { onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { auth, db, app } from "./firebase_config.js";
 
 // Si l'utilisateur est déjà connecté, on le redirige immédiatement.
