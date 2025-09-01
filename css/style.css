@@ -424,6 +424,15 @@ body {
     transition: all 0.3s ease-in-out;
 }
 
+#map.fullscreen {
+    position: fixed; /* Positionnement par rapport à la fenêtre de visualisation */
+    top: 0; /* Prend la totalité de l'espace */
+    left: 0;
+    width: 100vw; /* 100% de la largeur du viewport */
+    height: 100vh; /* 100% de la hauteur du viewport */
+    z-index: 9999; /* Assure que la carte est au-dessus de tout le reste */
+}
+
 #toggle-fullscreen-btn {
     position: absolute;
     bottom: 20px;

@@ -318,11 +318,27 @@ function initMap() {
     // Étape 4: Gestion des événements de la carte
     window.addEventListener('resize', () => map.invalidateSize());
 
-    fullscreenBtn.addEventListener('click', () => {
-        mapElement.classList.toggle('fullscreen');
-        fullscreenBtn.textContent = mapElement.classList.contains('fullscreen') ? 'Quitter le plein écran' : 'Plein écran';
-        setTimeout(() => map.invalidateSize(), 300);
-    });
+  if (fullscreenBtn && mapElement) {
+        fullscreenBtn.addEventListener('click', () => {
+            // Bascule la classe 'fullscreen' sur l'élément de la carte
+            mapElement.classList.toggle('fullscreen');
+
+            // Mise à jour de la carte pour s'adapter à la nouvelle taille
+            // Cette fonction est spécifique à la librairie que vous utilisez (par exemple, Leaflet)
+            // L.map('map').invalidateSize();
+            if (map) {
+                map.invalidateSize();
+            }
+
+            // Met à jour le texte du bouton
+            if (mapElement.classList.contains('fullscreen')) {
+                fullscreenBtn.textContent = 'Quitter le plein écran';
+            } else {
+                fullscreenBtn.textContent = 'Plein écran';
+            }
+        });
+    }
+
 
     recenterBtn.addEventListener('click', () => {
         if (playerMarker) {
