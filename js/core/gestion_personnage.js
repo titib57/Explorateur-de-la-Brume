@@ -15,7 +15,7 @@ onAuthStateChanged(auth, async (user) => {
         console.log("Utilisateur connecté :", user.uid);
         // Ici, vous ajouterez la logique pour récupérer et afficher les informations du personnage de l'utilisateur.
         try {
-            const docRef = doc(db, "personnages", user.uid);
+            const docRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
