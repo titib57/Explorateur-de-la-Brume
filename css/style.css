@@ -30,7 +30,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    margin: 0;
+
 }
         .quest-container {
             margin-bottom: 20px;
@@ -168,13 +168,13 @@ body {
 }
 
 .game-footer {
-    position: fixed;
     background-color: #333;
     color: #fff;
     text-align: center;
     font-size: 12px; /* Taille de police plus petite */
     bottom: 0;
     width: 100%;
+    margin-top: auto;
 }
 
 .hp-bar {
@@ -329,8 +329,6 @@ body {
 .world-map-page .game-container {
     max-width: none; /* Annule la limitation de largeur */
     flex-grow: 1; /* Le conteneur prend tout l'espace vertical */
-    display: flex; /* Permet au contenu de s'adapter */
-    flex-direction: column;
 }
 .world-map-page main {
     flex-grow: 1;
