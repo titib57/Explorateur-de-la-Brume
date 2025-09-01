@@ -30,7 +30,6 @@ import { savePlayer, player } from '../core/state.js';
 
 let db, auth, userId;
 let unsubscribeFromCharacterListener;
-let player = null; // Variable pour stocker les données du personnage
 
 // --- Définition de la classe Player ---
 // Ceci simule la classe Player qui serait dans le module 'state.js'
