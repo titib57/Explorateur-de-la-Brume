@@ -126,8 +126,8 @@ async function loadDungeons(player, playerLatLng) {
     const isSetSafePlaceQuest = currentQuest && currentQuest.objective.type === 'set_safe_place';
     
     if (!isSetSafePlaceQuest && player.safePlaceLocation) {
-        const searchRadius = ;
-        const overpassQuery = `
+        const searchRadius = 0.2;
+        const overpassQuery = 
 [out:json][timeout:25];
 (
     node["building"="castle"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
