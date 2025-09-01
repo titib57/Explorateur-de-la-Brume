@@ -45,14 +45,12 @@ class Player {
         this.quests = data.quests || {};
     }
 
-/**
- * Donne une quantité spécifiée de points d'expérience au joueur.
- * @param {number} amount La quantité d'XP à donner.
- */
-export function giveXP(amount) {
-    if (!player) return; // Assurez-vous que le joueur existe.
-    player.addXp(amount);
-    savePlayer(player);
+// Ajout de la méthode addXp directement dans la classe
+    addXp(amount) {
+        this.xp += amount;
+        // La logique pour la montée de niveau serait ici
+        console.log(`XP ajoutée : ${amount}. Total XP : ${this.xp}`);
+    }
 }
 
 // --- Fonctions Firestore pour la gestion de l'état ---
