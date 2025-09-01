@@ -8,7 +8,7 @@ import { auth, db, app } from "./firebase_config.js";
 onAuthStateChanged(auth, (user) => {
     if (user) {
         // Redirige vers la page principale une fois l'utilisateur connecté
-        window.location.href = "login.html"; 
+        window.location.href = "gestion_personnage.html"; 
     }
 });
 
