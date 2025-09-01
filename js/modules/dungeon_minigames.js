@@ -1,6 +1,6 @@
 ﻿// js/dungeon_minigames.js
 
-import { showNotification } from './core/notifications.js';
+import { showNotification } from '../core/notifications.js';
 
 // Mini-jeux textuels basés sur le type de lieu
 const miniGamesData = {

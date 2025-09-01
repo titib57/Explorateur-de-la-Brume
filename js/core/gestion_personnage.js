@@ -2,7 +2,7 @@
 
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import { app } from "js/core/firebase_config.js";
+import { app } from "./core/firebase_config.js";
 
 const auth = getAuth(app);
 const db = getFirestore(app);

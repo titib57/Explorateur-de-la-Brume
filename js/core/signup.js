@@ -2,20 +2,9 @@
 // import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { auth, app } from "./core/firebase_config.js";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-    apiKey: "AIzaSyBQDq4lQfoYfDr2abVAuAxC7UPez2wPnX4",
-    authDomain: "rpg---explorateur-de-la-brume.firebaseapp.com",
-    projectId: "rpg---explorateur-de-la-brume",
-    storageBucket: "rpg---explorateur-de-la-brume.firebasestorage.app",
-    messagingSenderId: "855919886618",
-    appId: "1:855919886618:web:933180441fa6f29dd26ca3",
-    measurementId: "G-139GQZWKTC"
-};
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

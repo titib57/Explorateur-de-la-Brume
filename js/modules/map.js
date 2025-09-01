@@ -4,7 +4,7 @@ import { showNotification } from '../core/notifications.js';
 import { generateDungeon } from '../core/dungeon.js';
 import { questsData } from '../core/gameData.js';
 import { savePlayer, loadCharacter } from '../core/state.js';
-import { initializeCharacter } from './character.js';
+import { initializeCharacter } from './module/character.js';
 
 /**
  * Met à jour la quête actuelle du joueur.
