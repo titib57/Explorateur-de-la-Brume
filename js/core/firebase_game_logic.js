@@ -102,5 +102,5 @@ updateBtn.addEventListener('click', () => {
     window.location.href = "character.html"; // Redirige vers la page de mise à jour du personnage
 });
 
-}
+
 });
