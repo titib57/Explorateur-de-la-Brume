@@ -37,7 +37,7 @@ function showNoCharacterView() {
 }
 
 async function loadCharacterData(user) {
-    const characterRef = doc(db, "characters", user.uid);
+    const characterRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
     try {
         const docSnap = await getDoc(characterRef);
         if (docSnap.exists()) {
@@ -67,7 +67,6 @@ onAuthStateChanged(auth, (user) => {
 
 // Écouteurs d'événements pour les boutons
 const characterForm = document.getElementById('characterForm');
-const deleteBtn = document.getElementById('delete-char-btn');
 const logoutButton = document.getElementById('logout-button');
 
 // On s'assure que le formulaire du personnage existe avant d'ajouter l'écouteur
