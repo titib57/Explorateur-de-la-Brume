@@ -1,6 +1,6 @@
 ﻿// Fichier : js/core/utils.js
 
-import { showNotification } from './core/notifications.js';
+import { showNotification } from './notifications.js';
 
 export function checkCharacter() {
     if (!localStorage.getItem('playerCharacter')) {

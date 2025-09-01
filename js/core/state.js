@@ -1,8 +1,8 @@
 ﻿// Fichier : js/core/state.js
 // Ce module gère l'état global du jeu, y compris l'objet joueur, le donjon et les monstres.
 
-import { itemsData } from './core/gameData.js';
-import { showNotification } from './core/notifications.js';
+import { itemsData } from './gameData.js';
+import { showNotification } from './notifications.js';
 import { initializeCharacter } from '../modules/character.js';
 
 // Objets d'état globaux

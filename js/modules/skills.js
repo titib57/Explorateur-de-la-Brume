@@ -5,7 +5,7 @@
 import { player, savePlayer, loadCharacter } from '../core/state.js';
 import { abilitiesData, skillTreeData } from '../core/gameData.js';
 import { showNotification } from '../core/notifications.js';
-import { recalculateDerivedStats } from './module/character.js';
+import { recalculateDerivedStats } from './character.js';
 
 // Attendre que le DOM soit complètement chargé avant d'initialiser l'interface utilisateur.
 document.addEventListener('DOMContentLoaded', () => {

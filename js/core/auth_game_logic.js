@@ -1,7 +1,7 @@
 // Fichier : js/core/auth_game_logic.js
 
 import { onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { auth } from "./core/firebase_config.js";
+import { auth } from "./firebase_config.js";
 
 // Si l'utilisateur est déjà connecté, on le redirige immédiatement.
 onAuthStateChanged(auth, (user) => {

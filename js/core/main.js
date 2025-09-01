@@ -3,7 +3,7 @@
 
 import { player, loadCharacter, createCharacter, updateStats, updateStatsDisplay } from './core/state.js';
 import { updatePlayerProfileUI, updateBattleUI, updateWorldMapUI, updateStatsUI, showCharacterCreationScreen } from './modules/ui.js';
-import { showNotification } from './core/notifications.js';
+import { showNotification } from './notifications.js';
 
 // Attendre que le DOM soit complètement chargé avant d'initialiser l'application
 document.addEventListener('DOMContentLoaded', () => {
