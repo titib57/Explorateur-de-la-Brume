@@ -2,7 +2,7 @@
 
 // Importations des données et des utilitaires nécessaires
 import { pointsOfInterest, dungeonTypes, monstersData, bossesData } from './gameData.js';
-import { questsData } from './quests.js';
+import { questsData } from '../modules/quests.js';
 import { showNotification } from './notifications.js';
 import { currentDungeon, player, savePlayer } from './state.js';
 
