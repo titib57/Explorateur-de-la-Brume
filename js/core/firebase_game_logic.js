@@ -152,6 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const docSnap = await getDoc(characterRef);
             if (docSnap.exists()) {
+                        const characterData = docSnap.data();
+        renderCharacter(characterData); // C'est ici que l'appel se fait
                 // S'il y a un personnage, affichez la vue appropriée
                 if (characterSection) {
                     renderCharacter(docSnap.data());
