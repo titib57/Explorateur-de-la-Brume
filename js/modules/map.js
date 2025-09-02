@@ -280,9 +280,6 @@ function initMap() {
         return;
     }
 
-    // Initialisation du personnage avec les quêtes
-    initializeCharacter(player);
-
     // Étape 2: Initialisation des variables et des éléments de la carte
     map = L.map('map');
     mapElement = document.getElementById('map');
