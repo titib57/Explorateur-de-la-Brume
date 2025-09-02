@@ -2,7 +2,7 @@
 
 // Importation des dépendances nécessaires pour la gestion des quêtes.
 import { player, savePlayer, loadCharacter, giveQuestReward, giveXP } from '../core/state.js';
-import { questsData } from '../core/questsData.js';
+import { initialQuest } from '../core/questsData.js';
 import { showNotification } from '../core/notifications.js';
 
 // =========================================================================
