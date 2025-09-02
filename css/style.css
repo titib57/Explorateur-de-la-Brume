@@ -264,7 +264,31 @@ body {
     font-family: var(--main-font);
     font-size: 0.9em;
 }
+#lo
+gout-button {
+    /* Fond rouge pour signifier l'action de déconnexion */
+    background-color: #d9534f;
+    /* Couleur du texte en blanc pour un bon contraste */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease;
+}
 
+#logout-button:hover {
+    /* Change la couleur au survol pour un feedback visuel */
+    background-color: #c9302c;
+}
+
+#logout-button:active {
+    /* Donne l'impression que le bouton est pressé */
+    background-color: #a02824;
+}
 .combat-log p {
     margin: 5px 0;
     line-height: 1.2;
