@@ -153,8 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 strength: 10, // Force pour le combat 💪
                 intelligence: 8, // Intelligence pour les sorts et énigmes 🧠
                 gold: 3, // Argent du personnage 💰
-                inventory: [couteau, potionPV], // Inventaire pour les objets et équipements
-                quests: {} // Suivi des quêtes
+                inventory: [], // Inventaire pour les objets et équipements
+                quests: {}, // Suivi des quêtes
                 creationDate: new Date()
             };
 
