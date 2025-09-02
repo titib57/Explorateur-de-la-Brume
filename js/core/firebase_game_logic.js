@@ -181,6 +181,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', deleteCharacterData);
+    }
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
             signOut(auth).then(() => {
