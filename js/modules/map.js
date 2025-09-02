@@ -15,7 +15,7 @@ function initMap() {
         showNotification("Aucun personnage trouvé. Veuillez en créer un d'abord.", 'error');
         // Redirige l'utilisateur vers la page de création si aucun personnage n'existe
         setTimeout(() => {
-            window.location.href = './character_creation.html';
+            window.location.href = '../character_creation.html';
         }, 3000);
         return;
     }
