@@ -2,7 +2,6 @@
 
 import { showNotification } from '../core/notifications.js';
 import { generateDungeon } from '../core/dungeon.js';
-import { initialQuest } from './questsData.js';
 import { savePlayer, loadCharacter } from '../core/state.js';
 import { initializeCharacter } from './character.js';
 
@@ -305,7 +304,7 @@ function initMap() {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-    
+
     // --- Ajoutez cette ligne pour forcer la carte à se redimensionner ---
     map.invalidateSize();
 
