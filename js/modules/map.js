@@ -15,7 +15,7 @@ function initMap() {
         showNotification("Aucun personnage trouvé. Veuillez en créer un d'abord.", 'error');
         // Redirige l'utilisateur vers la page de création si aucun personnage n'existe
         setTimeout(() => {
-            window.location.href = 'character_creation.html';
+            window.location.href = './character_creation.html';
         }, 3000);
         return;
     }
@@ -228,10 +228,6 @@ async function loadDungeons(player, playerLatLng) {
         });
     }
 
-    // Si la quête du tutoriel est terminée, charge les donjons dynamiques
-    const currentQuest = questsData[player.quests.current];
-    const isSetSafePlaceQuest = currentQuest && currentQuest.objective.type === 'set_safe_place';
-    
     if (!isSetSafePlaceQuest && player.safePlaceLocation) {
         const searchRadius = 0.2;
         const overpassQuery = `
