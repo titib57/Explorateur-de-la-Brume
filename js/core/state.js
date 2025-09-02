@@ -154,6 +154,11 @@ export function loadCharacter() {
     return null;
 }
 
+// Fonction pour sauvegarder les données du joueur.
+// Cette fonction appelle la fonction existante `saveCharacterData`.
+export async function savePlayer(playerData) {
+    await saveCharacterData(playerData);
+}
 
 /**
  * Sauvegarde les données du personnage dans Firestore.
