@@ -15,7 +15,7 @@
                     <a id="world-map-link" href="world_map.html">Carte du monde</a>
                     <a href="quests.html">Quêtes</a>
                     <a href="gestion_personnage.html">Personnage</a>
-                    <a href="#" id="logout-link" class="button">Se déconnecter</a>
+                <a href="#" id="logout-link" class="button">Se déconnecter</a>
                 </nav>
         </div>
     </header>
@@ -46,12 +46,30 @@
             </div>
         </section>
 
-        <section id="character-section" class="hidden">
+        <section id="stats-section" class="hidden">
             <h2>Statistiques</h2>
-            <div id="character-display">
-                <p id="loading-message">Chargement des données...</p>
+            <div id="stats-display">
             </div>
         </section>
+
+        <section id="quest-section" class="hidden">
+            <h2>Quêtes en cours</h2>
+            <div id="quests-display">
+            </div>
+        </section>
+
+        <section id="inventory-section" class="hidden">
+            <h2>Inventaire</h2>
+            <div id="inventory-display">
+            </div>
+        </section>
+
+        <section id="equipement-section" class="hidden">
+            <h2>Equipement</h2>
+            <div id="equipement-display">
+            </div>
+        </section>
+
 
         <div id="notification-container" class="notification-container"></div>
         <div id="progress-bar" class="progress-bar hidden"></div>
@@ -62,5 +80,6 @@
     </footer>
 
     <script type="module" src="./js/core/firebase_game_logic.js"></script>
+    <script type="module" src="./js/core/utils.js"></script>
 </body>
 </html>
