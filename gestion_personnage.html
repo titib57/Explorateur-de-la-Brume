@@ -5,44 +5,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion de Personnages</title>
-    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header class="game-header">
-        <div class="container">
-            <h1>Gestion du Personnage</h1>
-                <nav>
-                    <a id="world-map-link" href="world_map.html">Carte du monde</a>
-                    <a href="quests.html">Quêtes</a>
-                    <a href="gestion_personnage.html">Personnage</a>
-                    <a href="#" id="logout-link" class="button">Se déconnecter</a>
-                </nav>
-        </div>
+        <h1>Gestion du Personnage</h1>
+        <nav>
+            <a href="world_map.html">Carte du monde</a>
+            <a href="quests.html">Quêtes</a>
+            <a href="gestion_personnage.html">Personnage</a>
+            <a href="#" id="logout-link">Se déconnecter</a>
+        </nav>
     </header>
+
+    <!-- Barre de raccourcis pour mobile -->
+    <div id="shortcut-bar">
+        <a href="#stats-section">
+            <span class="icon">📊</span>
+            <span>Stats</span>
+        </a>
+        <a href="#inventory-section">
+            <span class="icon">📦</span>
+            <span>Inventaire</span>
+        </a>
+        <a href="#equipment-section">
+            <span class="icon">🛡️</span>
+            <span>Équipement</span>
+        </a>
+        <a href="#skills-section">
+            <span class="icon">🧙</span>
+            <span>Compétences</span>
+        </a>
+    </div>
 
     <main class="game-container">
         <section id="no-character-section" class="hidden">
             <h2>Préparez-vous à l'aventure</h2>
             <p>Vous n'avez pas encore de personnage. Créez-en un pour commencer à jouer !</p>
-            <button>
-                <a href="character.html" class="button">Créer mon premier personnage</a>
-            </button>
-            
+            <button id="create-character-btn" class="btn-primary">Créer mon premier personnage</button>
         </section>
 
         <section id="character-section" class="hidden">
-            <h2>Mon personnage</h2>
+            <h2>Mon Personnage</h2>
             <div id="character-display">
                 <p id="loading-message">Chargement des données...</p>
+
+                <!-- Section des statistiques -->
+                <div id="stats-section" class="info-block">
+                    <h3>Statistiques</h3>
+                    <div id="stats-content"></div>
+                </div>
+
+                <!-- Section de l'inventaire -->
+                <div id="inventory-section" class="info-block">
+                    <h3>Inventaire</h3>
+                    <div id="inventory-content"></div>
+                </div>
+
+                <!-- Section de l'équipement -->
+                <div id="equipment-section" class="info-block">
+                    <h3>Équipement</h3>
+                    <div id="equipment-content"></div>
+                </div>
+
+                <!-- Section des compétences -->
+                <div id="skills-section" class="info-block">
+                    <h3>Compétences</h3>
+                    <div id="skills-content"></div>
+                </div>
             </div>
-            <div class="flex">
-                <button id="play-btn" class="hidden">
-                    Commencer l'aventure
-                </button>
-                <br>
-                <button id="deleteBtn" class="hidden">
-                    Supprimer le personnage
-                </button>
+            
+            <div class="action-buttons">
+                <a href="world_map.html" id="play-btn" class="btn-primary hidden">Commencer l'aventure</a>
+                <button id="deleteBtn" class="btn-flee hidden">Supprimer le personnage</button>
             </div>
         </section>
 
@@ -53,7 +87,5 @@
     <footer class="game-footer">
         <p>© 2025 Explorateur de la Brume. Tous droits réservés. Titib.</p>
     </footer>
-
-    <script type="module" src="./js/core/firebase_game_logic.js"></script>
 </body>
 </html>
