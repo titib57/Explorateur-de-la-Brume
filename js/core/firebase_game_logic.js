@@ -5,6 +5,8 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/f
 import { auth, db } from "./firebase_config.js";
 import { showNotification } from './notifications.js';
 import { deleteCharacterData } from './state.js';
+import { initialQuest } from './questsData.js';
+
 
 document.addEventListener('DOMContentLoaded', () => {
     // Variables pour la page de gestion des personnages
@@ -133,6 +135,40 @@ document.addEventListener('DOMContentLoaded', () => {
         renderExistingCharacterOnCreationPage(character);
     }
     
+const playBtn = document.getElementById('play-btn');
+
+if (playBtn) {
+    playBtn.addEventListener('click', async () => {
+        const user = auth.currentUser;
+        if (user) {
+            try {
+                // Utilisez l'objet initialQuest importé pour l'ajouter aux données de l'utilisateur
+                const userDocRef = doc(db, 'users', user.uid);
+                await setDoc(userDocRef, {
+                    quests: {
+                        [initialQuest.questId]: initialQuest
+                    }
+                }, { merge: true });
+
+                // Masquez le bouton "Commencer l'aventure" après le lancement de la quête
+                playBtn.classList.add('hidden');
+                
+                // Optionnel : Informez l'utilisateur que la quête a démarré
+                alert('Votre première quête a commencé !');
+                
+                // Optionnel : Mettez à jour l'affichage de la page pour montrer la nouvelle quête acceptée
+                // Par exemple : displayQuests(initialQuest);
+
+            } catch (error) {
+                console.error('Erreur lors du démarrage de la quête :', error);
+                alert('Une erreur est survenue. Veuillez réessayer.');
+            }
+        } else {
+            alert('Vous devez être connecté pour commencer.');
+        }
+    });
+}
+
     // NOUVELLE LOGIQUE pour la page de la carte du monde
     function renderWorldMapCharacterInfo(character) {
         if (characterInfoDisplay) {
