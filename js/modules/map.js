@@ -255,12 +255,7 @@ function updatePlayerLocation(player, position) {
  * @param {object} playerLatLng - La position actuelle du joueur.
  */
 function updateActionButtons(player, playerLatLng) {
-    // Affiche le bouton de l'arbre de classes si le joueur remplit les conditions
-    if (player?.level >= 5 && player?.playerClass === 'explorateur') {
-        classTreeBtn.style.display = 'block';
-    } else {
-        classTreeBtn.style.display = 'none';
-    }
+
 
     // Gère le bouton de bataille/d'entrée de donjon
     if (selectedDungeon && playerLatLng) {
