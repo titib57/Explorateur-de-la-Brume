@@ -1,15 +1,19 @@
-﻿// Fichier : js/core/state.js
-// Ce module gère l'état global du jeu, y compris l'objet joueur, le donjon et les monstres.
+﻿// Ce module gère l'état global du jeu, y compris l'objet joueur, le donjon et les monstres.
 
 import { itemsData } from './gameData.js';
 import { showNotification } from './notifications.js';
 
 // Importations et initialisation de Firebase pour la gestion de la persistance des données
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { firebaseConfig } from './firebase_config.js';
 
+// Global variables provided by the Canvas environment
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+// Initialisation de l'application Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
@@ -19,6 +23,23 @@ export let player = null;
 export let currentDungeon = null;
 export let currentMonster = null;
 export let userId = null;
+
+let authPromiseResolved = false;
+let authPromise = new Promise(resolve => {
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      userId = user.uid;
+      // You can call setUserId here if other parts of your code rely on it
+    } else {
+      userId = null;
+    }
+    if (!authPromiseResolved) {
+      resolve();
+      authPromiseResolved = true;
+      unsubscribe();
+    }
+  });
+});
 
 /**
  * Définit l'ID de l'utilisateur.
@@ -134,24 +155,42 @@ export function giveXP(xpAmount) {
 }
 
 /**
- * Charge l'objet joueur depuis le localStorage.
- * @returns {object|null} L'objet joueur ou null si non trouvé.
+ * Charge l'objet joueur depuis Firestore.
+ * @returns {Promise<object|null>} L'objet joueur ou null si non trouvé.
  */
-export function loadCharacter() {
-    const savedPlayer = JSON.parse(localStorage.getItem('playerCharacter'));
-    if (savedPlayer) {
-        const char = new Character(
-            savedPlayer.name, savedPlayer.playerClass, savedPlayer.level, savedPlayer.xp, savedPlayer.gold,
-            savedPlayer.stats, savedPlayer.quests, savedPlayer.inventory, savedPlayer.equipment,
-            savedPlayer.abilities, savedPlayer.hp, savedPlayer.maxHp, savedPlayer.mana, savedPlayer.maxMana,
-            savedPlayer.age, savedPlayer.height, savedPlayer.weight
-        );
-        char.statPoints = savedPlayer.statPoints;
-        char.xpToNextLevel = savedPlayer.xpToNextLevel;
-        player = char;
-        return player;
+export async function loadCharacter() {
+    await authPromise;
+
+    if (!userId) {
+        console.log("Aucun utilisateur n'est connecté. Impossible de charger un personnage.");
+        return null;
     }
-    return null;
+    
+    try {
+        const charRef = doc(db, 'artifacts', appId, 'users', userId, 'characters', userId);
+        const characterSnap = await getDoc(charRef);
+
+        if (characterSnap.exists()) {
+            const savedPlayer = characterSnap.data();
+            const char = new Character(
+                savedPlayer.name, savedPlayer.playerClass, savedPlayer.level, savedPlayer.xp, savedPlayer.gold,
+                savedPlayer.stats, savedPlayer.quests, savedPlayer.inventory, savedPlayer.equipment,
+                savedPlayer.abilities, savedPlayer.hp, savedPlayer.maxHp, savedPlayer.mana, savedPlayer.maxMana,
+                savedPlayer.age, savedPlayer.height, savedPlayer.weight
+            );
+            char.statPoints = savedPlayer.statPoints;
+            char.xpToNextLevel = savedPlayer.xpToNextLevel;
+            player = char;
+            console.log("Personnage chargé depuis Firestore !");
+            return player;
+        } else {
+            console.log("Aucun document de personnage trouvé pour l'utilisateur.");
+            return null;
+        }
+    } catch (error) {
+        console.error("Erreur lors du chargement du personnage depuis Firestore : ", error);
+        return null;
+    }
 }
 
 // Fonction pour sauvegarder les données du joueur.
@@ -170,7 +209,7 @@ export async function saveCharacterData(playerData) {
         return;
     }
     try {
-        const charRef = doc(db, 'artifacts', 'default-app-id', 'users', userId, 'characters', userId);
+        const charRef = doc(db, 'artifacts', appId, 'users', userId, 'characters', userId);
         await setDoc(charRef, playerData, { merge: true });
         console.log("Personnage sauvegardé sur Firestore !");
     } catch (error) {
@@ -184,7 +223,7 @@ export async function saveCharacterData(playerData) {
 export async function deleteCharacterData() {
     if (!userId) return;
     try {
-        const charRef = doc(db, 'artifacts', 'default-app-id', 'users', userId, 'characters', userId);
+        const charRef = doc(db, 'artifacts', appId, 'users', userId, 'characters', userId);
         await deleteDoc(charRef);
         console.log("Personnage supprimé sur Firestore !");
     } catch (error) {
