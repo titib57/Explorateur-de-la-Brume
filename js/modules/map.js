@@ -7,6 +7,21 @@ import { savePlayer, loadCharacter } from '../core/state.js';
 import { initializeCharacter } from './character.js';
 
 /**
+ * Fonction d'initialisation principale de la carte.
+ */
+function initMap() {
+    // Étape 1: Chargez le personnage sauvegardé au début de la page
+    const player = loadCharacter();
+    if (!player) {
+        showNotification("Aucun personnage trouvé. Veuillez en créer un d'abord.", 'error');
+        // Redirige l'utilisateur vers la page de création si aucun personnage n'existe
+        setTimeout(() => {
+            window.location.href = 'character_creation.html';
+        }, 3000);
+        return;
+    }
+
+/**
  * Met à jour la quête actuelle du joueur.
  * @param {object} player - L'objet joueur.
  * @param {string} newQuestId - L'ID de la nouvelle quête.
@@ -269,20 +284,7 @@ function updateActionButtons(player, playerLatLng) {
     startBattleBtn.style.display = 'none';
 }
 
-/**
- * Fonction d'initialisation principale de la carte.
- */
-function initMap() {
-    // Étape 1: Chargez le personnage sauvegardé au début de la page
-    const player = loadCharacter();
-    if (!player) {
-        showNotification("Aucun personnage trouvé. Veuillez en créer un d'abord.", 'error');
-        // Redirige l'utilisateur vers la page de création si aucun personnage n'existe
-        setTimeout(() => {
-            window.location.href = 'character_creation.html';
-        }, 3000);
-        return;
-    }
+
 
         // Initialisation du personnage avec les quêtes
     initializeCharacter(player);
