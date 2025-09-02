@@ -55,7 +55,7 @@ class Player {
 
 
 // --- Fonctions utilitaires du module character.js ---
-function giveXP(amount) {
+export function giveXP(amount) {
     if (!player) return;
     player.addXp(amount);
     savePlayer(player);
