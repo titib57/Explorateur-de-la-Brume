@@ -10,7 +10,7 @@ export function initializeCharacter(player) {
         // Initialise la quête de départ si le joueur n'en a pas déjà une
         if (!player.quests || !player.quests.current) {
             player.quests = {
-                current: 'lieu_sur',
+                current: 'start_quest_01',
             };
             savePlayer(player);
         }
