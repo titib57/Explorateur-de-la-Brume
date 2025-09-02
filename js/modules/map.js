@@ -305,6 +305,14 @@ function initMap() {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
+    
+    // --- Ajoutez cette ligne pour forcer la carte à se redimensionner ---
+    map.invalidateSize();
+
+    // Si la carte ne s'affiche toujours pas, utilisez un court délai
+    setTimeout(function() {
+      map.invalidateSize();
+    }, 100);
 
     // Étape 4: Gestion des événements de la carte
     window.addEventListener('resize', () => map.invalidateSize());
