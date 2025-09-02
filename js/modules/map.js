@@ -74,20 +74,6 @@ function initMap() {
         }
     });
 
-    setSafePlaceBtn.addEventListener('click', () => {
-        if (playerMarker) {
-            player.safePlaceLocation = {
-                lat: playerMarker.getLatLng().lat,
-                lng: playerMarker.getLatLng().lng
-            };
-            player.quests.current = questsData[player.quests.current].nextQuestId;
-            savePlayer(player);
-            location.reload();
-        } else {
-            showNotification("Votre position n'est pas encore disponible. Veuillez patienter.", 'warning');
-        }
-    });
-
     startBattleBtn.addEventListener('click', () => {
         if (selectedDungeon) {
             generateDungeon(selectedDungeon.isTutorial ? 'tutoriel' : { lat: selectedDungeon.location.lat, lng: selectedDungeon.location.lng });
