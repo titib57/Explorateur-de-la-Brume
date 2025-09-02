@@ -7,21 +7,6 @@ import { savePlayer, loadCharacter } from '../core/state.js';
 import { initializeCharacter } from './character.js';
 
 /**
- * Fonction d'initialisation principale de la carte.
- */
-function initMap() {
-    // Étape 1: Chargez le personnage sauvegardé au début de la page
-    const player = loadCharacter();
-    if (!player) {
-        showNotification("Aucun personnage trouvé. Veuillez en créer un d'abord.", 'error');
-        // Redirige l'utilisateur vers la page de création si aucun personnage n'existe
-        setTimeout(() => {
-            window.location.href = 'character_creation.html';
-        }, 3000);
-        return;
-    }
-
-/**
  * Met à jour la quête actuelle du joueur.
  * @param {object} player - L'objet joueur.
  * @param {string} newQuestId - L'ID de la nouvelle quête.
@@ -260,7 +245,6 @@ function updatePlayerLocation(player, position) {
             lastKnownPosition = playerLatLng;
         }
     }
-
     updateActionButtons(player, playerLatLng);
 }
 
@@ -270,8 +254,6 @@ function updatePlayerLocation(player, position) {
  * @param {object} playerLatLng - La position actuelle du joueur.
  */
 function updateActionButtons(player, playerLatLng) {
-
-
     // Gère le bouton de bataille/d'entrée de donjon
     if (selectedDungeon && playerLatLng) {
         const distance = calculateDistance(playerLatLng, selectedDungeon.location);
@@ -284,9 +266,22 @@ function updateActionButtons(player, playerLatLng) {
     startBattleBtn.style.display = 'none';
 }
 
+/**
+ * Fonction d'initialisation principale de la carte.
+ */
+function initMap() {
+    // Étape 1: Chargez le personnage sauvegardé au début de la page
+    const player = loadCharacter();
+    if (!player) {
+        showNotification("Aucun personnage trouvé. Veuillez en créer un d'abord.", 'error');
+        // Redirige l'utilisateur vers la page de création si aucun personnage n'existe
+        setTimeout(() => {
+            window.location.href = 'character_creation.html';
+        }, 3000);
+        return;
+    }
 
-
-        // Initialisation du personnage avec les quêtes
+    // Initialisation du personnage avec les quêtes
     initializeCharacter(player);
 
     // Étape 2: Initialisation des variables et des éléments de la carte
@@ -307,95 +302,3 @@ function updateActionButtons(player, playerLatLng) {
     setSafePlaceBtn.style.display = isLieuSurQuest ? 'block' : 'none';
 
     // Étape 3: Ajout de la couche de tuiles OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    // Étape 4: Gestion des événements de la carte
-    window.addEventListener('resize', () => map.invalidateSize());
-
-  if (fullscreenBtn && mapElement) {
-        fullscreenBtn.addEventListener('click', () => {
-            // Bascule la classe 'fullscreen' sur l'élément de la carte
-            mapElement.classList.toggle('fullscreen');
-
-            // Mise à jour de la carte pour s'adapter à la nouvelle taille
-            // Cette fonction est spécifique à la librairie que vous utilisez (par exemple, Leaflet)
-            // L.map('map').invalidateSize();
-            if (map) {
-                map.invalidateSize();
-            }
-
-            // Met à jour le texte du bouton
-            if (mapElement.classList.contains('fullscreen')) {
-                fullscreenBtn.textContent = 'Quitter le plein écran';
-            } else {
-                fullscreenBtn.textContent = 'Plein écran';
-            }
-        });
-    }
-
-
-    recenterBtn.addEventListener('click', () => {
-        if (playerMarker) {
-            map.panTo(playerMarker.getLatLng());
-        } else {
-            showNotification("Votre position n'est pas encore connue.", "warning");
-        }
-    });
-
-    setSafePlaceBtn.addEventListener('click', () => {
-        if (playerMarker) {
-            player.safePlaceLocation = {
-                lat: playerMarker.getLatLng().lat,
-                lng: playerMarker.getLatLng().lng
-            };
-            player.quests.current = questsData[player.quests.current].nextQuestId;
-            savePlayer(player);
-            location.reload();
-        } else {
-            showNotification("Votre position n'est pas encore disponible. Veuillez patienter.", 'warning');
-        }
-    });
-
-    startBattleBtn.addEventListener('click', () => {
-        if (selectedDungeon) {
-            generateDungeon(selectedDungeon.isTutorial ? 'tutoriel' : { lat: selectedDungeon.location.lat, lng: selectedDungeon.location.lng });
-            window.location.href = 'battle.html';
-        } else {
-            showNotification("Veuillez sélectionner un donjon pour y entrer.", 'warning');
-        }
-    });
-
-    // Étape 5: Démarrage de la géolocalisation
-    if (navigator.geolocation) {
-        navigator.geolocation.watchPosition(
-            (position) => updatePlayerLocation(player, position),
-            (error) => {
-                console.error("Erreur de géolocalisation :", error);
-                showNotification("Impossible d'obtenir votre position. La carte ne pourra pas fonctionner correctement.", 'error');
-                const defaultLatLng = L.latLng(48.8566, 2.3522);
-                if (!playerMarker) {
-                    playerMarker = L.marker(defaultLatLng, { icon: playerIcon }).addTo(map);
-                    playerMarker.bindTooltip("Position par défaut", { permanent: true, direction: "top" });
-                    map.setView(defaultLatLng, 15);
-                    loadDungeons(player, defaultLatLng);
-                }
-            }, {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 0,
-            }
-        );
-    } else {
-        showNotification("Votre navigateur ne supporte pas la géolocalisation.", 'warning');
-        const defaultLatLng = L.latLng(48.8566, 2.3522);
-        playerMarker = L.marker(defaultLatLng, { icon: playerIcon }).addTo(map);
-        playerMarker.bindTooltip("Position par défaut", { permanent: true, direction: "top" });
-        map.setView(defaultLatLng, 15);
-        loadDungeons(player, defaultLatLng);
-    }
-}
-
-// Démarrage de l'initialisation du jeu une fois le DOM chargé
-document.addEventListener('DOMContentLoaded', initMap);
