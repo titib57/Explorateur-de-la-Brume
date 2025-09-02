@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const questsDisplay = document.getElementById('quests-display');
     const inventoryDisplay = document.getElementById('inventory-display');
     const equipmentDisplay = document.getElementById('equipment-display');
-    const characterInfoDisplay = document.getElementById('character-info-display'); 
+    const characterInfoDisplay = document.getElementById('character-info-display');
     const characterForm = document.getElementById('character-form');
     const characterExistsSection = document.getElementById('character-exists-section');
     const existingCharacterDisplay = document.getElementById('existing-character-display');
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fonction pour rendre le personnage sur la page de gestion
     function renderCharacter(character) {
         if (!character) return;
-        
+
         // 1. Section "Mon personnage"
         if (characterDisplay) {
             characterDisplay.innerHTML = `
@@ -135,39 +135,39 @@ document.addEventListener('DOMContentLoaded', () => {
         renderExistingCharacterOnCreationPage(character);
     }
     
-const playBtn = document.getElementById('play-btn');
+    // NOUVELLE LOGIQUE : Écouteur de clic pour le bouton "Commencer l'aventure"
+    if (playBtn) {
+        playBtn.addEventListener('click', async () => {
+            const user = auth.currentUser;
+            if (user) {
+                try {
+                    // Vérifiez si le personnage a déjà une quête
+                    const docRef = doc(db, "users", user.uid);
+                    const docSnap = await getDoc(docRef);
+                    const hasActiveQuest = docSnap.exists() && docSnap.data().quests && Object.keys(docSnap.data().quests).length > 0;
 
-if (playBtn) {
-    playBtn.addEventListener('click', async () => {
-        const user = auth.currentUser;
-        if (user) {
-            try {
-                // Utilisez l'objet initialQuest importé pour l'ajouter aux données de l'utilisateur
-                const userDocRef = doc(db, 'users', user.uid);
-                await setDoc(userDocRef, {
-                    quests: {
-                        [initialQuest.questId]: initialQuest
+                    if (!hasActiveQuest) {
+                        // Si le personnage n'a pas de quête, ajoutez la quête initiale
+                        await setDoc(docRef, {
+                            quests: {
+                                [initialQuest.questId]: initialQuest
+                            }
+                        }, { merge: true });
+                        showNotification("Votre première quête a commencé !", "success");
                     }
-                }, { merge: true });
 
-                // Masquez le bouton "Commencer l'aventure" après le lancement de la quête
-                playBtn.classList.add('hidden');
-                
-                // Optionnel : Informez l'utilisateur que la quête a démarré
-                alert('Votre première quête a commencé !');
-                
-                // Optionnel : Mettez à jour l'affichage de la page pour montrer la nouvelle quête acceptée
-                // Par exemple : displayQuests(initialQuest);
+                    // Redirigez l'utilisateur vers la carte du monde
+                    window.location.href = "world_map.html";
 
-            } catch (error) {
-                console.error('Erreur lors du démarrage de la quête :', error);
-                alert('Une erreur est survenue. Veuillez réessayer.');
+                } catch (error) {
+                    console.error('Erreur lors du démarrage de la quête :', error);
+                    showNotification("Une erreur est survenue. Veuillez réessayer.", "error");
+                }
+            } else {
+                showNotification("Vous devez être connecté pour commencer.", "error");
             }
-        } else {
-            alert('Vous devez être connecté pour commencer.');
-        }
-    });
-}
+        });
+    }
 
     // NOUVELLE LOGIQUE pour la page de la carte du monde
     function renderWorldMapCharacterInfo(character) {
@@ -181,7 +181,6 @@ if (playBtn) {
             `;
         }
     }
-
 
     async function loadCharacterData(user) {
         const characterRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
@@ -286,9 +285,6 @@ if (playBtn) {
                 console.error("Erreur de déconnexion :", error);
             });
         });
-    }
-    if (playBtn) {
-        playBtn.addEventListener('click', () => { window.location.href = "world_map.html"; });
     }
     if (updateBtn) {
         updateBtn.addEventListener('click', () => { window.location.href = "character.html"; });
