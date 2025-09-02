@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (playBtn) playBtn.classList.remove('hidden');
     if (deleteBtn) deleteBtn.classList.remove('hidden');
     if (updateBtn) updateBtn.classList.remove('hidden');
-    }
+    };
 
 // NOUVELLE LOGIQUE pour la page de la carte du monde
     if (characterInfoDisplay) {
