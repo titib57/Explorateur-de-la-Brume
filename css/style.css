@@ -274,8 +274,6 @@ body {
 }
 
 #logout-button {
-    /* Fond rouge pour signifier l'action de déconnexion */
-    background-color: #d9534f;
     /* Couleur du texte en blanc pour un bon contraste */
     color: white;
     border: none;
@@ -290,7 +288,7 @@ body {
 
 #logout-button:hover {
     /* Change la couleur au survol pour un feedback visuel */
-    background-color: #c9302c;
+    background-color: #ff0800;
 }
 
 #logout-button:active {
