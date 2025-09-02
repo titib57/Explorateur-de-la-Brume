@@ -34,11 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
         characterDisplay.innerHTML = `
             <div class="character-card">
             <h3>${character.name}</h3>
-            <p>Classe : ${character.class}</p>
+          
             <p>Niveau : ${character.level}</p>
             <p>Points de vie : ${character.hp}</p>
-            <p>Mana : ${character.mana}</p>
-            <p>Endurance : ${character.stamina}</p>
+            <p>Points de magie : ${character.mana}</p>
+            <p>Fatigue : ${character.stamina}</p>
             </div>
         `;
         if (loadingMessage) loadingMessage.classList.add('hidden');
@@ -63,11 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
         existingCharacterDisplay.innerHTML = `
             <div class="character-card">
             <h3>${character.name}</h3>
-            <p>Classe : ${character.class}</p>
+           
             <p>Niveau : ${character.level}</p>
             <p>Points de vie : ${character.hp}</p>
-            <p>Mana : ${character.mana}</p>
-            <p>Endurance : ${character.stamina}</p>
+            <p>Points de magie : ${character.mana}</p>
+            <p>Fatigue : ${character.stamina}</p>
             </div>
         `;
         if (loadingMessage) loadingMessage.classList.add('hidden');
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 height: height,
                 weight: weight,
                 class: charClass,
-                hp: 100,
+                hp: 20,
                 level: 1,
                 mana: 50, // Point de magie pour les sorts 🧙‍♂️
                 stamina: 80, // Endurance pour les actions physiques 🏃‍♂️
