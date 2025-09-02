@@ -33,10 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!characterDisplay) return;
         characterDisplay.innerHTML = `
             <div class="character-card">
-                <h3>${character.name}</h3>
-                <p>Classe : ${character.class}</p>
-                <p>Niveau : ${character.level}</p>
-                <p>Points de vie : ${character.hp}</p>
+            <h3>${character.name}</h3>
+            <p>Classe : ${character.class}</p>
+            <p>Niveau : ${character.level}</p>
+            <p>Points de vie : ${character.hp}</p>
+            <p>Mana : ${character.mana}</p>
+            <p>Endurance : ${character.stamina}</p>
             </div>
         `;
         if (loadingMessage) loadingMessage.classList.add('hidden');
@@ -60,10 +62,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!existingCharacterDisplay) return;
         existingCharacterDisplay.innerHTML = `
             <div class="character-card">
-                <h3>${character.name}</h3>
-                <p>Classe : ${character.class}</p>
-                <p>Niveau : ${character.level}</p>
-                <p>Points de vie : ${character.hp}</p>
+            <h3>${character.name}</h3>
+            <p>Classe : ${character.class}</p>
+            <p>Niveau : ${character.level}</p>
+            <p>Points de vie : ${character.hp}</p>
+            <p>Mana : ${character.mana}</p>
+            <p>Endurance : ${character.stamina}</p>
             </div>
         `;
         if (loadingMessage) loadingMessage.classList.add('hidden');
@@ -144,6 +148,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 class: charClass,
                 hp: 100,
                 level: 1,
+                mana: 50, // Point de magie pour les sorts 🧙‍♂️
+                stamina: 80, // Endurance pour les actions physiques 🏃‍♂️
+                strength: 10, // Force pour le combat 💪
+                intelligence: 8, // Intelligence pour les sorts et énigmes 🧠
+                gold: 3, // Argent du personnage 💰
+                inventory: [couteau, potionPV], // Inventaire pour les objets et équipements
+                quests: {} // Suivi des quêtes
                 creationDate: new Date()
             };
 
