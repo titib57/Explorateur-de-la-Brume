@@ -2,7 +2,7 @@
 
 import { showNotification } from '../core/notifications.js';
 import { generateDungeon } from '../core/dungeon.js';
-import { questsData } from '../core/quests.js';
+import { questsData } from './quests.js';
 import { savePlayer, loadCharacter } from '../core/state.js';
 import { initializeCharacter } from './character.js';
 
