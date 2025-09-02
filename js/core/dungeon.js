@@ -2,7 +2,7 @@
 
 // Importations des données et des utilitaires nécessaires
 import { pointsOfInterest, dungeonTypes, monstersData, bossesData } from './gameData.js';
-import { questsData } from '../modules/quests.js';
+import { initialQuest } from './questsData.js';
 import { showNotification } from './notifications.js';
 import { currentDungeon, player, savePlayer } from './state.js';
 
@@ -135,7 +135,7 @@ export function generateDungeon(locationInfo) {
 
         // Gérer la quête dynamique
         const newQuestId = closestPOI.questId;
-        const newQuest = questsData[newQuestId];
+        const newQuest = initialQuest[newQuestId];
 
         // On vérifie si la quête existe et si le joueur ne l'a pas déjà
         if (newQuest && (!player.quests || !player.quests[newQuestId])) {
