@@ -25,9 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const existingCharacterDisplay = document.getElementById('existing-character-display');
     // Changement ici : le sélecteur pointe maintenant vers l'ID unique
     const deleteBtnOnCharacterPage = document.getElementById('delete-btn-creation-page');
+    const logoutLink = document.getElementById('logout-link');
 
-    // Autres boutons
-    const logoutButton = document.getElementById('logout-button');
 
     function renderCharacter(character) {
         if (!characterDisplay) return;
@@ -184,15 +183,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (deleteBtn) {
         deleteBtn.addEventListener('click', deleteCharacterData);
     }
-    if (logoutButton) {
-        logoutButton.addEventListener('click', () => {
-            signOut(auth).then(() => {
-                window.location.href = "login.html";
-            }).catch((error) => {
-                console.error("Erreur de déconnexion :", error);
-            });
+
+
+if (logoutLink) {
+    logoutLink.addEventListener('click', (e) => {
+        e.preventDefault(); // Empêche le lien de recharger la page
+        signOut(auth).then(() => {
+            window.location.href = "login.html";
+        }).catch((error) => {
+            console.error("Erreur de déconnexion :", error);
         });
-    }
+    });
+}
     if (playBtn) {
         playBtn.addEventListener('click', () => { window.location.href = "world_map.html"; });
     }

@@ -264,8 +264,16 @@ body {
     font-family: var(--main-font);
     font-size: 0.9em;
 }
-#lo
-gout-button {
+
+
+
+
+/* Effet au survol */
+.button:hover {
+    background-color: #c9302c; /* Rouge plus foncé au survol */
+}
+
+#logout-button {
     /* Fond rouge pour signifier l'action de déconnexion */
     background-color: #d9534f;
     /* Couleur du texte en blanc pour un bon contraste */
