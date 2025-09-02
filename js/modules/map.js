@@ -8,12 +8,12 @@ import { initializeCharacter } from './character.js';
 /**
  * Fonction d'initialisation principale de la carte.
  */
-function initMap() {
-    // Étape 1: Chargez le personnage sauvegardé au début de la page
-    const player = loadCharacter();
+async function initMap() {
+    // Attendez que le personnage soit chargé depuis Firebase
+    const player = await loadCharacter();
+    
     if (!player) {
         showNotification("Aucun personnage trouvé. Veuillez en créer un d'abord.", 'error');
-        // Redirige l'utilisateur vers la page de création si aucun personnage n'existe
         setTimeout(() => {
             window.location.href = '../character_creation.html';
         }, 3000);
