@@ -15,35 +15,96 @@ document.addEventListener('DOMContentLoaded', () => {
     const playBtn = document.getElementById('play-btn');
     const deleteBtn = document.getElementById('delete-btn');
     const updateBtn = document.getElementById('update-btn');
-
-// NOUVELLE VARIABLE pour la page de carte du monde
+    const statsDisplay = document.getElementById('stats-display');
+    const questsDisplay = document.getElementById('quests-display');
+    const inventoryDisplay = document.getElementById('inventory-display');
+    const equipmentDisplay = document.getElementById('equipment-display');
     const characterInfoDisplay = document.getElementById('character-info-display'); 
-
-    // Variables pour la page de création de personnage (nouveaux)
     const characterForm = document.getElementById('character-form');
     const characterExistsSection = document.getElementById('character-exists-section');
     const existingCharacterDisplay = document.getElementById('existing-character-display');
-    // Changement ici : le sélecteur pointe maintenant vers l'ID unique
     const deleteBtnOnCharacterPage = document.getElementById('delete-btn-creation-page');
     const logoutLink = document.getElementById('logout-link');
 
 
     function renderCharacter(character) {
-        if (!characterDisplay) return;
+        if (!character) return; // S'assure que les données existent
+            // 1. Section "Mon personnage"
+    if (characterDisplay) {
         characterDisplay.innerHTML = `
-            <div class="character-card">
             <h3>${character.name}</h3>
-          
             <p>Niveau : ${character.level}</p>
-            <p>Points de vie : ${character.hp}</p>
-            <p>Points de magie : ${character.mana}</p>
-            <p>Fatigue : ${character.stamina}</p>
-            </div>
+            <p>Points de vie : ${character.hp}/${character.maxHp}</p>
+            <p>Points de magie : ${character.mana}/${character.maxMana}</p>
+            <p>Or : ${character.gold}</p>
         `;
-        if (loadingMessage) loadingMessage.classList.add('hidden');
-        if (playBtn) playBtn.classList.remove('hidden');
-        if (deleteBtn) deleteBtn.classList.remove('hidden');
-        if (updateBtn) updateBtn.classList.remove('hidden');
+    }
+
+    // 2. Section "Statistiques"
+    if (statsDisplay && character.stats) {
+        statsDisplay.innerHTML = `
+            <p>Force : ${character.stats.strength}</p>
+            <p>Intelligence : ${character.stats.intelligence}</p>
+            <p>Vitesse : ${character.stats.speed}</p>
+            <p>Dextérité : ${character.stats.dexterity}</p>
+        `;
+    }
+
+    // 3. Section "Quêtes"
+    if (questsDisplay && character.quests) {
+        const questKeys = Object.keys(character.quests);
+        if (questKeys.length > 0) {
+            questsDisplay.innerHTML = questKeys.map(key => {
+                const quest = character.quests[key];
+                return `
+                    <div>
+                        <h4>${quest.title}</h4>
+                        <p>Statut : ${quest.status}</p>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            questsDisplay.innerHTML = '<p>Aucune quête en cours.</p>';
+        }
+    }
+
+    // 4. Section "Inventaire"
+    if (inventoryDisplay && character.inventory) {
+        const inventoryKeys = Object.keys(character.inventory);
+        if (inventoryKeys.length > 0) {
+            inventoryDisplay.innerHTML = inventoryKeys.map(key => {
+                const item = character.inventory[key];
+                return `<p>${item.name} (x${item.quantity})</p>`;
+            }).join('');
+        } else {
+            inventoryDisplay.innerHTML = '<p>Votre inventaire est vide.</p>';
+        }
+    }
+
+    // 5. Section "Équipement"
+    if (equipmentDisplay && character.equipment) {
+        equipmentDisplay.innerHTML = `
+            <p>Arme : ${character.equipment.weapon ? character.equipment.weapon.name : 'Aucune'}</p>
+            <p>Armure : ${character.equipment.armor ? character.equipment.armor.name : 'Aucune'}</p>
+        `;
+    }
+
+ // Afficher toutes les sections
+    const sectionsToDisplay = ['character-section', 'stats-section', 'quest-section', 'inventory-section', 'equipement-section'];
+    sectionsToDisplay.forEach(id => {
+        const section = document.getElementById(id);
+        if (section) section.classList.remove('hidden');
+    });
+
+    // Cacher le message de chargement
+    const loadingMessage = document.getElementById('loading-message');
+    if (loadingMessage) loadingMessage.classList.add('hidden');
+}
+
+    if (loadingMessage) loadingMessage.classList.add('hidden');
+    if (playBtn) playBtn.classList.remove('hidden');
+    if (deleteBtn) deleteBtn.classList.remove('hidden');
+    if (updateBtn) updateBtn.classList.remove('hidden');
     }
 
 // NOUVELLE LOGIQUE pour la page de la carte du monde

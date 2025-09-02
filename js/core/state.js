@@ -154,13 +154,6 @@ export function loadCharacter() {
     return null;
 }
 
-/**
- * Sauvegarde l'objet joueur dans le localStorage.
- * @param {object} p L'objet joueur à sauvegarder.
- */
-export function savePlayer(p) {
-    localStorage.setItem('playerCharacter', JSON.stringify(p));
-}
 
 /**
  * Sauvegarde les données du personnage dans Firestore.
