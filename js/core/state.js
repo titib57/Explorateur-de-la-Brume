@@ -3,7 +3,7 @@
 
 import { itemsData } from './gameData.js';
 import { showNotification } from './notifications.js';
-import { initialQuest } from './questsData.js';
+import { questsData } from './questsData.js';
 import { auth, db } from './firebase_config.js';
 import { onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
@@ -130,7 +130,7 @@ export function createCharacter(name, playerClass, age, height, weight) {
         0,
         100,
         { strength: 1, intelligence: 1, speed: 1, dexterity: 1 },
-        [initialQuest], // Ajout de la quête initiale ici
+        [initial_adventure_quest], // Ajout de la quête initiale ici
         {},
         {},
         [],

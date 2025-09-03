@@ -1,11 +1,9 @@
-// Fichier : firebase_game_logic.js
-
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { auth, db } from "./firebase_config.js";
 import { showNotification } from './notifications.js';
-import { deleteCharacterData } from './state.js';
-import { initialQuest } from './questsData.js'; // Importez l'objet complet des quêtes
+import { questsData } from './questsData.js'; // ⬅️ Ajout de l'importation manquante
+
 
 // =========================================================================
 // VARIABLES GLOBALES (sauf celles qui changent d'une page à l'autre)
@@ -77,6 +75,10 @@ function renderCharacter(character) {
                 `;
                 if (activeQuestsList) activeQuestsList.appendChild(li);
             }
+        } else {
+            const li = document.createElement('li');
+            li.textContent = "Aucune quête active pour le moment.";
+            if (activeQuestsList) activeQuestsList.appendChild(li);
         }
 
         // On affiche les quêtes terminées
@@ -91,18 +93,18 @@ function renderCharacter(character) {
         
         // On affiche les quêtes non commencées
         for (const questId in questsData) {
-            // Vérifier si la quête n'est pas la quête active et n'est pas déjà complétée
-            if (!character.quests.current || character.quests.current.questId !== questId) {
-                if (!character.quests.completed || !character.quests.completed[questId]) {
-                    const questData = questsData[questId];
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <h4>${questData.title}</h4>
-                        <p>${questData.description}</p>
-                        <button class="accept-quest-btn" data-quest-id="${questId}">Accepter</button>
-                    `;
-                    if (unstartedQuestsList) unstartedQuestsList.appendChild(li);
-                }
+            const isCompleted = character.quests.completed && character.quests.completed[questId];
+            const isActive = character.quests.current && character.quests.current.questId === questId;
+
+            if (!isCompleted && !isActive) {
+                const questData = questsData[questId];
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <h4>${questData.title}</h4>
+                    <p>${questData.description}</p>
+                    <button class="accept-quest-btn" data-quest-id="${questId}">Accepter</button>
+                `;
+                if (unstartedQuestsList) unstartedQuestsList.appendChild(li);
             }
         }
     }
@@ -310,6 +312,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    
+    async function deleteCharacterData(user) {
+        const characterRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
+        try {
+            await deleteDoc(characterRef);
+            showNotification("Personnage supprimé avec succès !", "info");
+            setTimeout(() => { window.location.href = "character.html"; }, 1500);
+        } catch (error) {
+            console.error("Erreur lors de la suppression du personnage :", error);
+            showNotification("Erreur lors de la suppression. Veuillez réessayer.", "error");
+        }
+    }
 
     // Gère la suppression du personnage
     if (deleteBtnOnCharacterPage) {
@@ -317,10 +331,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const user = auth.currentUser;
             if (user) {
                 await deleteCharacterData(user);
-                showNotification("Personnage supprimé. Vous pouvez en créer un nouveau.", "info");
-                setTimeout(() => {
-                    window.location.href = "character.html";
-                }, 1500);
             }
         });
     }
@@ -329,10 +339,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const user = auth.currentUser;
             if (user) {
                 await deleteCharacterData(user);
-                showNotification("Personnage supprimé. Vous pouvez en créer un nouveau.", "info");
-                setTimeout(() => {
-                    window.location.href = "character.html";
-                }, 1500);
             }
         });
     }
