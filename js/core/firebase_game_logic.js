@@ -5,7 +5,7 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/f
 import { auth, db } from "./firebase_config.js";
 import { showNotification } from './notifications.js';
 import { deleteCharacterData } from './state.js';
-import { questsData } from './questsData.js'; // Importez l'objet complet des quêtes
+import { initialQuest } from './questsData.js'; // Importez l'objet complet des quêtes
 
 // =========================================================================
 // VARIABLES GLOBALES (sauf celles qui changent d'une page à l'autre)
