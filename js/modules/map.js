@@ -3,7 +3,6 @@
 import { showNotification } from '../core/notifications.js';
 import { generateDungeon } from '../core/dungeon.js';
 import { savePlayer, loadCharacter } from '../core/state.js';
-import { initializeCharacter } from './character.js';
 
 /**
  * Fonction d'initialisation principale de la carte.
@@ -170,7 +169,6 @@ let mapElement;
 // Éléments du DOM (déclarés au niveau global pour une meilleure lisibilité)
 let fullscreenBtn;
 let startBattleBtn;
-let classTreeBtn;
 let recenterBtn;
 let setSafePlaceBtn;
 let dungeonDetails;

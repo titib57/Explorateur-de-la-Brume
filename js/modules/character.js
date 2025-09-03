@@ -1,6 +1,17 @@
-﻿// Fichier : js/modules/character.js
-// Ce module gère la logique d'interaction avec l'état du personnage.
+﻿// Ce module gère la logique d'interaction avec l'état du personnage.
 // La gestion de l'état elle-même est centralisée dans le module core/state.js.
+
+// Importations des modules de l'application
+import { showNotification } from './notifications.js';
+import {
+    auth,
+    db,
+    player,
+    savePlayer,
+    deleteCharacterData,
+    userId,
+    authPromise
+} from '../core/state.js';
 
 /**
  * Initialise le personnage avec la quête de départ.
@@ -16,52 +27,6 @@ export function initializeCharacter(player) {
         }
     }
 }
-
-// Déclaration des variables globales fournies par l'environnement
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-// Importations des modules Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import { savePlayer, player, saveCharacterData, deleteCharacterData } from '../core/state.js';
-
-let db, auth, userId;
-let unsubscribeFromCharacterListener;
-
-// --- Définition de la classe Player ---
-// Ceci simule la classe Player qui serait dans le module 'state.js'
-class Player {
-    constructor(data) {
-        this.name = data.name;
-        this.class = data.class;
-        this.age = data.age;
-        this.height = data.height;
-        this.weight = data.weight;
-        this.xp = data.xp || 0;
-        this.level = data.level || 1;
-        this.quests = data.quests || {};
-    }
-
-// Ajout de la méthode addXp directement dans la classe  
-    addXp(amount) {
-        this.xp += amount;
-        // La logique pour la montée de niveau serait ici
-        console.log(`XP ajoutée : ${amount}. Total XP : ${this.xp}`);
-    }
-}
-
-
-// --- Fonctions utilitaires du module character.js ---
-export function giveXP(amount) {
-    if (!player) return;
-    player.addXp(amount);
-    savePlayer(player);
-}
-
-
 
 // --- Éléments du DOM ---
 const loadingMessage = document.getElementById('loading-message');
@@ -81,25 +46,6 @@ const cancelDeleteBtn = document.getElementById('cancel-delete');
 const userIdDisplay = document.getElementById('user-id-display');
 
 // --- Fonctions utilitaires pour l'UI ---
-function showNotification(message, type) {
-    const container = document.getElementById('notification-container');
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    container.appendChild(notification);
-
-    setTimeout(() => {
-        notification.classList.add('notification-show');
-    }, 10);
-
-    setTimeout(() => {
-        notification.classList.remove('notification-show');
-        notification.addEventListener('transitionend', () => {
-            notification.remove();
-        });
-    }, 3000);
-}
-
 function showUI(element) {
     element.style.display = 'flex';
 }
@@ -146,66 +92,46 @@ function updateUI(character) {
         hideUI(actionButtons);
         showUI(characterForm);
         charNameInput.disabled = false;
+        // Réinitialiser le formulaire
+        characterForm.reset();
     }
     hideUI(loadingMessage);
 }
 
 // --- Gestion des événements et Initialisation ---
-window.onload = function() {
-    // Initialisation de Firebase
-    try {
-        const app = initializeApp(firebaseConfig);
-        auth = getAuth(app);
-        db = getFirestore(app);
-    } catch (error) {
-        console.error("Erreur lors de l'initialisation de Firebase : ", error);
-        showNotification("Erreur de connexion aux serveurs de jeu.", 'error');
-        return;
-    }
-    
+// Utilisation d'une fonction asynchrone pour attendre la résolution de l'authentification
+(async () => {
     showUI(loadingMessage);
 
-    // Écouteur de l'état d'authentification pour gérer l'initialisation
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            userId = user.uid;
-            userIdDisplay.textContent = userId;
-            const characterRef = doc(db, 'artifacts', appId, 'users', userId, 'characters', userId);
-            
-            // Écouteur en temps réel pour le document du personnage
-            if (unsubscribeFromCharacterListener) {
-                unsubscribeFromCharacterListener();
-            }
-            unsubscribeFromCharacterListener = onSnapshot(characterRef, (docSnapshot) => {
-                const characterData = docSnapshot.exists() ? docSnapshot.data() : null;
-                if (characterData) {
-                    player = new Player(characterData);
-                    initializeCharacter(player); // Appel à la fonction du module character.js
-                } else {
-                    player = null;
-                }
-                updateUI(characterData);
-            }, (error) => {
-                console.error("Erreur lors de l'écoute du personnage : ", error);
-                showNotification("Erreur de synchronisation des données.", 'error');
-                updateUI(null);
-            });
+    // Attendre que l'authentification soit terminée
+    await authPromise;
 
+    if (!userId) {
+        console.log("Utilisateur non connecté après l'authentification.");
+        updateUI(null);
+        return;
+    }
+
+    userIdDisplay.textContent = userId;
+
+    // Écouteur en temps réel pour le document du personnage
+    const { onSnapshot, doc } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js");
+    const characterRef = doc(db, 'artifacts', 'default-app-id', 'users', userId, 'characters', userId);
+
+    onSnapshot(characterRef, (docSnapshot) => {
+        const characterData = docSnapshot.exists() ? docSnapshot.data() : null;
+        if (characterData) {
+            initializeCharacter(characterData);
         } else {
-            // Si pas d'utilisateur, on essaie de s'authentifier
-            try {
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Erreur d'authentification : ", error);
-                showNotification("Erreur de connexion. Veuillez réessayer.", 'error');
-                updateUI(null);
-            }
+            // Pas de personnage, on réinitialise l'état
         }
+        updateUI(characterData);
+    }, (error) => {
+        console.error("Erreur lors de l'écoute du personnage : ", error);
+        showNotification("Erreur de synchronisation des données.", 'error');
+        updateUI(null);
     });
+
 
     // Écouteur pour la soumission du formulaire
     characterForm.addEventListener('submit', (e) => {
@@ -225,7 +151,9 @@ window.onload = function() {
             class: charClassSelect.value,
             xp: 0,
             level: 1,
-            quests: { current: 'lieu_sur' },
+            quests: {
+                current: 'lieu_sur'
+            },
             createdAt: new Date().toISOString(),
             lastPlayed: new Date().toISOString()
         };
@@ -239,31 +167,11 @@ window.onload = function() {
     });
 
     confirmDeleteBtn.addEventListener('click', () => {
-        deleteCharacter();
+        deleteCharacterData();
         hidePopup();
     });
 
     cancelDeleteBtn.addEventListener('click', () => {
         hidePopup();
     });
-};
-
-async function deleteCharacter() {
-    if (!userId) {
-        showNotification("Erreur : Utilisateur non authentifié.", 'error');
-        return;
-    }
-    try {
-        const charRef = doc(db, 'artifacts', appId, 'users', userId, 'characters', userId);
-        await deleteDoc(charRef);
-        showNotification("Personnage supprimé avec succès !", 'success');
-        // Réinitialiser le formulaire et l'UI
-        characterForm.reset();
-        charNameInput.disabled = false;
-        updateUI(null);
-        player = null; // Réinitialiser le joueur
-    } catch (error) {
-        console.error("Erreur lors de la suppression du personnage : ", error);
-        showNotification("Erreur lors de la suppression.", 'error');
-    }
-}
+})();

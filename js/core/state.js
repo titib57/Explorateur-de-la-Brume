@@ -3,18 +3,18 @@
 import { itemsData } from './gameData.js';
 import { showNotification } from './notifications.js';
 
-// Importations et initialisation de Firebase pour la gestion de la persistance des données
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+// Importations des modules Firebase
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import { firebaseConfig } from './firebase_config.js';
 
 // Global variables provided by the Canvas environment
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initialAuthToken : null;
 
-// Initialisation de l'application Firebase
-const app = initializeApp(firebaseConfig);
+// Initialisation de l'application Firebase (une seule fois)
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
@@ -165,7 +165,7 @@ export async function loadCharacter() {
         console.log("Aucun utilisateur n'est connecté. Impossible de charger un personnage.");
         return null;
     }
-    
+
     try {
         const charRef = doc(db, 'artifacts', appId, 'users', userId, 'characters', userId);
         const characterSnap = await getDoc(charRef);
