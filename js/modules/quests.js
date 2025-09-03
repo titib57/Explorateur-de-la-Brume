@@ -176,9 +176,7 @@ export function updateQuestsUI() {
 }
 
 
- * Vérifie si la quête "lieu_sur" est actuellement la quête active du joueur.
- * @returns {boolean} Vrai si la quête est active, faux sinon.
- */
+
 export function isSetSafePlaceQuest() {
     if (!player || !player.quests || !player.quests.current) {
         return false;
