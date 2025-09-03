@@ -2,16 +2,8 @@
 // La gestion de l'état elle-même est centralisée dans le module core/state.js.
 
 // Importations des modules de l'application
-import { showNotification } from './notifications.js';
-import {
-    auth,
-    db,
-    player,
-    savePlayer,
-    deleteCharacterData,
-    userId,
-    authPromise
-} from '../core/state.js';
+import { showNotification } from '../core/notifications.js';
+import { auth, db, player, savePlayer, deleteCharacterData, userId, authPromise } from '../core/state.js';
 
 /**
  * Initialise le personnage avec la quête de départ.
