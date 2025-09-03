@@ -7,8 +7,8 @@ import { questsData } from './questsData.js';
 import { auth, db } from './firebase_config.js';
 import { onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import { upgradeShelter } from './module/shelterManager.js';
-import { startNextWaveTimer } from './module/waveManager.js';
+import { upgradeShelter } from '../module/shelterManager.js';
+import { startNextWaveTimer } from '../module/waveManager.js';
 
 
 // Global variables provided by the Canvas environment
