@@ -29,7 +29,7 @@ let selectedDungeon = null;
 let dungeonMarkers;
 let lastKnownPosition = null;
 let mapElement;
-let player; // Ajout de la variable player pour la rendre accessible globalement
+let player = null; // Initialisation de player à null par défaut
 
 // Éléments du DOM (déclarés au niveau global pour une meilleure lisibilité)
 let fullscreenBtn;
@@ -99,11 +99,18 @@ async function initMap() {
             }
         });
     }
-
-    // Étape 5: Démarrage de la géolocalisation
+    
+    // Étape 5: Démarrage de la géolocalisation après le chargement du DOM
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
-            (position) => updatePlayerLocation(player, position),
+            (position) => {
+                // Vérification ajoutée avant d'appeler la fonction
+                if (player) {
+                    updatePlayerLocation(player, position);
+                } else {
+                    console.log("Les données du personnage ne sont pas encore chargées, mise à jour de la position ignorée.");
+                }
+            },
             (error) => {
                 console.error("Erreur de géolocalisation :", error);
                 showNotification("Impossible d'obtenir votre position. La carte ne pourra pas fonctionner correctement.", 'error');
@@ -112,7 +119,9 @@ async function initMap() {
                     playerMarker = L.marker(defaultLatLng, { icon: playerIcon }).addTo(map);
                     playerMarker.bindTooltip("Position par défaut", { permanent: true, direction: "top" });
                     map.setView(defaultLatLng, 15);
-                    loadDungeons(player, defaultLatLng);
+                    if (player) {
+                        loadDungeons(player, defaultLatLng);
+                    }
                 }
             }, {
                 enableHighAccuracy: true,
@@ -126,7 +135,9 @@ async function initMap() {
         playerMarker = L.marker(defaultLatLng, { icon: playerIcon }).addTo(map);
         playerMarker.bindTooltip("Position par défaut", { permanent: true, direction: "top" });
         map.setView(defaultLatLng, 15);
-        loadDungeons(player, defaultLatLng);
+        if (player) {
+            loadDungeons(player, defaultLatLng);
+        }
     }
 }
 
@@ -136,6 +147,7 @@ async function initMap() {
  * @param {string} newQuestId - L'ID de la nouvelle quête.
  */
 function updateQuest(player, newQuestId) {
+    if (!player) return; // Vérification ajoutée
     player.quests.current = newQuestId;
     savePlayer(player);
 }
@@ -182,6 +194,7 @@ function updateDungeonDetails(dungeon) {
  * @param {object} playerLatLng - La position actuelle du joueur.
  */
 async function loadDungeons(player, playerLatLng) {
+    if (!player) return; // Vérification ajoutée pour éviter les erreurs
     if (!dungeonMarkers) {
         dungeonMarkers = L.layerGroup().addTo(map);
     }
@@ -312,6 +325,7 @@ out skel qt;
  * @param {object} position - L'objet de position de géolocalisation.
  */
 function updatePlayerLocation(player, position) {
+    if (!player) return; // Vérification ajoutée
     const { latitude, longitude } = position.coords;
     const playerLatLng = L.latLng(latitude, longitude);
 
@@ -340,6 +354,7 @@ function updatePlayerLocation(player, position) {
  * @param {object} playerLatLng - La position actuelle du joueur.
  */
 function updateActionButtons(player, playerLatLng) {
+    if (!player) return; // Vérification ajoutée
     // Gère le bouton de bataille/d'entrée de donjon
     if (selectedDungeon && playerLatLng) {
         const distance = calculateDistance(playerLatLng, selectedDungeon.location);
@@ -361,7 +376,7 @@ onAuthStateChanged(auth, async (user) => {
             console.log("Données du personnage chargées ! Initialisation de la carte...");
             initMap(); // L'initialisation de la carte est déplacée ici
         } else {
-            console.error("Impossible de charger les données du personnage.");
+            console.error("Impossible de charger les données du personnage. Redirection vers la création de personnage.");
             window.location.href = "character_creation.html";
         }
     } else {
