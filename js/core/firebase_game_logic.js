@@ -53,23 +53,43 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
 
-        // 3. Section "Quêtes"
-        if (questsDisplay && character.quests) {
-            const questKeys = Object.keys(character.quests);
-            if (questKeys.length > 0) {
-                questsDisplay.innerHTML = questKeys.map(key => {
-                    const quest = character.quests[key];
-                    return `
-                        <div>
-                            <h4>${quest.title}</h4>
-                            <p>Statut : ${quest.status}</p>
-                        </div>
-                    `;
-                }).join('');
-            } else {
-                questsDisplay.innerHTML = '<p>Aucune quête en cours.</p>';
-            }
+// 3. Section "Quêtes"
+if (character.quests) {
+    // Affichez le conteneur principal des quêtes
+    const questLog = document.getElementById('quest-log');
+    if (questLog) questLog.style.display = 'block';
+
+    const activeQuestsList = document.getElementById('active-quests-list');
+    const unstartedQuestsList = document.getElementById('unstarted-quests-list');
+    const completedQuestsList = document.getElementById('completed-quests-list');
+
+    // Videz les listes avant de les remplir
+    if (activeQuestsList) activeQuestsList.innerHTML = '';
+    if (unstartedQuestsList) unstartedQuestsList.innerHTML = '';
+    if (completedQuestsList) completedQuestsList.innerHTML = '';
+
+    // Parcourez les quêtes du personnage et triez-les
+    const quests = Object.values(character.quests);
+    quests.forEach(quest => {
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `
+            <div>
+                <h4>${quest.title}</h4>
+                <p>Statut : ${quest.status}</p>
+                <p>Description : ${quest.description}</p>
+            </div>
+        `;
+        // Ajoutez d'autres détails de quête si nécessaire
+        
+        if (quest.status === 'active' && activeQuestsList) {
+            activeQuestsList.appendChild(listItem);
+        } else if (quest.status === 'unstarted' && unstartedQuestsList) {
+            unstartedQuestsList.appendChild(listItem);
+        } else if (quest.status === 'completed' && completedQuestsList) {
+            completedQuestsList.appendChild(listItem);
         }
+    });
+}
 
         // 4. Section "Inventaire"
         if (inventoryDisplay && character.inventory) {
