@@ -4,7 +4,7 @@
  */
 
 // Importez les fonctions nécessaires de Firebase
-import { doc, getDoc, setDoc } from from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { auth, db } from "../config/firebase-config.js"; // Assurez-vous d'avoir ce fichier de configuration
 
 const COLLECTION_NAME = "users";
