@@ -5,7 +5,7 @@
 
 // Importations des données et des modules nécessaires
 import { questsData } from '../core/questsData.js';
-import { giveRewards } from './rewards.js'; // Supposons un nouveau module de récompenses
+// import { giveRewards } from './rewards.js'; // Supposons un nouveau module de récompenses
 import { shelterManager } from './shelterManager.js';
 
 // =========================================================================
