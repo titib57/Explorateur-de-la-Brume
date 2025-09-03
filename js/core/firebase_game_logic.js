@@ -162,7 +162,7 @@ if (character.quests) {
             if (user) {
                 try {
                     // Vérifiez si le personnage a déjà une quête
-                    const docRef = doc(db, "users", user.uid);
+                    const docRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
                     const docSnap = await getDoc(docRef);
                     const hasActiveQuest = docSnap.exists() && docSnap.data().quests && Object.keys(docSnap.data().quests).length > 0;
 
