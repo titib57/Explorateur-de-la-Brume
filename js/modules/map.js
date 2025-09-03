@@ -4,21 +4,33 @@ import { showNotification } from '../core/notifications.js';
 import { generateDungeon } from '../core/dungeon.js';
 import { savePlayer, loadCharacter } from '../core/state.js';
 import { isSetSafePlaceQuest, updateQuestObjective} from './quests.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
-/**
- * Fonction d'initialisation principale de la carte.
- */
+
+// Fonction pour initialiser la carte
 async function initMap() {
-    // Attendez que le personnage soit chargé depuis Firebase
-    const player = await loadCharacter();
-    
-    if (!player) {
-        showNotification("Aucun personnage trouvé. Veuillez en créer un d'abord.", 'error');
-        setTimeout(() => {
-            window.location.href = '../character_creation.html';
-        }, 3000);
-        return;
-    }
+    // Écouteur d'état d'authentification pour s'assurer que l'utilisateur est bien connecté
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            // L'utilisateur est connecté, on peut charger les données du personnage
+            const characterData = await loadCharacter(user);
+            if (characterData) {
+                console.log("Données du personnage chargées dans la carte !");
+                // Le reste de votre logique pour afficher la carte...
+            } else {
+                console.error("Impossible de charger les données du personnage.");
+                // Gérer le cas où le personnage n'existe pas
+            }
+        } else {
+            // L'utilisateur est déconnecté, rediriger vers la page de connexion
+            console.log("Utilisateur non connecté. Redirection...");
+            window.location.href = "login.html";
+        }
+    });
+}
+
+// Appeler la fonction d'initialisation de la carte
+document.addEventListener('DOMContentLoaded', initMap);
 
     // Étape 2: Initialisation des variables et des éléments de la carte
     map = L.map('map');
