@@ -768,3 +768,55 @@ button:hover {
 .login-link a:hover {
     text-decoration: underline;
 }
+/* Styles pour le pêle-mêle et la colonne */
+/* ------------------------------------ */
+.grid-pele-mele {
+    display: grid;
+    /* Crée des colonnes flexibles qui s'ajustent */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    /* Les lignes s'ajustent automatiquement pour un effet pêle-mêle */
+    grid-auto-rows: minmax(150px, auto);
+    gap: 20px;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 1200px;
+}
+
+.grid-pele-mele .item {
+    background-color: var(--bg-color-medium);
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Ajoutez un effet de pêle-mêle en variant la taille de certains éléments. 
+   Vous pouvez adapter ces règles pour cibler les éléments de votre choix (par ex. .quest-item) */
+.grid-pele-mele .item:nth-child(2) {
+    grid-column: span 2;
+}
+
+.grid-pele-mele .item:nth-child(4) {
+    grid-row: span 2;
+}
+
+.grid-pele-mele .item:nth-child(5) {
+    grid-column: span 2;
+}
+
+/* MEDIA QUERY pour les écrans de petite taille (smartphones, etc.) */
+@media (max-width: 768px) {
+    .grid-pele-mele {
+        /* Passe de la grille à la disposition en colonne */
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    /* Réinitialise les styles de pêle-mêle pour les éléments */
+    .grid-pele-mele .item {
+        grid-column: auto !important;
+        grid-row: auto !important;
+    }
+}
