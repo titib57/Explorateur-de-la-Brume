@@ -3,6 +3,7 @@
 import { showNotification } from '../core/notifications.js';
 import { generateDungeon } from '../core/dungeon.js';
 import { savePlayer, loadCharacter } from '../core/state.js';
+import { isSetSafePlaceQuest, updateQuestObjective} from './quests.js';
 
 /**
  * Fonction d'initialisation principale de la carte.

@@ -175,9 +175,17 @@ export function updateQuestsUI() {
     }
 }
 
-// =========================================================================
-// GESTION DE L'INITIALISATION
-// =========================================================================
+
+ * Vérifie si la quête "lieu_sur" est actuellement la quête active du joueur.
+ * @returns {boolean} Vrai si la quête est active, faux sinon.
+ */
+export function isSetSafePlaceQuest() {
+    if (!player || !player.quests || !player.quests.current) {
+        return false;
+    }
+    return player.quests.current === 'safe_place_quest';
+}
+
 
 // Gère le chargement initial de la page et la mise à jour de l'UI des quêtes.
 document.addEventListener('DOMContentLoaded', () => {
