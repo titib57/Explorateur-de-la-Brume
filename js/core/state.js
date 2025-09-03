@@ -1,5 +1,5 @@
 ﻿// Fichier : js/core/state.js
-// Ce module gère l'état global du jeu, y compris l'objet joueur, le donjon et les monstres.
+// Ce module gère l'état global du jeu, y compris l'objet joueur, le donjon, les monstres et l'abris.
 
 import { itemsData } from './gameData.js';
 import { showNotification } from './notifications.js';
@@ -7,6 +7,9 @@ import { questsData } from './questsData.js';
 import { auth, db } from './firebase_config.js';
 import { onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { upgradeShelter } from '../module/shelterManager.js';
+import { startNextWaveTimer } from '../module/waveManager.js';
+
 
 // Global variables provided by the Canvas environment
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -352,3 +355,22 @@ export function initDungeon(dungeon) {
 export function saveDungeon(dungeon) {
     localStorage.setItem('currentDungeon', JSON.stringify(dungeon));
 }
+
+// Référence aux éléments de l'interface utilisateur
+const upgradeShelterBtn = document.getElementById('upgradeShelterBtn');
+
+// Écouteur pour le bouton d'amélioration
+if (upgradeShelterBtn) {
+    upgradeShelterBtn.addEventListener('click', async () => {
+        const success = await upgradeShelter('murs'); // L'amélioration des murs
+        if (success) {
+            // Mettre à jour l'affichage de l'abri après l'amélioration
+            console.log("Amélioration réussie !");
+        } else {
+            console.log("Échec de l'amélioration.");
+        }
+    });
+}
+
+// Démarrez le système de vagues au lancement du jeu
+startNextWaveTimer();
