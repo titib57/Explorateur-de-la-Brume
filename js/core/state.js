@@ -179,7 +179,7 @@ export async function loadCharacter() {
     }
 
     try {
-        const charRef = doc(db, 'artifacts', appId, 'users', userId, 'characters', userId);
+        const charRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
         const characterSnap = await getDoc(charRef);
 
         if (characterSnap.exists()) {
@@ -221,7 +221,7 @@ export async function saveCharacterData(playerData) {
         return;
     }
     try {
-        const charRef = doc(db, 'artifacts', appId, 'users', userId, 'characters', userId);
+        const charRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
         await setDoc(charRef, playerData, { merge: true });
         console.log("Personnage sauvegardé sur Firestore !");
     } catch (error) {
@@ -235,7 +235,7 @@ export async function saveCharacterData(playerData) {
 export async function deleteCharacterData() {
     if (!userId) return;
     try {
-        const charRef = doc(db, 'artifacts', appId, 'users', userId, 'characters', userId);
+        const charRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
         await deleteDoc(charRef);
         console.log("Personnage supprimé sur Firestore !");
     } catch (error) {

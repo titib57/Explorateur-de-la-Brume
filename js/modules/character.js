@@ -116,7 +116,7 @@ function updateUI(character) {
 
     // Écouteur en temps réel pour le document du personnage
     const { onSnapshot, doc } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js");
-    const characterRef = doc(db, 'artifacts', 'default-app-id', 'users', userId, 'characters', userId);
+    const characterRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
 
     onSnapshot(characterRef, (docSnapshot) => {
         const characterData = docSnapshot.exists() ? docSnapshot.data() : null;
