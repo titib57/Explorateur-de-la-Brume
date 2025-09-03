@@ -3,22 +3,17 @@
 import { itemsData } from './gameData.js';
 import { showNotification } from './notifications.js';
 
+// Importation du module de quêtes
 import { initialQuest } from './questsData.js';
 
-// Importations des modules Firebase
-import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+// Importation des services Firebase depuis firebase_config.js
+import { auth, db } from './firebase_config.js';
+import { onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 // Global variables provided by the Canvas environment
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initialAuthToken : null;
-
-// Initialisation de l'application Firebase (une seule fois)
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
 // Objets d'état globaux
 export let player = null;
@@ -69,7 +64,7 @@ class Character {
         this.xpToNextLevel = this.level * 100;
         this.gold = gold || 3;
         this.stats = stats || { strength: 1, intelligence: 1, speed: 1, dexterity: 1 };
-        this.quests = quests || {};
+        this.quests = quests || [];
         this.inventory = inventory || {};
         this.equipment = equipment || {};
         this.abilities = abilities || [];
@@ -131,10 +126,27 @@ class Character {
  * @returns {Character} Le nouvel objet personnage.
  */
 export function createCharacter(name, playerClass, age, height, weight) {
-    const newPlayer = new Character(name, playerClass, 1, 0, 100, { strength: 1, intelligence: 1, speed: 1, dexterity: 1 }, {}, {}, {}, [], 0, 0, 0, 0, age, height, weight);
+    const newPlayer = new Character(
+        name,
+        playerClass,
+        1,
+        0,
+        100,
+        { strength: 1, intelligence: 1, speed: 1, dexterity: 1 },
+        [initialQuest], // Ajout de la quête initiale ici
+        {},
+        {},
+        [],
+        0,
+        0,
+        0,
+        0,
+        age,
+        height,
+        weight
+    );
     newPlayer.statPoints = 5;
     recalculateDerivedStats(newPlayer);
-    [initialQuest], 
     player = newPlayer;
     savePlayer(player);
     return player;
