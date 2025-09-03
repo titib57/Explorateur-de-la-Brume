@@ -3,36 +3,49 @@
 import { showNotification } from '../core/notifications.js';
 import { generateDungeon } from '../core/dungeon.js';
 import { savePlayer, loadCharacter } from '../core/state.js';
-import { isSetSafePlaceQuest, updateQuestObjective} from './quests.js';
+import { isSetSafePlaceQuest, updateQuestObjective } from './quests.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { auth } from '../firebase_config.js';
 
+// Définition des icônes personnalisées (peuvent être globales)
+const playerIcon = L.icon({
+    iconUrl: 'assets/img/player_icon.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+});
+
+const dungeonIcon = L.icon({
+    iconUrl: 'assets/img/dungeon_icon.png',
+    iconSize: [28, 28],
+    iconAnchor: [14, 28],
+    popupAnchor: [0, -28]
+});
+
+// Variables globales pour la carte et les éléments du jeu
+let map;
+let playerMarker;
+let selectedDungeon = null;
+let dungeonMarkers;
+let lastKnownPosition = null;
+let mapElement;
+let player; // Ajout de la variable player pour la rendre accessible globalement
+
+// Éléments du DOM (déclarés au niveau global pour une meilleure lisibilité)
+let fullscreenBtn;
+let startBattleBtn;
+let recenterBtn;
+let setSafePlaceBtn;
+let dungeonDetails;
+let dungeonNameDisplay;
+let dungeonDescriptionDisplay;
+let dungeonDifficultyDisplay;
+
+/**
+ * Initialise la carte du monde et la logique de géolocalisation.
+ */
 async function initMap() {
-    // Écoute l'état d'authentification pour s'assurer que l'utilisateur est bien connecté.
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            // L'utilisateur est connecté, on peut charger les données en toute sécurité.
-            const characterData = await loadCharacter(user);
-            if (characterData) {
-                console.log("Données du personnage chargées dans la carte !");
-                // Le reste de votre logique pour afficher la carte...
-            } else {
-                console.error("Impossible de charger les données du personnage.");
-                // Gérer le cas où le personnage n'existe pas
-            }
-        } else {
-            // L'utilisateur est déconnecté, on le redirige.
-            console.log("Utilisateur non connecté. Redirection...");
-            window.location.href = "login.html";
-        }
-    });
-}
-
-// Appelle la fonction d'initialisation de la carte une fois que le DOM est chargé.
-document.addEventListener('DOMContentLoaded', initMap);
-
     // Étape 2: Initialisation des variables et des éléments de la carte
-    map = L.map('map');
     mapElement = document.getElementById('map');
     fullscreenBtn = document.getElementById('toggle-fullscreen-btn');
     startBattleBtn = document.getElementById('start-battle-btn');
@@ -42,56 +55,50 @@ document.addEventListener('DOMContentLoaded', initMap);
     dungeonNameDisplay = document.getElementById('dungeon-name');
     dungeonDescriptionDisplay = document.getElementById('dungeon-description');
     dungeonDifficultyDisplay = document.getElementById('dungeon-difficulty');
-    
 
-    // Étape 3: Ajout de la couche de tuiles OpenStreetMap
+    // Étape 3: Création de la carte et ajout de la couche de tuiles OpenStreetMap
+    map = L.map('map');
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // --- Ajoutez cette ligne pour forcer la carte à se redimensionner ---
+    // Force la carte à se redimensionner
     map.invalidateSize();
-
-    // Si la carte ne s'affiche toujours pas, utilisez un court délai
-    setTimeout(function() {
-      map.invalidateSize();
-    }, 100);
+    setTimeout(() => map.invalidateSize(), 100);
 
     // Étape 4: Gestion des événements de la carte
     window.addEventListener('resize', () => map.invalidateSize());
 
     if (fullscreenBtn && mapElement) {
         fullscreenBtn.addEventListener('click', () => {
-            // Bascule la classe 'fullscreen' sur l'élément de la carte
             mapElement.classList.toggle('fullscreen');
             if (map) {
                 map.invalidateSize();
             }
-            // Met à jour le texte du bouton
-            if (mapElement.classList.contains('fullscreen')) {
-                fullscreenBtn.textContent = 'Quitter le plein écran';
+            fullscreenBtn.textContent = mapElement.classList.contains('fullscreen') ? 'Quitter le plein écran' : 'Plein écran';
+        });
+    }
+
+    if (recenterBtn) {
+        recenterBtn.addEventListener('click', () => {
+            if (playerMarker) {
+                map.panTo(playerMarker.getLatLng());
             } else {
-                fullscreenBtn.textContent = 'Plein écran';
+                showNotification("Votre position n'est pas encore connue.", "warning");
             }
         });
     }
 
-    recenterBtn.addEventListener('click', () => {
-        if (playerMarker) {
-            map.panTo(playerMarker.getLatLng());
-        } else {
-            showNotification("Votre position n'est pas encore connue.", "warning");
-        }
-    });
-
-    startBattleBtn.addEventListener('click', () => {
-        if (selectedDungeon) {
-            generateDungeon(selectedDungeon.isTutorial ? 'tutoriel' : { lat: selectedDungeon.location.lat, lng: selectedDungeon.location.lng });
-            window.location.href = 'battle.html';
-        } else {
-            showNotification("Veuillez sélectionner un donjon pour y entrer.", 'warning');
-        }
-    });
+    if (startBattleBtn) {
+        startBattleBtn.addEventListener('click', () => {
+            if (selectedDungeon) {
+                generateDungeon(selectedDungeon.isTutorial ? 'tutoriel' : { lat: selectedDungeon.location.lat, lng: selectedDungeon.location.lng });
+                window.location.href = 'battle.html';
+            } else {
+                showNotification("Veuillez sélectionner un donjon pour y entrer.", 'warning');
+            }
+        });
+    }
 
     // Étape 5: Démarrage de la géolocalisation
     if (navigator.geolocation) {
@@ -121,6 +128,22 @@ document.addEventListener('DOMContentLoaded', initMap);
         map.setView(defaultLatLng, 15);
         loadDungeons(player, defaultLatLng);
     }
+
+    // Écoute l'état d'authentification pour charger le personnage après l'initialisation de la carte.
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const characterData = await loadCharacter(user);
+            if (characterData) {
+                player = characterData; // Assigne les données du personnage à la variable globale
+                console.log("Données du personnage chargées dans la carte !");
+            } else {
+                console.error("Impossible de charger les données du personnage.");
+            }
+        } else {
+            console.log("Utilisateur non connecté. Redirection...");
+            window.location.href = "login.html";
+        }
+    });
 }
 
 /**
@@ -147,45 +170,12 @@ function calculateDistance(loc1, loc2) {
     const deltaLon = (loc2.lng - loc1.lng) * Math.PI / 180;
 
     const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-              Math.cos(lat1) * Math.cos(lat2) *
-              Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+        Math.cos(lat1) * Math.cos(lat2) *
+        Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c; // Distance en mètres
 }
-
-// Définition des icônes personnalisées
-const playerIcon = L.icon({
-    iconUrl: 'assets/img/player_icon.png',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32]
-});
-
-const dungeonIcon = L.icon({
-    iconUrl: 'assets/img/dungeon_icon.png',
-    iconSize: [28, 28],
-    iconAnchor: [14, 28],
-    popupAnchor: [0, -28]
-});
-
-// Variables globales pour la carte et les éléments du jeu
-let map;
-let playerMarker;
-let selectedDungeon = null;
-let dungeonMarkers;
-let lastKnownPosition = null;
-let mapElement;
-
-// Éléments du DOM (déclarés au niveau global pour une meilleure lisibilité)
-let fullscreenBtn;
-let startBattleBtn;
-let recenterBtn;
-let setSafePlaceBtn;
-let dungeonDetails;
-let dungeonNameDisplay;
-let dungeonDescriptionDisplay;
-let dungeonDifficultyDisplay;
 
 /**
  * Met à jour les informations du donjon sélectionné dans l'interface utilisateur.
@@ -194,7 +184,7 @@ let dungeonDifficultyDisplay;
 function updateDungeonDetails(dungeon) {
     selectedDungeon = dungeon;
     dungeonNameDisplay.textContent = dungeon.name;
-    dungeonDescriptionDisplay.textContent = dungeon.isTutorial ? 
+    dungeonDescriptionDisplay.textContent = dungeon.isTutorial ?
         'Un lieu sûr pour apprendre les bases du combat. Vainquez le mannequin d\'entraînement !' :
         'Un donjon généré dynamiquement. Préparez-vous au combat !';
     dungeonDifficultyDisplay.textContent = dungeon.difficulty || '1';
