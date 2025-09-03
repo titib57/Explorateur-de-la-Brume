@@ -24,7 +24,6 @@ async function initMap() {
     mapElement = document.getElementById('map');
     fullscreenBtn = document.getElementById('toggle-fullscreen-btn');
     startBattleBtn = document.getElementById('start-battle-btn');
-    classTreeBtn = document.getElementById('class-tree-btn');
     recenterBtn = document.getElementById('recenter-btn');
     setSafePlaceBtn = document.getElementById('set-safe-place-btn');
     dungeonDetails = document.getElementById('dungeon-details');
