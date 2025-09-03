@@ -170,7 +170,7 @@ export function giveXP(xpAmount) {
  * Charge l'objet joueur depuis Firestore.
  * @returns {Promise<object|null>} L'objet joueur ou null si non trouvé.
  */
-export async function loadCharacter() {
+export async function loadCharacter(user) {
     await authPromise;
 
     if (!userId) {
@@ -232,7 +232,7 @@ export async function saveCharacterData(playerData) {
 /**
  * Supprime le document du personnage de Firestore.
  */
-export async function deleteCharacterData() {
+export async function deleteCharacterData(user) {
     if (!userId) return;
     try {
         const charRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
