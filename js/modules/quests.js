@@ -1,166 +1,129 @@
-﻿// Fichier : js/quests.js
+﻿/**
+ * @fileoverview Module de gestion de la logique des quêtes du jeu.
+ * Gère l'acceptation, la mise à jour de la progression et la complétion des quêtes.
+ */
 
-// Importation des dépendances nécessaires
+// Importations des données et des modules nécessaires
 import { questsData } from '../core/questsData.js';
-import { showNotification } from '../core/notifications.js';
+import { giveRewards } from './rewards.js'; // Supposons un nouveau module de récompenses
+import { shelterManager } from './module/shelterManager.js';
 
 // =========================================================================
-// LOGIQUE DE GESTION DES QUÊTES
+// GESTION DES QUÊTES
 // =========================================================================
 
 /**
- * Met à jour la progression d'un objectif de quête pour le personnage donné.
- * @param {Object} characterData Les données complètes du personnage.
- * @param {string} objectiveType Le type de l'objectif (ex: 'vaincre_monstre').
- * @param {string} target La cible de l'objectif (ex: 'mannequin_dentrainement').
- * @param {number} amount Le montant à ajouter à la progression (par défaut: 1).
- * @returns {Promise<Object|null>} Un objet Promise contenant les données du personnage mises à jour, ou null en cas d'échec.
+ * Accepte une quête et la rend active pour le personnage.
+ * @param {Object} characterData - Les données complètes du personnage.
+ * @param {string} questId - L'ID de la quête à accepter.
+ * @returns {Object|null} Les données du personnage mises à jour ou null si la quête ne peut être acceptée.
  */
-export async function updateQuestObjective(characterData, objectiveType, target, amount = 1) {
-    if (!characterData || !characterData.quests || !characterData.quests.current) {
-        return characterData;
+export function acceptQuest(characterData, questId) {
+    const questDefinition = questsData[questId];
+
+    // Vérifie si la quête existe et s'il n'y a pas déjà de quête en cours
+    if (!questDefinition) {
+        console.error(`Erreur: La quête avec l'ID '${questId}' n'existe pas.`);
+        return null;
+    }
+    if (characterData.quests.current) {
+        console.warn(`Le personnage a déjà une quête en cours : '${characterData.quests.current.title}'.`);
+        return null;
     }
 
-    const currentQuestData = characterData.quests.current;
-    if (!questsData[currentQuestData.questId]) {
-        console.error(`Erreur: La quête '${currentQuestData.questId}' n'existe pas dans questsData.`);
-        return characterData;
-    }
-
-    if (questsData[currentQuestData.questId].objective.type === objectiveType && questsData[currentQuestData.questId].objective.target === target) {
-        let currentProgress = currentQuestData.currentProgress || 0;
-        currentProgress += amount;
-
-        const required = questsData[currentQuestData.questId].objective.required;
-        showNotification(`Progression de la quête '${questsData[currentQuestData.questId].title}' : ${currentProgress}/${required}`, 'info');
-
-        // Mise à jour de l'objet local
-        characterData.quests.current.currentProgress = currentProgress;
-
-        if (currentProgress >= required) {
-            return await checkQuestCompletion(characterData);
-        }
-    }
+    // Initialise la quête pour le personnage
+    characterData.quests.current = {
+        questId: questId,
+        currentProgress: 0,
+        ...questDefinition // Ajoute les propriétés de la définition de quête
+    };
+    console.log(`Quête '${questDefinition.title}' acceptée.`);
     return characterData;
 }
 
 /**
- * Vérifie si la quête en cours est terminée et gère la complétion.
- * @param {Object} characterData Les données complètes du personnage.
- * @returns {Promise<Object>} Un objet Promise contenant les données du personnage mises à jour.
+ * Met à jour la progression d'une quête en cours.
+ * Cette fonction est le point d'entrée pour toutes les actions de progression.
+ * @param {Object} characterData - Les données du personnage.
+ * @param {string} objectiveType - Le type de l'objectif (ex: 'validate_current_location').
+ * @param {any} [payload] - Des données additionnelles nécessaires (ex: la position du joueur).
+ * @returns {Object|null} Les données du personnage mises à jour ou null en cas d'échec.
  */
-export async function checkQuestCompletion(characterData) {
-    if (!characterData || !characterData.quests || !characterData.quests.current) {
-        return characterData;
+export function updateQuestProgress(characterData, objectiveType, payload) {
+    if (!characterData || !characterData.quests.current) {
+        console.warn("Pas de quête en cours.");
+        return null;
     }
 
-    const currentQuestId = characterData.quests.current.questId;
-    const currentQuestData = questsData[currentQuestId];
+    const currentQuest = characterData.quests.current;
+    const questDefinition = questsData[currentQuest.questId];
+    const objective = questDefinition.objective;
 
-    if (!currentQuestData) {
-        console.error(`Erreur: La quête '${currentQuestId}' n'existe pas dans questsData.`);
-        return characterData;
+    if (objective.type !== objectiveType) {
+        // L'action ne correspond pas à l'objectif en cours, on ne fait rien
+        return null;
     }
 
-    if (characterData.quests.current.currentProgress >= currentQuestData.objective.required) {
-        showNotification(`Quête terminée : '${currentQuestData.title}' !`, 'success');
+    // Gère la logique spécifique à chaque type d'objectif
+    switch (objective.action) {
+        case "define_shelter":
+            const success = shelterManager.defineShelter(payload); // 'payload' est la position du joueur
+            if (success) {
+                currentQuest.currentProgress = 1;
+                console.log("Objectif 'définir l'abri' accompli.");
+            } else {
+                console.warn("Impossible de définir l'abri. L'objectif pourrait être déjà terminé ou la position est invalide.");
+            }
+            break;
         
-        // Ajout de la quête à la liste des quêtes terminées
-        const completedQuests = { ...characterData.quests.completed, [currentQuestId]: { ...currentQuestData, status: 'completed' } };
-        
-        // Définir la prochaine quête si elle existe
-        const nextQuestId = currentQuestData.nextQuestId;
-        if (nextQuestId) {
-            const nextQuestData = questsData[nextQuestId];
-            characterData.quests.current = { ...nextQuestData, status: 'active', currentProgress: 0 };
-            showNotification(`Nouvelle quête acceptée : '${nextQuestData.title}'`, 'info');
-        } else {
-            characterData.quests.current = null;
-        }
-        
-        characterData.quests.completed = completedQuests;
-    }
-    return characterData;
-}
-
-/**
- * Permet d'accepter une nouvelle quête pour le personnage.
- * @param {Object} characterData Les données complètes du personnage.
- * @param {string} questId L'identifiant de la quête à accepter.
- * @returns {Promise<Object>} Un objet Promise contenant les données du personnage mises à jour.
- */
-export async function acceptQuest(characterData, questId) {
-    const questData = questsData[questId];
-    if (!questData) {
-        showNotification("Cette quête n'existe pas.", 'error');
-        return characterData;
+        default:
+            // Logique par défaut pour les quêtes de type 'récolter', 'vaincre', etc.
+            // On incrémente la progression si la cible correspond
+            if (objective.target && objective.target === payload.target) {
+                currentQuest.currentProgress = (currentQuest.currentProgress || 0) + 1;
+                console.log(`Progression de la quête '${questDefinition.title}' : ${currentQuest.currentProgress}/${objective.required}`);
+            }
+            break;
     }
 
-    if (characterData.quests.current && characterData.quests.current.questId) {
-        showNotification("Vous avez déjà une quête en cours. Terminez-la d'abord.", 'error');
-        return characterData;
+    // Vérifie si la quête est terminée
+    if (currentQuest.currentProgress >= objective.required) {
+        return completeQuest(characterData);
     }
-
-    characterData.quests.current = { ...questData, status: 'active', currentProgress: 0 };
-    showNotification(`Quête acceptée : '${questData.title}'`, 'success');
-    return characterData;
-}
-
-/**
- * Met à jour l'interface utilisateur des quêtes avec les données du personnage.
- * @param {Object} characterData Les données complètes du personnage.
- */
-export function updateQuestsUI(characterData) {
-    if (!characterData || !characterData.quests) {
-        return;
-    }
-
-    const activeList = document.getElementById('active-quests-list');
-    const unstartedList = document.getElementById('unstarted-quests-list');
-    const completedList = document.getElementById('completed-quests-list');
     
-    if (activeList) activeList.innerHTML = '';
-    if (unstartedList) unstartedList.innerHTML = '';
-    if (completedList) completedList.innerHTML = '';
+    return characterData;
+}
 
-    const allQuests = Object.values(questsData);
+/**
+ * Gère la complétion d'une quête et le passage à la suivante.
+ * @param {Object} characterData - Les données du personnage.
+ * @returns {Object} Les données du personnage mises à jour.
+ */
+function completeQuest(characterData) {
+    const currentQuest = characterData.quests.current;
+    const questDefinition = questsData[currentQuest.questId];
 
-    allQuests.forEach(questData => {
-        const li = document.createElement('li');
-        li.className = 'quest-item';
+    console.log(`Quête terminée : '${questDefinition.title}' !`);
 
-        const title = document.createElement('h4');
-        title.textContent = questData.title;
-        li.appendChild(title);
+    // 1. Donne les récompenses
+    giveRewards(characterData, questDefinition.rewards);
 
-        const description = document.createElement('p');
-        description.textContent = questData.description;
-        li.appendChild(description);
+    // 2. Déplace la quête vers la liste des quêtes terminées
+    characterData.quests.completed[currentQuest.questId] = { ...currentQuest, status: 'completed' };
+    
+    // 3. Définir la prochaine quête si elle existe
+    const nextQuestId = questDefinition.nextQuestId;
+    if (nextQuestId) {
+        const nextQuestDefinition = questsData[nextQuestId];
+        characterData.quests.current = {
+            questId: nextQuestId,
+            currentProgress: 0,
+            ...nextQuestDefinition
+        };
+        console.log(`Nouvelle quête acceptée : '${nextQuestDefinition.title}'`);
+    } else {
+        characterData.quests.current = null; // Aucune quête en cours
+    }
 
-        if (characterData.quests.current && characterData.quests.current.questId === questData.questId) {
-            const progress = document.createElement('p');
-            progress.textContent = `Progression : ${characterData.quests.current.currentProgress || 0} / ${questData.objective.required}`;
-            li.appendChild(progress);
-            if (activeList) activeList.appendChild(li);
-        } 
-        else if (characterData.quests.completed && characterData.quests.completed[questData.questId]) {
-            li.classList.add('completed');
-            const status = document.createElement('p');
-            status.textContent = 'Terminée';
-            status.className = 'quest-status completed';
-            li.appendChild(status);
-            if (completedList) completedList.appendChild(li);
-        } 
-        else {
-            const acceptBtn = document.createElement('button');
-            acceptBtn.textContent = "Accepter la quête";
-            acceptBtn.className = 'btn-primary';
-            
-            // L'écouteur d'événement pour le bouton "Accepter" doit être géré dans le fichier principal,
-            // car il a besoin de l'objet 'user' pour la sauvegarde dans Firestore.
-            
-            li.appendChild(acceptBtn);
-            if (unstartedList) unstartedList.appendChild(li);
-        }
-    });
+    return characterData;
 }
