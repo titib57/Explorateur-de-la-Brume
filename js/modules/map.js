@@ -128,22 +128,6 @@ async function initMap() {
         map.setView(defaultLatLng, 15);
         loadDungeons(player, defaultLatLng);
     }
-
-    // Écoute l'état d'authentification pour charger le personnage après l'initialisation de la carte.
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            const characterData = await loadCharacter(user);
-            if (characterData) {
-                player = characterData; // Assigne les données du personnage à la variable globale
-                console.log("Données du personnage chargées dans la carte !");
-            } else {
-                console.error("Impossible de charger les données du personnage.");
-            }
-        } else {
-            console.log("Utilisateur non connecté. Redirection...");
-            window.location.href = "login.html";
-        }
-    });
 }
 
 /**
@@ -368,5 +352,20 @@ function updateActionButtons(player, playerLatLng) {
     startBattleBtn.style.display = 'none';
 }
 
-// Démarrage de l'initialisation du jeu une fois le DOM chargé
-document.addEventListener('DOMContentLoaded', initMap);
+// Point d'entrée de l'application : l'écouteur d'authentification
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        const characterData = await loadCharacter(user);
+        if (characterData) {
+            player = characterData;
+            console.log("Données du personnage chargées ! Initialisation de la carte...");
+            initMap(); // L'initialisation de la carte est déplacée ici
+        } else {
+            console.error("Impossible de charger les données du personnage.");
+            window.location.href = "character_creation.html";
+        }
+    } else {
+        console.log("Utilisateur non connecté. Redirection...");
+        window.location.href = "login.html";
+    }
+});
