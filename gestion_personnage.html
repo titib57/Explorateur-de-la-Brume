@@ -1,115 +1,116 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion de Personnages</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion de Personnages</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <header class="game-header">
-        <div class="container">
-            <h1>Gestion du Personnage</h1>
-                <nav>
-                    <a id="world-map-link" href="world_map.html">Carte du monde</a>
-                    <a href="gestion_personnage.html">Personnage</a>
-                    <a href="#" id="logout-link" class="button">Se déconnecter</a>
-                </nav>
-        </div>
-    </header>
+    <header class="game-header">
+        <div class="container">
+            <h1>Gestion du Personnage</h1>
+            <nav>
+                <a id="world-map-link" href="world_map.html">Carte du monde</a>
+                <a href="gestion_personnage.html">Personnage</a>
+                <a href="#" id="logout-link" class="button">Se déconnecter</a>
+            </nav>
+        </div>
+    </header>
 
-    <main class="game-container">
-        <div class="grid-pele-mele">
-        <section id="no-character-section" class="hidden">
-            <h2>Préparez-vous à l'aventure</h2>
-            <p>Vous n'avez pas encore de personnage. Créez-en un pour commencer à jouer !</p>
-            <button>
-                <a href="character.html" class="button">Créer mon premier personnage</a>
-            </button>
-            
-        </section>
+    <main class="game-container">
+                <div class="grid-pele-mele">
 
-        <section id="character-section" class="hidden">
-            <h2>Mon personnage</h2>
-            <div id="character-display">
-                <p id="loading-message">Chargement des données...</p>
-            </div>
-            <div class="flex">
-                <button id="play-btn" class="hidden">
-                    Commencer l'aventure
-                </button>
-                <br>
-                <button id="deleteBtn" class="hidden">
-                    Supprimer le personnage
-                </button>
-            </div>
-        </section>
-        <section id="shelter-info">
-            <h2>Votre Abri</h2>
-            <p>Niveau : <span id="shelter-level">0</span></p>
-            <p>Défense : <span id="shelter-defense">0</span></p>
-            <button id="upgradeShelterBtn" class="btn-primary">Améliorer l'abri</button>
-        </section>
+            <section id="no-character-section" class="item hidden">
+                <h2>Préparez-vous à l'aventure</h2>
+                <p>Vous n'avez pas encore de personnage. Créez-en un pour commencer à jouer !</p>
+                <button>
+                    <a href="character.html" class="button">Créer mon premier personnage</a>
+                </button>
+            </section>
 
-<section id="wave-info">
-    <h2>Vagues de monstres</h2>
-    <p>Vague actuelle : <span id="current-wave">0</span></p>
-    <p>Prochaine vague dans : <span id="wave-timer"></span></p>
-</section>
-        <section id="stats-section" class="hidden">
-            <h2>Statistiques</h2>
-            <div id="stats-display">
-            </div>
-        </section>
+            <section id="character-section" class="item hidden">
+                <h2>Mon personnage</h2>
+                <div id="character-display">
+                    <p id="loading-message">Chargement des données...</p>
+                </div>
+                <div class="flex">
+                    <button id="play-btn" class="hidden">
+                        Commencer l'aventure
+                    </button>
+                    <br>
+                    <button id="deleteBtn" class="hidden">
+                        Supprimer le personnage
+                    </button>
+                </div>
+            </section>
 
-        <section id="quest-section" class="hidden">
-            <h2>Quêtes</h2>
-            <div id="quests-display">
-        <div id="quest-log" style="display: none;">
-            <div id="active-quests" class="quest-container">
-                <h3>Quêtes en cours</h3>
-                <ul id="active-quests-list" class="quest-list"></ul>
-            </div>
-            <div id="unstarted-quests" class="quest-container">
-                <h3>Quêtes non commencées</h3>
-                <ul id="unstarted-quests-list" class="quest-list"></ul>
-            </div>
-            <div id="completed-quests" class="quest-container">
-                <h3>Quêtes terminées</h3>
-                <ul id="completed-quests-list" class="quest-list"></ul>
-            </div>
-        </div>
-            </div>
-        </section>
+            <section id="shelter-info" class="item">
+                <h2>Votre Abri</h2>
+                <p>Niveau : <span id="shelter-level">0</span></p>
+                <p>Défense : <span id="shelter-defense">0</span></p>
+                <button id="upgradeShelterBtn" class="btn-primary">Améliorer l'abri</button>
+            </section>
 
-        <section id="inventory-section" class="hidden">
-            <h2>Inventaire</h2>
-            <div id="inventory-display">
-            </div>
-        </section>
+            <section id="wave-info" class="item">
+                <h2>Vagues de monstres</h2>
+                <p>Vague actuelle : <span id="current-wave">0</span></p>
+                <p>Prochaine vague dans : <span id="wave-timer"></span></p>
+            </section>
 
-        <section id="equipement-section" class="hidden">
-            <h2>Equipement</h2>
-            <div id="equipement-display">
-            </div>
-        </section>
+            <section id="stats-section" class="item hidden">
+                <h2>Statistiques</h2>
+                <div id="stats-display">
+                </div>
+            </section>
 
+            <section id="quest-section" class="item hidden">
+                <h2>Quêtes</h2>
+                <div id="quests-display">
+                    <div id="quest-log" style="display: none;">
+                        <div id="active-quests" class="quest-container">
+                            <h3>Quêtes en cours</h3>
+                            <ul id="active-quests-list" class="quest-list"></ul>
+                        </div>
+                        <div id="unstarted-quests" class="quest-container">
+                            <h3>Quêtes non commencées</h3>
+                            <ul id="unstarted-quests-list" class="quest-list"></ul>
+                        </div>
+                        <div id="completed-quests" class="quest-container">
+                            <h3>Quêtes terminées</h3>
+                            <ul id="completed-quests-list" class="quest-list"></ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-        <div id="notification-container" class="notification-container"></div>
-        <div id="progress-bar" class="progress-bar hidden"></div>
-        </div>
-    </main>
+            <section id="inventory-section" class="item hidden">
+                <h2>Inventaire</h2>
+                <div id="inventory-display">
+                </div>
+            </section>
 
-    <footer class="game-footer">
-        <p>© 2025 Explorateur de la Brume. Tous droits réservés. Titib.</p>
-    </footer>
+            <section id="equipement-section" class="item hidden">
+                <h2>Equipement</h2>
+                <div id="equipement-display">
+                </div>
+            </section>
+        </div>
 
-    <script type="module" src="./js/core/firebase_game_logic.js"></script>
-    <script type="module" src="./js/core/utils.js"></script>
-    <script src="./js/modules/quests.js" type="module"></script>
-    <script src="./js/core/notifications.js" type="module"></script>
-    <script src="./js/modules/battle.js" type="module"></script>
-    <script src="./js/core/questsData.js" type="module"></script>
+        <div id="notification-container" class="notification-container"></div>
+        <div id="progress-bar" class="progress-bar hidden"></div>
+    </main>
+
+    <footer class="game-footer">
+        <p>© 2025 Explorateur de la Brume. Tous droits réservés. Titib.</p>
+    </footer>
+
+    <script type="module" src="./js/core/firebase_game_logic.js"></script>
+    <script type="module" src="./js/core/utils.js"></script>
+    <script src="./js/modules/quests.js" type="module"></script>
+    <script src="./js/core/notifications.js" type="module"></script>
+    <script src="./js/modules/battle.js" type="module"></script>
+    <script src="./js/core/questsData.js" type="module"></script>
 </body>
 </html>
