@@ -1,7 +1,7 @@
 ﻿// Fichier : js/quests.js
 
 // Importation des dépendances nécessaires
-import { questsData } from '../core/questsData.js';
+import { initialQuest } from '../core/questsData.js';
 import { showNotification } from '../core/notifications.js';
 
 // =========================================================================

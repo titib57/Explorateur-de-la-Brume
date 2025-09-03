@@ -1,4 +1,4 @@
-﻿// Fichier : js/core/questsData.js
+﻿// Fichier : js/core/state.js
 // Ce module gère l'état global du jeu, y compris l'objet joueur, le donjon et les monstres.
 
 import { itemsData } from './gameData.js';
