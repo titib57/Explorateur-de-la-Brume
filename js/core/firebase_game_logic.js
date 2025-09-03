@@ -5,274 +5,301 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/f
 import { auth, db } from "./firebase_config.js";
 import { showNotification } from './notifications.js';
 import { deleteCharacterData } from './state.js';
-import { initialQuest } from './questsData.js';
+import { questsData } from './questsData.js'; // Importez l'objet complet des quêtes
 
+// =========================================================================
+// VARIABLES GLOBALES (sauf celles qui changent d'une page à l'autre)
+// =========================================================================
+const noCharacterSection = document.getElementById('no-character-section');
+const characterSection = document.getElementById('character-section');
+const characterDisplay = document.getElementById('character-display');
+const loadingMessage = document.getElementById('loading-message');
+const playBtn = document.getElementById('play-btn');
+const deleteBtn = document.getElementById('delete-btn');
+const updateBtn = document.getElementById('update-btn');
+const statsDisplay = document.getElementById('stats-display');
+const questsDisplay = document.getElementById('quests-display');
+const inventoryDisplay = document.getElementById('inventory-display');
+const equipmentDisplay = document.getElementById('equipment-display');
+const characterInfoDisplay = document.getElementById('character-info-display');
+const characterForm = document.getElementById('character-form');
+const characterExistsSection = document.getElementById('character-exists-section');
+const existingCharacterDisplay = document.getElementById('existing-character-display');
+const deleteBtnOnCharacterPage = document.getElementById('delete-btn-creation-page');
+const logoutLink = document.getElementById('logout-link');
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Variables pour la page de gestion des personnages
-    const noCharacterSection = document.getElementById('no-character-section');
-    const characterSection = document.getElementById('character-section');
-    const characterDisplay = document.getElementById('character-display');
-    const loadingMessage = document.getElementById('loading-message');
-    const playBtn = document.getElementById('play-btn');
-    const deleteBtn = document.getElementById('delete-btn');
-    const updateBtn = document.getElementById('update-btn');
-    const statsDisplay = document.getElementById('stats-display');
-    const questsDisplay = document.getElementById('quests-display');
-    const inventoryDisplay = document.getElementById('inventory-display');
-    const equipmentDisplay = document.getElementById('equipment-display');
-    const characterInfoDisplay = document.getElementById('character-info-display');
-    const characterForm = document.getElementById('character-form');
-    const characterExistsSection = document.getElementById('character-exists-section');
-    const existingCharacterDisplay = document.getElementById('existing-character-display');
-    const deleteBtnOnCharacterPage = document.getElementById('delete-btn-creation-page');
-    const logoutLink = document.getElementById('logout-link');
-
-    // Fonction pour rendre le personnage sur la page de gestion
-    function renderCharacter(character) {
-        if (!character) return;
-
-        // 1. Section "Mon personnage"
-        if (characterDisplay) {
-            characterDisplay.innerHTML = `
-                <h3>${character.name}</h3>
-                <p>Niveau : ${character.level}</p>
-                <p>Points de vie : ${character.hp}/${character.maxHp}</p>
-                <p>Points de magie : ${character.mana}/${character.maxMana}</p>
-                <p>Or : ${character.gold}</p>
-            `;
-        }
-
-        // 2. Section "Statistiques"
-        if (statsDisplay && character.stats) {
-            statsDisplay.innerHTML = `
-                <p>Force : ${character.stats.strength}</p>
-                <p>Intelligence : ${character.stats.intelligence}</p>
-                <p>Vitesse : ${character.stats.speed}</p>
-                <p>Dextérité : ${character.stats.dexterity}</p>
-            `;
-        }
-
-// 3. Section "Quêtes"
-if (character.quests) {
-    // Affichez le conteneur principal des quêtes
-    const questLog = document.getElementById('quest-log');
-    if (questLog) questLog.style.display = 'block';
-
-    const activeQuestsList = document.getElementById('active-quests-list');
-    const unstartedQuestsList = document.getElementById('unstarted-quests-list');
-    const completedQuestsList = document.getElementById('completed-quests-list');
-
-    // Videz les listes avant de les remplir
-    if (activeQuestsList) activeQuestsList.innerHTML = '';
-    if (unstartedQuestsList) unstartedQuestsList.innerHTML = '';
-    if (completedQuestsList) completedQuestsList.innerHTML = '';
-
-    // Parcourez les quêtes du personnage et triez-les
-    const quests = Object.values(character.quests);
-    quests.forEach(quest => {
-        const listItem = document.createElement('li');
-        listItem.innerHTML = `
-            <div>
-                <h4>${quest.title}</h4>
-                <p>Statut : ${quest.status}</p>
-                <p>Description : ${quest.description}</p>
-            </div>
+// =========================================================================
+// FONCTIONS DE GESTION DE L'AFFICHAGE
+// =========================================================================
+function renderCharacter(character) {
+    if (!character) return;
+    
+    // 1. Section "Mon personnage"
+    if (characterDisplay) {
+        characterDisplay.innerHTML = `
+            <h3>${character.name}</h3>
+            <p>Niveau : ${character.level}</p>
+            <p>Points de vie : ${character.hp}/${character.maxHp}</p>
+            <p>Points de magie : ${character.mana}/${character.maxMana}</p>
+            <p>Or : ${character.gold}</p>
         `;
-        // Ajoutez d'autres détails de quête si nécessaire
+    }
+    
+    // 2. Section "Statistiques"
+    if (statsDisplay && character.stats) {
+        statsDisplay.innerHTML = `
+            <p>Force : ${character.stats.strength}</p>
+            <p>Intelligence : ${character.stats.intelligence}</p>
+            <p>Vitesse : ${character.stats.speed}</p>
+            <p>Dextérité : ${character.stats.dexterity}</p>
+        `;
+    }
+    
+    // 3. Section "Quêtes"
+    if (questsDisplay && character.quests) {
+        const activeQuestsList = document.getElementById('active-quests-list');
+        const unstartedQuestsList = document.getElementById('unstarted-quests-list');
+        const completedQuestsList = document.getElementById('completed-quests-list');
         
-        if (quest.status === 'active' && activeQuestsList) {
-            activeQuestsList.appendChild(listItem);
-        } else if (quest.status === 'unstarted' && unstartedQuestsList) {
-            unstartedQuestsList.appendChild(listItem);
-        } else if (quest.status === 'completed' && completedQuestsList) {
-            completedQuestsList.appendChild(listItem);
-        }
-    });
-}
+        if (activeQuestsList) activeQuestsList.innerHTML = '';
+        if (unstartedQuestsList) unstartedQuestsList.innerHTML = '';
+        if (completedQuestsList) completedQuestsList.innerHTML = '';
 
-        // 4. Section "Inventaire"
-        if (inventoryDisplay && character.inventory) {
-            const inventoryKeys = Object.keys(character.inventory);
-            if (inventoryKeys.length > 0) {
-                inventoryDisplay.innerHTML = inventoryKeys.map(key => {
-                    const item = character.inventory[key];
-                    return `<p>${item.name} (x${item.quantity})</p>`;
-                }).join('');
-            } else {
-                inventoryDisplay.innerHTML = '<p>Votre inventaire est vide.</p>';
+        // Si la quête actuelle existe, on l'affiche
+        if (character.quests.current) {
+            const questData = questsData[character.quests.current.questId];
+            if (questData) {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <h4>${questData.title}</h4>
+                    <p>${questData.description}</p>
+                    <p>Progression : ${character.quests.current.currentProgress || 0} / ${questData.objective.required}</p>
+                `;
+                if (activeQuestsList) activeQuestsList.appendChild(li);
             }
         }
 
-        // 5. Section "Équipement"
-        if (equipmentDisplay && character.equipment) {
-            equipmentDisplay.innerHTML = `
-                <p>Arme : ${character.equipment.weapon ? character.equipment.weapon.name : 'Aucune'}</p>
-                <p>Armure : ${character.equipment.armor ? character.equipment.armor.name : 'Aucune'}</p>
-            `;
+        // On affiche les quêtes terminées
+        for (const questId in character.quests.completed) {
+            const questData = questsData[questId];
+            if (questData) {
+                const li = document.createElement('li');
+                li.innerHTML = `<h4>${questData.title}</h4><p>Terminée</p>`;
+                if (completedQuestsList) completedQuestsList.appendChild(li);
+            }
         }
-
-        // Afficher toutes les sections
-        const sectionsToDisplay = ['character-section', 'stats-section', 'quest-section', 'inventory-section', 'equipement-section'];
-        sectionsToDisplay.forEach(id => {
-            const section = document.getElementById(id);
-            if (section) section.classList.remove('hidden');
-        });
-
-        // Cacher le message de chargement
-        if (loadingMessage) loadingMessage.classList.add('hidden');
-        if (playBtn) playBtn.classList.remove('hidden');
-        if (deleteBtn) deleteBtn.classList.remove('hidden');
-        if (updateBtn) updateBtn.classList.remove('hidden');
-    }
-
-    // Fonction pour afficher le personnage sur la page de création/validation
-    function renderExistingCharacterOnCreationPage(character) {
-        if (!existingCharacterDisplay) return;
-        existingCharacterDisplay.innerHTML = `
-            <div class="character-card">
-                <h3>${character.name}</h3>
-                <p>Niveau : ${character.level}</p>
-                <p>Points de vie : ${character.hp}</p>
-                <p>Points de magie : ${character.mana}</p>
-                <p>Fatigue : ${character.stamina}</p>
-            </div>
-        `;
-        if (loadingMessage) loadingMessage.classList.add('hidden');
-    }
-
-    function showNoCharacterView() {
-        if (characterSection) characterSection.classList.add('hidden');
-        if (noCharacterSection) noCharacterSection.classList.remove('hidden');
-        if (characterExistsSection) characterExistsSection.classList.add('hidden');
-        if (characterForm) characterForm.classList.remove('hidden');
-    }
-
-    function showCharacterExistsView(character) {
-        if (noCharacterSection) noCharacterSection.classList.add('hidden');
-        if (characterForm) characterForm.classList.add('hidden');
-        if (characterExistsSection) characterExistsSection.classList.remove('hidden');
-        renderExistingCharacterOnCreationPage(character);
+        
+        // On affiche les quêtes non commencées
+        for (const questId in questsData) {
+            // Vérifier si la quête n'est pas la quête active et n'est pas déjà complétée
+            if (!character.quests.current || character.quests.current.questId !== questId) {
+                if (!character.quests.completed || !character.quests.completed[questId]) {
+                    const questData = questsData[questId];
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <h4>${questData.title}</h4>
+                        <p>${questData.description}</p>
+                        <button class="accept-quest-btn" data-quest-id="${questId}">Accepter</button>
+                    `;
+                    if (unstartedQuestsList) unstartedQuestsList.appendChild(li);
+                }
+            }
+        }
     }
     
-    // NOUVELLE LOGIQUE : Écouteur de clic pour le bouton "Commencer l'aventure"
+    // 4. Section "Inventaire"
+    if (inventoryDisplay && character.inventory) {
+        const inventoryKeys = Object.keys(character.inventory);
+        if (inventoryKeys.length > 0) {
+            inventoryDisplay.innerHTML = inventoryKeys.map(key => {
+                const item = character.inventory[key];
+                return `<p>${item.name} (x${item.quantity})</p>`;
+            }).join('');
+        } else {
+            inventoryDisplay.innerHTML = '<p>Votre inventaire est vide.</p>';
+        }
+    }
+    
+    // 5. Section "Équipement"
+    if (equipmentDisplay && character.equipment) {
+        equipmentDisplay.innerHTML = `
+            <p>Arme : ${character.equipment.weapon ? character.equipment.weapon.name : 'Aucune'}</p>
+            <p>Armure : ${character.equipment.armor ? character.equipment.armor.name : 'Aucune'}</p>
+        `;
+    }
+    
+    // Afficher les sections
+    const sectionsToDisplay = ['character-section', 'stats-section', 'quest-section', 'inventory-section', 'equipement-section'];
+    sectionsToDisplay.forEach(id => {
+        const section = document.getElementById(id);
+        if (section) section.classList.remove('hidden');
+    });
+
+    if (loadingMessage) loadingMessage.classList.add('hidden');
+    if (playBtn) playBtn.classList.remove('hidden');
+    if (deleteBtn) deleteBtn.classList.remove('hidden');
+    if (updateBtn) updateBtn.classList.remove('hidden');
+}
+
+function renderExistingCharacterOnCreationPage(character) {
+    if (!existingCharacterDisplay) return;
+    existingCharacterDisplay.innerHTML = `
+        <div class="character-card">
+            <h3>${character.name}</h3>
+            <p>Niveau : ${character.level}</p>
+            <p>Points de vie : ${character.hp}</p>
+            <p>Points de magie : ${character.mana}</p>
+            <p>Fatigue : ${character.stamina}</p>
+        </div>
+    `;
+    if (loadingMessage) loadingMessage.classList.add('hidden');
+}
+
+function showNoCharacterView() {
+    if (characterSection) characterSection.classList.add('hidden');
+    if (noCharacterSection) noCharacterSection.classList.remove('hidden');
+    if (characterExistsSection) characterExistsSection.classList.add('hidden');
+    if (characterForm) characterForm.classList.remove('hidden');
+}
+
+function showCharacterExistsView(character) {
+    if (noCharacterSection) noCharacterSection.classList.add('hidden');
+    if (characterForm) characterForm.classList.add('hidden');
+    if (characterExistsSection) characterExistsSection.classList.remove('hidden');
+    renderExistingCharacterOnCreationPage(character);
+}
+    
+function renderWorldMapCharacterInfo(character) {
+    if (characterInfoDisplay) {
+        characterInfoDisplay.innerHTML = `
+            <div class="player-info">
+                <span>Personnage : **${character.name}**</span>
+                <span>Niveau : **${character.level}**</span>
+                <span>PV : **${character.hp}**</span>
+            </div>
+        `;
+    }
+}
+
+async function loadCharacterData(user) {
+    const characterRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
+    try {
+        const docSnap = await getDoc(characterRef);
+        if (docSnap.exists()) {
+            const characterData = docSnap.data();
+            // On vérifie sur quelle page on est et on affiche le bon contenu
+            if (characterSection) {
+                renderCharacter(characterData);
+                characterSection.classList.remove('hidden');
+                if (noCharacterSection) noCharacterSection.classList.add('hidden');
+            } else if (characterExistsSection) {
+                showCharacterExistsView(characterData);
+            } else if (characterInfoDisplay) {
+                renderWorldMapCharacterInfo(characterData);
+            }
+        } else {
+            showNoCharacterView();
+        }
+    } catch (error) {
+        console.error("Erreur lors du chargement du personnage:", error);
+        showNoCharacterView();
+        showNotification("Erreur lors du chargement des données. Veuillez réessayer.", "error");
+    }
+}
+
+// =========================================================================
+// GESTION DES ÉVÉNEMENTS
+// =========================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Écouteur de clic pour le bouton "Commencer l'aventure"
     if (playBtn) {
         playBtn.addEventListener('click', async () => {
             const user = auth.currentUser;
-            if (user) {
-                try {
-                    // Vérifiez si le personnage a déjà une quête
-                    const docRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
-                    const docSnap = await getDoc(docRef);
-                    const hasActiveQuest = docSnap.exists() && docSnap.data().quests && Object.keys(docSnap.data().quests).length > 0;
-
-                    if (!hasActiveQuest) {
-                        // Si le personnage n'a pas de quête, ajoutez la quête initiale
-                        await setDoc(docRef, {
-                            quests: {
-                                [initialQuest.questId]: initialQuest
-                            }
-                        }, { merge: true });
-                        showNotification("Votre première quête a commencé !", "success");
-                    }
-
-                    // Redirigez l'utilisateur vers la carte du monde
-                    window.location.href = "world_map.html";
-
-                } catch (error) {
-                    console.error('Erreur lors du démarrage de la quête :', error);
-                    showNotification("Une erreur est survenue. Veuillez réessayer.", "error");
-                }
-            } else {
+            if (!user) {
                 showNotification("Vous devez être connecté pour commencer.", "error");
+                return;
+            }
+            try {
+                const docRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
+                const docSnap = await getDoc(docRef);
+                const characterData = docSnap.data();
+                
+                // Vérifie si la quête de démarrage n'est pas déjà présente
+                if (!characterData.quests || !characterData.quests.current) {
+                    const initialQuestData = {
+                        questId: 'initial_adventure_quest',
+                        ...questsData.initial_adventure_quest,
+                        status: 'active',
+                        currentProgress: 0
+                    };
+                    
+                    // Met à jour la quête directement dans l'objet des quêtes
+                    characterData.quests.current = initialQuestData;
+                    
+                    await setDoc(docRef, { quests: characterData.quests }, { merge: true });
+                    showNotification("Votre première quête a commencé !", "success");
+                }
+                
+                window.location.href = "world_map.html";
+            } catch (error) {
+                console.error('Erreur lors du démarrage de la quête :', error);
+                showNotification("Une erreur est survenue. Veuillez réessayer.", "error");
             }
         });
     }
 
-    // NOUVELLE LOGIQUE pour la page de la carte du monde
-    function renderWorldMapCharacterInfo(character) {
-        if (characterInfoDisplay) {
-            characterInfoDisplay.innerHTML = `
-                <div class="player-info">
-                    <span>Personnage : **${character.name}**</span>
-                    <span>Niveau : **${character.level}**</span>
-                    <span>PV : **${character.hp}**</span>
-                </div>
-            `;
-        }
-    }
-
-    async function loadCharacterData(user) {
-        const characterRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
-        try {
-            const docSnap = await getDoc(characterRef);
-            if (docSnap.exists()) {
-                const characterData = docSnap.data();
-                if (characterSection) {
-                    renderCharacter(characterData);
-                    characterSection.classList.remove('hidden');
-                    if (noCharacterSection) noCharacterSection.classList.add('hidden');
-                } else if (characterExistsSection) {
-                    showCharacterExistsView(characterData);
-                } else if (characterInfoDisplay) {
-                    renderWorldMapCharacterInfo(characterData);
-                }
-            } else {
-                showNoCharacterView();
-            }
-        } catch (error) {
-            console.error("Erreur lors du chargement du personnage:", error);
-            showNoCharacterView();
-            showNotification("Erreur lors du chargement des données. Veuillez réessayer.", "error");
-        }
-    }
-
-    // Gestion de l'état d'authentification
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            loadCharacterData(user);
-        } else {
-            window.location.href = "login.html";
-        }
-    });
-
-    // Écouteurs d'événements pour les boutons
     if (characterForm) {
         characterForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!auth.currentUser) {
+            const user = auth.currentUser;
+            if (!user) {
                 showNotification("Veuillez vous connecter pour créer un personnage.", "error");
                 setTimeout(() => { window.location.href = "login.html"; }, 1500);
                 return;
             }
-            const userId = auth.currentUser.uid;
             const name = document.getElementById('char-name').value.trim();
             const age = parseInt(document.getElementById('char-age').value);
             const height = parseInt(document.getElementById('char-height').value);
             const weight = parseInt(document.getElementById('char-weight').value);
             const charClass = document.getElementById('char-class').value;
+
             if (!name) {
                 showNotification("Veuillez saisir un pseudo pour votre personnage.", "error");
                 return;
             }
+
+            const initialStats = {
+                hp: 100,
+                maxHp: 100,
+                mana: 50,
+                maxMana: 50,
+                stamina: 80,
+                strength: 10,
+                intelligence: 8,
+                speed: 10,
+                dexterity: 10,
+                luck: 5,
+                xp: 0,
+                nextLevelXp: 100
+            };
             const characterData = {
                 name: name,
                 age: age,
                 height: height,
                 weight: weight,
                 class: charClass,
-                hp: 20,
                 level: 1,
-                mana: 50,
-                stamina: 80,
-                strength: 10,
-                intelligence: 8,
                 gold: 3,
                 inventory: {},
-                quests: {},
+                equipment: {},
+                quests: {
+                    current: null, // Pas de quête active au début
+                    completed: {} // Aucune quête terminée
+                },
+                stats: initialStats,
                 creationDate: new Date()
             };
-            const characterRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
+            const characterRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
             try {
                 await setDoc(characterRef, characterData);
                 showNotification("Personnage créé avec succès !", "success");
@@ -284,18 +311,33 @@ if (character.quests) {
         });
     }
 
+    // Gère la suppression du personnage
     if (deleteBtnOnCharacterPage) {
         deleteBtnOnCharacterPage.addEventListener('click', async () => {
-            await deleteCharacterData();
-            showNotification("Personnage supprimé. Vous pouvez en créer un nouveau.", "info");
-            setTimeout(() => {
-                window.location.href = "character.html";
-            }, 1500);
+            const user = auth.currentUser;
+            if (user) {
+                await deleteCharacterData(user);
+                showNotification("Personnage supprimé. Vous pouvez en créer un nouveau.", "info");
+                setTimeout(() => {
+                    window.location.href = "character.html";
+                }, 1500);
+            }
         });
     }
     if (deleteBtn) {
-        deleteBtn.addEventListener('click', deleteCharacterData);
+        deleteBtn.addEventListener('click', async () => {
+            const user = auth.currentUser;
+            if (user) {
+                await deleteCharacterData(user);
+                showNotification("Personnage supprimé. Vous pouvez en créer un nouveau.", "info");
+                setTimeout(() => {
+                    window.location.href = "character.html";
+                }, 1500);
+            }
+        });
     }
+    
+    // Gère la déconnexion
     if (logoutLink) {
         logoutLink.addEventListener('click', (e) => {
             e.preventDefault();
@@ -309,4 +351,13 @@ if (character.quests) {
     if (updateBtn) {
         updateBtn.addEventListener('click', () => { window.location.href = "character.html"; });
     }
+
+    // Gestion de l'état d'authentification
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            loadCharacterData(user);
+        } else {
+            window.location.href = "login.html";
+        }
+    });
 });
