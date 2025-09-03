@@ -1,12 +1,9 @@
-﻿// Ce module gère l'état global du jeu, y compris l'objet joueur, le donjon et les monstres.
+﻿// Fichier : js/core/questsData.js
+// Ce module gère l'état global du jeu, y compris l'objet joueur, le donjon et les monstres.
 
 import { itemsData } from './gameData.js';
 import { showNotification } from './notifications.js';
-
-// Importation du module de quêtes
 import { initialQuest } from './questsData.js';
-
-// Importation des services Firebase depuis firebase_config.js
 import { auth, db } from './firebase_config.js';
 import { onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
