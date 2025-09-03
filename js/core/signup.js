@@ -6,9 +6,6 @@ import { auth, app } from "./firebase_config.js";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-// const analytics = getAnalytics(app); // Vous n'avez pas besoin de cette ligne si vous n'utilisez pas Google Analytics
 
 // Initialisez Firebase Auth et stockez l'objet dans une constante appelée auth
 const auth = getAuth(app);
