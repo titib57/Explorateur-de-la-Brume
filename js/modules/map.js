@@ -5,14 +5,13 @@ import { generateDungeon } from '../core/dungeon.js';
 import { savePlayer, loadCharacter } from '../core/state.js';
 import { isSetSafePlaceQuest, updateQuestObjective} from './quests.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { auth } from '../firebase_config.js';
 
-
-// Fonction pour initialiser la carte
 async function initMap() {
-    // Écouteur d'état d'authentification pour s'assurer que l'utilisateur est bien connecté
+    // Écoute l'état d'authentification pour s'assurer que l'utilisateur est bien connecté.
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            // L'utilisateur est connecté, on peut charger les données du personnage
+            // L'utilisateur est connecté, on peut charger les données en toute sécurité.
             const characterData = await loadCharacter(user);
             if (characterData) {
                 console.log("Données du personnage chargées dans la carte !");
@@ -22,14 +21,14 @@ async function initMap() {
                 // Gérer le cas où le personnage n'existe pas
             }
         } else {
-            // L'utilisateur est déconnecté, rediriger vers la page de connexion
+            // L'utilisateur est déconnecté, on le redirige.
             console.log("Utilisateur non connecté. Redirection...");
             window.location.href = "login.html";
         }
     });
 }
 
-// Appeler la fonction d'initialisation de la carte
+// Appelle la fonction d'initialisation de la carte une fois que le DOM est chargé.
 document.addEventListener('DOMContentLoaded', initMap);
 
     // Étape 2: Initialisation des variables et des éléments de la carte
