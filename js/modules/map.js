@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', initMap);
         map.setView(defaultLatLng, 15);
         loadDungeons(player, defaultLatLng);
     }
-
+}
 
 /**
  * Met à jour la quête actuelle du joueur.
