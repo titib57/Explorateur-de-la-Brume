@@ -164,15 +164,3 @@ export function updateQuestsUI(characterData) {
         }
     });
 }
-
-/**
- * Vérifie si la quête 'safe_place_quest' est la quête active du personnage.
- * @param {Object} characterData Les données complètes du personnage.
- * @returns {boolean} True si la quête est active, sinon False.
- */
-export function isSetSafePlaceQuest(characterData) {
-    if (!characterData || !characterData.quests || !characterData.quests.current) {
-        return false;
-    }
-    return characterData.quests.current.questId === 'safe_place_quest';
-}

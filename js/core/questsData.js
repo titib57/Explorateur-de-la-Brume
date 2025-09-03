@@ -4,7 +4,7 @@ export const questsData = {
     "initial_adventure_quest": {
         questId: 'initial_adventure_quest',
         title: 'Les premiers pas',
-        description: "Apprenez les bases de la survie dans la Brume et trouvez un abri sûr.",
+        description: "Trouvez un abri sûr.",
         objective: {
             type: 'talk_to_npc',
             target: 'le-sage',
