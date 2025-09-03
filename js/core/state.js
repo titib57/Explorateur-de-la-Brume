@@ -3,6 +3,8 @@
 import { itemsData } from './gameData.js';
 import { showNotification } from './notifications.js';
 
+import { initialQuest } from './questsData.js';
+
 // Importations des modules Firebase
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
@@ -132,6 +134,7 @@ export function createCharacter(name, playerClass, age, height, weight) {
     const newPlayer = new Character(name, playerClass, 1, 0, 100, { strength: 1, intelligence: 1, speed: 1, dexterity: 1 }, {}, {}, {}, [], 0, 0, 0, 0, age, height, weight);
     newPlayer.statPoints = 5;
     recalculateDerivedStats(newPlayer);
+    [initialQuest], 
     player = newPlayer;
     savePlayer(player);
     return player;
