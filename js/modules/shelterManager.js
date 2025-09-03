@@ -83,3 +83,56 @@ export const shelterManager = {
         }
     }
 };
+
+ /**
+     * Améliore l'abri en augmentant son niveau et ses statistiques de défense.
+     * @param {string} upgradeType - Le type d'amélioration (ex: 'murs', 'portail').
+     * @returns {Promise<boolean>} Vrai si l'amélioration est réussie.
+     */
+    async upgradeShelter(upgradeType) {
+        const user = auth.currentUser;
+        if (!user) {
+            console.error("Erreur : Aucun utilisateur n'est connecté.");
+            return false;
+        }
+
+        const shelterRef = doc(db, COLLECTION_NAME, user.uid);
+        
+        try {
+            // Utiliser une transaction pour lire, vérifier et mettre à jour de manière atomique
+            await runTransaction(db, async (transaction) => {
+                const docSnap = await transaction.get(shelterRef);
+                const shelterData = docSnap.data() || {};
+                
+                // Récupérer le niveau actuel et les stats de l'abri, ou initialiser
+                const currentLevel = shelterData.shelterLevel || 0;
+                const currentStats = shelterData.shelterStats || { defense: 0, durability: 0 };
+                
+                // Vérifier si le joueur a les ressources nécessaires (ajouter cette logique)
+                // if (!hasRequiredResources(upgradeType, currentLevel)) {
+                //     throw new Error("Ressources insuffisantes.");
+                // }
+                
+                // Calculer les nouvelles stats
+                const newLevel = currentLevel + 1;
+                const newStats = {
+                    defense: currentStats.defense + 10, // Exemple d'augmentation
+                    durability: currentStats.durability + 50
+                };
+                
+                // Mettre à jour le document
+                transaction.update(shelterRef, { 
+                    shelterLevel: newLevel,
+                    shelterStats: newStats
+                });
+            });
+
+            console.log(`L'abri a été amélioré au niveau ${newLevel} avec de nouvelles statistiques.`);
+            return true;
+
+        } catch (error) {
+            console.error("Erreur lors de l'amélioration de l'abri:", error);
+            return false;
+        }
+    }
+};
