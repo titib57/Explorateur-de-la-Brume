@@ -5,12 +5,24 @@
 
 // Importations des données et des modules nécessaires
 import { questsData } from '../core/questsData.js';
-// import { giveRewards } from './rewards.js'; // Supposons un nouveau module de récompenses
-import { getShelterLocation } from './shelterManager.js';
+import { giveRewards } from './rewards.js';
+import { defineShelter } from './shelterManager.js';
 
 // =========================================================================
-// GESTION DES QUÊTES
+// FONCTIONS PUBLIQUES (EXPORTÉES)
 // =========================================================================
+
+/**
+ * Vérifie si la quête "Établir un abri" est la quête active.
+ * Utile pour l'affichage ou pour lier une action spécifique à cette quête.
+ * @param {Object} characterData - Les données complètes du personnage.
+ * @returns {boolean} Vrai si la quête est active et a l'ID "set_shelter", sinon faux.
+ */
+export function isSetSafePlaceQuest(characterData) {
+    const currentQuest = characterData.quests.current;
+    // Supposons que l'ID de la quête pour l'abri est "set_shelter"
+    return currentQuest && currentQuest.questId === 'set_shelter';
+}
 
 /**
  * Accepte une quête et la rend active pour le personnage.
@@ -21,7 +33,6 @@ import { getShelterLocation } from './shelterManager.js';
 export function acceptQuest(characterData, questId) {
     const questDefinition = questsData[questId];
 
-    // Vérifie si la quête existe et s'il n'y a pas déjà de quête en cours
     if (!questDefinition) {
         console.error(`Erreur: La quête avec l'ID '${questId}' n'existe pas.`);
         return null;
@@ -31,25 +42,25 @@ export function acceptQuest(characterData, questId) {
         return null;
     }
 
-    // Initialise la quête pour le personnage
     characterData.quests.current = {
         questId: questId,
         currentProgress: 0,
-        ...questDefinition // Ajoute les propriétés de la définition de quête
+        ...questDefinition
     };
-    console.log(`Quête '${questDefinition.title}' acceptée.`);
+    console.log(`Quête '${questDefinition.title}' acceptée. ✅`);
     return characterData;
 }
 
 /**
  * Met à jour la progression d'une quête en cours.
  * Cette fonction est le point d'entrée pour toutes les actions de progression.
+ * C'est une fonction asynchrone car elle utilise 'defineShelter' qui l'est.
  * @param {Object} characterData - Les données du personnage.
- * @param {string} objectiveType - Le type de l'objectif (ex: 'validate_current_location').
+ * @param {string} objectiveAction - L'action de l'objectif (ex: 'define_shelter').
  * @param {any} [payload] - Des données additionnelles nécessaires (ex: la position du joueur).
- * @returns {Object|null} Les données du personnage mises à jour ou null en cas d'échec.
+ * @returns {Promise<Object|null>} Les données du personnage mises à jour ou null en cas d'échec.
  */
-export function updateQuestProgress(characterData, objectiveType, payload) {
+export async function updateQuestProgress(characterData, objectiveAction, payload) {
     if (!characterData || !characterData.quests.current) {
         console.warn("Pas de quête en cours.");
         return null;
@@ -57,56 +68,71 @@ export function updateQuestProgress(characterData, objectiveType, payload) {
 
     const currentQuest = characterData.quests.current;
     const questDefinition = questsData[currentQuest.questId];
-    const objective = questDefinition.objective;
-
-    if (objective.type !== objectiveType) {
-        // L'action ne correspond pas à l'objectif en cours, on ne fait rien
+    if (!questDefinition || !questDefinition.objective) {
+        console.error("Définition de quête ou objectif invalide.");
         return null;
     }
+    const objective = questDefinition.objective;
 
-    // Gère la logique spécifique à chaque type d'objectif
+    // Vérifie si l'action fournie correspond à l'objectif de la quête
+    if (objective.action !== objectiveAction) {
+        return null; // L'action ne correspond pas à l'objectif en cours, on ne fait rien.
+    }
+
+    let progressMade = false;
+
     switch (objective.action) {
         case "define_shelter":
-            const success = shelterManager.defineShelter(payload); // 'payload' est la position du joueur
+            // Appel de la fonction asynchrone et attente du résultat
+            const success = await defineShelter(payload); 
             if (success) {
                 currentQuest.currentProgress = 1;
-                console.log("Objectif 'définir l'abri' accompli.");
+                console.log("Objectif 'définir l'abri' accompli. 🎉");
+                progressMade = true;
             } else {
-                console.warn("Impossible de définir l'abri. L'objectif pourrait être déjà terminé ou la position est invalide.");
+                console.warn("Impossible de définir l'abri. Il peut déjà exister.");
             }
             break;
-        
-        default:
-            // Logique par défaut pour les quêtes de type 'récolter', 'vaincre', etc.
-            // On incrémente la progression si la cible correspond
+
+        case "gather": // Exemple d'un autre type d'objectif
             if (objective.target && objective.target === payload.target) {
                 currentQuest.currentProgress = (currentQuest.currentProgress || 0) + 1;
                 console.log(`Progression de la quête '${questDefinition.title}' : ${currentQuest.currentProgress}/${objective.required}`);
+                progressMade = true;
             }
             break;
+            
+        default:
+            console.warn(`Type d'objectif inconnu : '${objective.action}'.`);
+            return null;
     }
 
-    // Vérifie si la quête est terminée
-    if (currentQuest.currentProgress >= objective.required) {
-        return completeQuest(characterData);
+    // Après l'incrémentation, vérifie si la quête est terminée.
+    if (progressMade && currentQuest.currentProgress >= objective.required) {
+        return await completeQuest(characterData);
     }
     
     return characterData;
 }
 
+// =========================================================================
+// FONCTIONS INTERNES (NON EXPORTÉES)
+// =========================================================================
+
 /**
- * Gère la complétion d'une quête et le passage à la suivante.
+ * Gère la complétion d'une quête.
+ * C'est une fonction interne qui doit être appelée après une mise à jour réussie.
  * @param {Object} characterData - Les données du personnage.
- * @returns {Object} Les données du personnage mises à jour.
+ * @returns {Promise<Object>} Les données du personnage mises à jour.
  */
-function completeQuest(characterData) {
+async function completeQuest(characterData) {
     const currentQuest = characterData.quests.current;
     const questDefinition = questsData[currentQuest.questId];
 
-    console.log(`Quête terminée : '${questDefinition.title}' !`);
+    console.log(`Quête terminée : '${questDefinition.title}' ! 🏆`);
 
-    // 1. Donne les récompenses
-    giveRewards(characterData, questDefinition.rewards);
+    // 1. Donne les récompenses (rendu asynchrone si giveRewards l'est)
+    await giveRewards(characterData, questDefinition.rewards);
 
     // 2. Déplace la quête vers la liste des quêtes terminées
     characterData.quests.completed[currentQuest.questId] = { ...currentQuest, status: 'completed' };
@@ -122,7 +148,8 @@ function completeQuest(characterData) {
         };
         console.log(`Nouvelle quête acceptée : '${nextQuestDefinition.title}'`);
     } else {
-        characterData.quests.current = null; // Aucune quête en cours
+        characterData.quests.current = null;
+        console.log("Toutes les quêtes de la série sont terminées. 🥳");
     }
 
     return characterData;
