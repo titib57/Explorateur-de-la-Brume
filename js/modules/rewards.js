@@ -7,7 +7,7 @@
 // Importations des fonctions nécessaires de Firebase Firestore
 import { doc, runTransaction } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 // Assurez-vous d'importer votre instance de base de données Firestore
-import { db } from '../core/firebaseConfig.js'; 
+import { db } from '../core/firebase_config.js'; 
 
 /**
  * Attribue les récompenses de quête au personnage en mettant à jour son document Firestore.
