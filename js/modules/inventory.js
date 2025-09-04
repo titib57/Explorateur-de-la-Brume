@@ -11,13 +11,25 @@ import { auth, db } from '../firebase_config.js';
 const USERS_COLLECTION = "users";
 
 /**
+ * Structure de données optimisée pour une recherche rapide des objets.
+ * Ceci est une amélioration par rapport à la recherche dans des objets séparés.
+ * @type {object}
+ */
+const allItems = {
+    ...itemsData.weapons,
+    ...itemsData.armors,
+    ...itemsData.consumables
+};
+
+/**
  * Fonction utilitaire pour trouver un objet par son ID.
+ * Utilise la structure de données optimisée pour une recherche en O(1).
  * @param {string} itemId L'ID de l'objet à trouver.
  * @returns {object|null} L'objet trouvé ou null.
  */
 function findItemById(itemId) {
     if (!itemId) return null;
-    return itemsData.weapons[itemId] || itemsData.armors[itemId] || itemsData.consumables[itemId];
+    return allItems[itemId];
 }
 
 /**
@@ -48,7 +60,42 @@ async function loadAndDisplayInventory() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', loadAndDisplayInventory);
+document.addEventListener('DOMContentLoaded', () => {
+    loadAndDisplayInventory();
+    setupInventoryEventListeners();
+});
+
+/**
+ * Configure un seul écouteur d'événements sur le conteneur de l'inventaire
+ * pour gérer les clics sur les boutons d'équiper et d'utiliser.
+ * Cette approche de délégation d'événements est plus performante.
+ */
+function setupInventoryEventListeners() {
+    const inventoryItemsGrid = document.getElementById('inventory-items-grid');
+    if (!inventoryItemsGrid) return;
+
+    inventoryItemsGrid.addEventListener('click', (e) => {
+        const target = e.target;
+        if (target.classList.contains('equip-btn')) {
+            const itemId = target.dataset.itemId;
+            const itemType = target.dataset.itemType;
+            equipItem(itemId, itemType);
+        } else if (target.classList.contains('use-btn')) {
+            const itemId = target.dataset.itemId;
+            useItem(itemId);
+        }
+    });
+
+    const unequipWeaponBtn = document.getElementById('unequip-weapon-btn');
+    if (unequipWeaponBtn) {
+        unequipWeaponBtn.addEventListener('click', () => unequipItem('weapon'));
+    }
+    const unequipArmorBtn = document.getElementById('unequip-armor-btn');
+    if (unequipArmorBtn) {
+        unequipArmorBtn.addEventListener('click', () => unequipItem('armor'));
+    }
+}
+
 
 export function updateInventoryPageUI() {
     if (!player) return;
@@ -82,21 +129,6 @@ export function updateInventoryPageUI() {
         inventoryItemsGrid.appendChild(itemElement);
     });
 
-    document.querySelectorAll('.equip-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const itemId = e.target.dataset.itemId;
-            const itemType = e.target.dataset.itemType;
-            equipItem(itemId, itemType);
-        });
-    });
-
-    document.querySelectorAll('.use-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const itemId = e.target.dataset.itemId;
-            useItem(itemId);
-        });
-    });
-
     const equippedWeapon = findItemById(player.equipment.weapon);
     const equippedArmor = findItemById(player.equipment.armor);
     
@@ -109,12 +141,10 @@ export function updateInventoryPageUI() {
     const unequipWeaponBtn = document.getElementById('unequip-weapon-btn');
     if (unequipWeaponBtn) {
         unequipWeaponBtn.style.display = equippedWeapon ? 'block' : 'none';
-        unequipWeaponBtn.addEventListener('click', () => unequipItem('weapon'));
     }
     const unequipArmorBtn = document.getElementById('unequip-armor-btn');
     if (unequipArmorBtn) {
         unequipArmorBtn.style.display = equippedArmor ? 'block' : 'none';
-        unequipArmorBtn.addEventListener('click', () => unequipItem('armor'));
     }
 }
 
