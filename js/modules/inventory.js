@@ -128,7 +128,6 @@ export async function useItem(itemId) {
         await runTransaction(db, async (transaction) => {
             const userDocRef = doc(db, USERS_COLLECTION, auth.currentUser.uid);
             const docSnap = await transaction.get(userDocRef);
-
             if (!docSnap.exists()) {
                 throw new Error("Document utilisateur introuvable.");
             }
@@ -150,9 +149,9 @@ export async function useItem(itemId) {
             }
         });
 
-        // Mise à jour de l'UI et affichage de la notification uniquement après la transaction réussie
+        const item = findItemById(itemId);
         updateInventoryPageUI();
-        showNotification(`Vous avez utilisé ${findItemById(itemId).name}.`, 'success');
+        showNotification(`Vous avez utilisé ${item.name}.`, 'success');
     } catch (error) {
         console.error("Erreur lors de l'utilisation de l'objet:", error);
         showNotification(error.message || "Erreur lors de l'utilisation de l'objet.", 'error');
@@ -196,7 +195,6 @@ export async function equipItem(itemId, type) {
             }
         });
         
-        // Mise à jour de l'état local et de l'UI après la transaction réussie
         player.equipment = result.currentEquipment;
         player.inventory = result.currentInventory;
         recalculateDerivedStats();
@@ -242,7 +240,6 @@ export async function unequipItem(type) {
             }
         });
         
-        // Mise à jour de l'état local et de l'UI après la transaction réussie
         player.equipment = result.currentEquipment;
         player.inventory = result.currentInventory;
         recalculateDerivedStats();
