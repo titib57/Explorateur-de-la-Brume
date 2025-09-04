@@ -449,7 +449,7 @@ body {
 }
 
 /* Styles de la carte du monde */
-#map {
+.map {
     height: 100%; /* S'étend sur toute la hauteur disponible du parent */
     width: 100%; /* S'étend sur toute la largeur disponible du parent */
     flex-grow: 1; /* Important : prend l'espace restant */
