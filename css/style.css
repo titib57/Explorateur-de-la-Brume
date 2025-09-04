@@ -447,9 +447,10 @@ a:hover, a:focus {
 }
 
 .map-container {
-    position: relative;
-    width: 100%;
-    height: 600px; /* Conserve une hauteur fixe */
+    background-color: var(--bg-color-medium);
+    padding: 20px;
+    text-align: center;
+    border-bottom: 2px solid var(--border-color);
 }
 
 .map {
