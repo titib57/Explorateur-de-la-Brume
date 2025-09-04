@@ -1,10 +1,11 @@
 ﻿// Fichier : js/modules/map.js
 
+
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { showNotification } from '../core/notifications.js';
 import { generateDungeon } from '../core/dungeon.js';
 import { savePlayer, loadCharacter } from '../core/state.js';
 import { isSetSafePlaceQuest, updateQuestObjective } from './quests.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { auth } from '../core/firebase_config.js';
 
 // Définition des icônes personnalisées

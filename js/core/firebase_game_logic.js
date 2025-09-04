@@ -2,8 +2,7 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { auth, db } from "./firebase_config.js";
 import { showNotification } from './notifications.js';
-import { questsData } from './questsData.js'; // ⬅️ Ajout de l'importation manquante
-
+import { questsData } from './questsData.js';
 
 // =========================================================================
 // VARIABLES GLOBALES (sauf celles qui changent d'une page à l'autre)
