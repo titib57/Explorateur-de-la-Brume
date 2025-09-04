@@ -1,10 +1,17 @@
-﻿// Fichier : js/core/dungeon.js
+﻿/**
+ * @fileoverview Module de gestion des donjons.
+ * Gère la génération de donjons et leur interaction avec le joueur en utilisant Firestore.
+ */
 
 // Importations des données et des utilitaires nécessaires
 import { pointsOfInterest, dungeonTypes, monstersData, bossesData } from './gameData.js';
 import { questsData } from './questsData.js';
 import { showNotification } from './notifications.js';
-import { currentDungeon, player, savePlayer } from './state.js';
+
+// Importations Firebase
+import { doc, runTransaction } from "firebase/firestore";
+// Assurez-vous d'importer votre instance de base de données Firestore
+import { db } from '../core/firebaseConfig.js'; 
 
 /**
  * Calcule la distance entre deux points géographiques en utilisant la formule de Haversine simplifiée.
@@ -29,132 +36,142 @@ function calculateDistance(loc1, loc2) {
 }
 
 /**
- * Génère un donjon pour le joueur, soit un donjon de tutoriel, soit un donjon dynamique basé sur la position.
- * @param {object|string} locationInfo L'objet de position du joueur { lat, lng } ou la chaîne de caractères 'tutoriel'.
- * @returns {boolean} Renvoie true si un donjon a été généré avec succès, sinon false.
+ * Génère un donjon pour le joueur et met à jour son état sur Firestore.
+ * Cette fonction utilise une transaction pour garantir la cohérence des données du personnage.
+ * @param {string} characterId L'ID unique du personnage.
+ * @param {object|string} locationInfo La position du joueur { lat, lng } ou la chaîne de caractères 'tutoriel'.
+ * @returns {Promise<boolean>} Vrai si un donjon a été généré et sauvegardé, faux sinon.
  */
-export function generateDungeon(locationInfo) {
-    let dungeonToGenerate;
-    let closestPOI = null;
-    const isTutorial = locationInfo === 'tutoriel';
+export async function generateDungeon(characterId, locationInfo) {
+    const characterRef = doc(db, 'characters', characterId);
 
-    if (isTutorial) {
-        // Logique spécifique pour le donjon de tutoriel
-        dungeonToGenerate = dungeonTypes['tutoriel'];
-        closestPOI = pointsOfInterest['tutorial_dungeon_poi'];
-    } else {
-        // Logique pour les donjons dynamiques basés sur la géolocalisation
-        let minDistance = Infinity;
-
-        for (const poiId in pointsOfInterest) {
-            const poi = pointsOfInterest[poiId];
-            if (!poi.isTutorial) { // On s'assure de ne pas considérer le POI de tutoriel ici
-                const distance = calculateDistance(locationInfo, poi.location);
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    closestPOI = poi;
-                }
+    try {
+        await runTransaction(db, async (transaction) => {
+            const characterDoc = await transaction.get(characterRef);
+            if (!characterDoc.exists()) {
+                throw new Error("Le document du personnage n'existe pas.");
             }
-        }
-        
-        if (!closestPOI) {
-            showNotification("Aucun lieu remarquable à proximité !", 'error');
-            return false;
-        }
+            const characterData = characterDoc.data();
+            const playerLevel = characterData.stats?.level || 1;
 
-        dungeonToGenerate = dungeonTypes[closestPOI.dungeonType];
-    }
+            let dungeonToGenerate;
+            let closestPOI = null;
+            const isTutorial = locationInfo === 'tutoriel';
 
-    if (!dungeonToGenerate) {
-        showNotification("Type de donjon non défini.", 'error');
+            if (isTutorial) {
+                dungeonToGenerate = dungeonTypes['tutoriel'];
+                closestPOI = pointsOfInterest['tutorial_dungeon_poi'];
+            } else {
+                let minDistance = Infinity;
+                for (const poiId in pointsOfInterest) {
+                    const poi = pointsOfInterest[poiId];
+                    if (!poi.isTutorial) {
+                        const distance = calculateDistance(locationInfo, poi.location);
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            closestPOI = poi;
+                        }
+                    }
+                }
+                
+                if (!closestPOI) {
+                    throw new Error("Aucun lieu remarquable à proximité !");
+                }
+                dungeonToGenerate = dungeonTypes[closestPOI.dungeonType];
+            }
+
+            if (!dungeonToGenerate) {
+                throw new Error("Type de donjon non défini.");
+            }
+
+            const levelFactor = playerLevel > 0 ? playerLevel - 1 : 0;
+            let dungeonData;
+
+            if (isTutorial) {
+                const tutorialMonster = monstersData['mannequin_dentrainement'];
+                const tutorialBoss = bossesData['mannequin_dentrainement'];
+                
+                dungeonData = {
+                    id: closestPOI.id,
+                    name: closestPOI.name,
+                    location: closestPOI.location,
+                    difficulty: closestPOI.difficulty,
+                    type: closestPOI.dungeonType,
+                    description: dungeonToGenerate.description,
+                    monsters: [tutorialMonster],
+                    boss: tutorialBoss,
+                    isTutorial: true,
+                    rewards: dungeonToGenerate.rewards
+                };
+            } else {
+                const monsterPool = dungeonToGenerate.monsterPool.map(id => monstersData[id]);
+                const bossPool = dungeonToGenerate.bossPool.map(id => bossesData[id]);
+                const selectedMonsterData = monsterPool[Math.floor(Math.random() * monsterPool.length)];
+                const selectedBossData = bossPool[Math.floor(Math.random() * bossPool.length)];
+                
+                const scaledMonster = {
+                    ...selectedMonsterData,
+                    hp: selectedMonsterData.hp + (levelFactor * 5),
+                    attack: selectedMonsterData.attack + (levelFactor * 2),
+                    defense: selectedMonsterData.defense + (levelFactor * 1),
+                    xpReward: selectedMonsterData.xpReward + (levelFactor * 10),
+                    goldReward: selectedMonsterData.goldReward + (levelFactor * 5)
+                };
+
+                const scaledBoss = {
+                    ...selectedBossData,
+                    hp: selectedBossData.hp + (levelFactor * 15),
+                    attack: selectedBossData.attack + (levelFactor * 5),
+                    defense: selectedBossData.defense + (levelFactor * 3),
+                    xpReward: selectedBossData.xpReward + (levelFactor * 30),
+                    goldReward: selectedBossData.goldReward + (levelFactor * 15)
+                };
+
+                dungeonData = {
+                    id: closestPOI.id,
+                    name: `Le donjon de ${closestPOI.name}`,
+                    location: closestPOI.location,
+                    difficulty: closestPOI.difficulty,
+                    type: closestPOI.dungeonType,
+                    description: dungeonToGenerate.description,
+                    monsters: [scaledMonster],
+                    boss: scaledBoss,
+                    rewards: dungeonToGenerate.rewards
+                };
+            }
+
+            // Gérer la quête dynamique et la sauvegarder
+            const newQuestId = closestPOI.questId;
+            const newQuest = questsData[newQuestId];
+            const quests = characterData.quests || {};
+            const completedQuests = quests.completed || {};
+            
+            // On vérifie si la quête existe et si elle n'est pas déjà en cours ou terminée
+            if (newQuest && !quests.current && !completedQuests[newQuestId]) {
+                const updatedQuests = {
+                    ...quests,
+                    current: {
+                        questId: newQuestId,
+                        currentProgress: 0,
+                        ...newQuest
+                    }
+                };
+                transaction.update(characterRef, { quests: updatedQuests });
+                showNotification(`Nouvelle quête acceptée : ${newQuest.name}`, 'quest');
+            }
+
+            // Enregistrer le donjon dans l'état du personnage sur Firestore
+            const updatedData = {
+                'quests.currentDungeon': dungeonData,
+            };
+            transaction.update(characterRef, updatedData);
+
+            showNotification(`Vous entrez dans ${dungeonData.name}! ${dungeonData.description}`, 'info');
+        });
+        return true;
+    } catch (e) {
+        console.error("Échec de la génération du donjon :", e.message);
+        showNotification(e.message, 'error');
         return false;
     }
-
-    let dungeonData;
-
-    if (isTutorial) {
-        // Configuration du donjon de tutoriel
-        const tutorialMonster = monstersData['mannequin_dentrainement'];
-        const tutorialBoss = bossesData['mannequin_dentrainement'];
-        
-        dungeonData = {
-            id: closestPOI.id,
-            name: closestPOI.name,
-            location: closestPOI.location,
-            difficulty: closestPOI.difficulty,
-            type: closestPOI.dungeonType,
-            description: dungeonToGenerate.description,
-            monsters: [tutorialMonster],
-            boss: tutorialBoss,
-            isTutorial: true,
-            rewards: dungeonToGenerate.rewards
-        };
-    } else {
-        // Configuration du donjon dynamique
-        const monsterPool = dungeonToGenerate.monsterPool.map(id => monstersData[id]);
-        const bossPool = dungeonToGenerate.bossPool.map(id => bossesData[id]);
-
-        // Sélectionne un monstre et un boss au hasard du pool
-        const selectedMonsterData = monsterPool[Math.floor(Math.random() * monsterPool.length)];
-        const selectedBossData = bossPool[Math.floor(Math.random() * bossPool.length)];
-        
-        const playerLevel = player.level;
-        // Le facteur de niveau est utilisé pour la mise à l'échelle des stats
-        const levelFactor = playerLevel > 0 ? playerLevel - 1 : 0;
-
-        // Mise à l'échelle des monstres et du boss en fonction du niveau du joueur
-        const scaledMonster = {
-            ...selectedMonsterData,
-            hp: selectedMonsterData.hp + (levelFactor * 5),
-            attack: selectedMonsterData.attack + (levelFactor * 2),
-            defense: selectedMonsterData.defense + (levelFactor * 1),
-            xpReward: selectedMonsterData.xpReward + (levelFactor * 10),
-            goldReward: selectedMonsterData.goldReward + (levelFactor * 5)
-        };
-
-        const scaledBoss = {
-            ...selectedBossData,
-            hp: selectedBossData.hp + (levelFactor * 15),
-            attack: selectedBossData.attack + (levelFactor * 5),
-            defense: selectedBossData.defense + (levelFactor * 3),
-            xpReward: selectedBossData.xpReward + (levelFactor * 30),
-            goldReward: selectedBossData.goldReward + (levelFactor * 15)
-        };
-
-        dungeonData = {
-            id: closestPOI.id,
-            name: `Le donjon de ${closestPOI.name}`,
-            location: closestPOI.location,
-            difficulty: closestPOI.difficulty,
-            type: closestPOI.dungeonType,
-            description: dungeonToGenerate.description,
-            monsters: [scaledMonster],
-            boss: scaledBoss,
-            rewards: dungeonToGenerate.rewards
-        };
-
-        // Gérer la quête dynamique
-        const newQuestId = closestPOI.questId;
-        const newQuest = questsData[newQuestId];
-
-        // On vérifie si la quête existe et si le joueur ne l'a pas déjà
-        if (newQuest && (!player.quests || !player.quests[newQuestId])) {
-            if (!player.quests) {
-                player.quests = {};
-            }
-            player.quests[newQuestId] = { ...newQuest };
-            showNotification(`Nouvelle quête acceptée : ${newQuest.name}`, 'quest');
-            savePlayer(player); // Sauvegarde le joueur après avoir ajouté la quête
-        }
-    }
-
-    // Mise à jour de l'état du jeu avec le nouveau donjon
-    // Note : Modifier une variable globale (currentDungeon) peut rendre le débogage difficile.
-    // Une meilleure pratique serait que cette fonction retourne le donjon et que l'appelant
-    // (par exemple, la fonction principale du jeu) gère l'état.
-    localStorage.setItem('currentDungeon', JSON.stringify(dungeonData));
-    showNotification(`Vous entrez dans ${dungeonData.name}! ${dungeonData.description}`, 'info');
-    currentDungeon = dungeonData;
-
-    return true;
 }
