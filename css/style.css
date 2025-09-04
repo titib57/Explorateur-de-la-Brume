@@ -449,13 +449,12 @@ a:hover, a:focus {
 .map-container {
     position: relative;
     width: 100%;
-    height: 600px;
+    height: 600px; /* Conserve une hauteur fixe */
 }
 
 .map {
-    height: 100%;
-    width: 100%;
-    flex-grow: 1;
+    height: 100%; /* La carte occupe 100% de la hauteur de son conteneur */
+    width: 100%; /* La carte occupe 100% de la largeur de son conteneur */
     border: 2px solid var(--border-color);
     border-radius: 8px;
     transition: all 0.3s ease-in-out;
@@ -468,7 +467,7 @@ a:hover, a:focus {
     width: 100vw;
     height: 100vh;
     z-index: 9999;
-}
+}s
 
 /* Ajustement crucial du z-index pour les boutons */
 #toggle-fullscreen-btn, #recenter-btn, #set-safe-place-btn {
