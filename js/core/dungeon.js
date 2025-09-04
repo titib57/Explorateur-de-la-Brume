@@ -11,7 +11,7 @@ import { showNotification } from './notifications.js';
 // Importations Firebase
 import { doc, runTransaction } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 // Assurez-vous d'importer votre instance de base de données Firestore
-import { db } from './firebaseConfig.js';
+import { db } from './firebase_config.js';
 
 /**
  * Calcule la distance entre deux points géographiques en utilisant la formule de Haversine simplifiée.
