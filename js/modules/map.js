@@ -7,7 +7,7 @@ import { isSetSafePlaceQuest, updateQuestObjective } from './quests.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { auth } from '../core/firebase_config.js';
 
-// Définition des icônes personnalisées (peuvent être globales)
+// Définition des icônes personnalisées
 const playerIcon = L.icon({
     iconUrl: 'assets/img/player_icon.png',
     iconSize: [32, 32],
@@ -28,10 +28,10 @@ let playerMarker;
 let selectedDungeon = null;
 let dungeonMarkers;
 let lastKnownPosition = null;
+let player = null; // Initialisation à null
 let mapElement;
-let player = null; // Initialisation de player à null par défaut
 
-// Éléments du DOM (déclarés au niveau global pour une meilleure lisibilité)
+// Éléments du DOM
 let fullscreenBtn;
 let startBattleBtn;
 let recenterBtn;
@@ -43,9 +43,13 @@ let dungeonDifficultyDisplay;
 
 /**
  * Initialise la carte du monde et la logique de géolocalisation.
+ * Cette fonction est appelée une fois que les données du joueur sont chargées.
+ * @param {object} player - L'objet joueur.
  */
-async function initMap() {
-    // Étape 2: Initialisation des variables et des éléments de la carte
+async function initMap(player) {
+    if (map) return; // Si la carte est déjà initialisée, ne rien faire
+
+    // Initialisation des éléments du DOM
     mapElement = document.getElementById('map');
     fullscreenBtn = document.getElementById('toggle-fullscreen-btn');
     startBattleBtn = document.getElementById('start-battle-btn');
@@ -56,8 +60,9 @@ async function initMap() {
     dungeonDescriptionDisplay = document.getElementById('dungeon-description');
     dungeonDifficultyDisplay = document.getElementById('dungeon-difficulty');
 
-    // Étape 3: Création de la carte et ajout de la couche de tuiles OpenStreetMap
-    map = L.map('map');
+    // Création de la carte et ajout de la couche de tuiles OpenStreetMap
+    map = L.map('map').setView([48.8566, 2.3522], 13); // Position par défaut pour Paris
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
@@ -66,7 +71,7 @@ async function initMap() {
     map.invalidateSize();
     setTimeout(() => map.invalidateSize(), 100);
 
-    // Étape 4: Gestion des événements de la carte
+    // Gestion des événements de la carte et des boutons
     window.addEventListener('resize', () => map.invalidateSize());
 
     if (fullscreenBtn && mapElement) {
@@ -99,17 +104,12 @@ async function initMap() {
             }
         });
     }
-    
-    // Étape 5: Démarrage de la géolocalisation après le chargement du DOM
+
+    // Démarrage de la géolocalisation
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
             (position) => {
-                // Vérification ajoutée avant d'appeler la fonction
-                if (player) {
-                    updatePlayerLocation(player, position);
-                } else {
-                    console.log("Les données du personnage ne sont pas encore chargées, mise à jour de la position ignorée.");
-                }
+                updatePlayerLocation(player, position);
             },
             (error) => {
                 console.error("Erreur de géolocalisation :", error);
@@ -119,9 +119,7 @@ async function initMap() {
                     playerMarker = L.marker(defaultLatLng, { icon: playerIcon }).addTo(map);
                     playerMarker.bindTooltip("Position par défaut", { permanent: true, direction: "top" });
                     map.setView(defaultLatLng, 15);
-                    if (player) {
-                        loadDungeons(player, defaultLatLng);
-                    }
+                    loadDungeons(player, defaultLatLng);
                 }
             }, {
                 enableHighAccuracy: true,
@@ -135,31 +133,24 @@ async function initMap() {
         playerMarker = L.marker(defaultLatLng, { icon: playerIcon }).addTo(map);
         playerMarker.bindTooltip("Position par défaut", { permanent: true, direction: "top" });
         map.setView(defaultLatLng, 15);
-        if (player) {
-            loadDungeons(player, defaultLatLng);
-        }
+        loadDungeons(player, defaultLatLng);
     }
 }
 
 /**
  * Met à jour la quête actuelle du joueur.
- * @param {object} player - L'objet joueur.
- * @param {string} newQuestId - L'ID de la nouvelle quête.
  */
 function updateQuest(player, newQuestId) {
-    if (!player) return; // Vérification ajoutée
+    if (!player) return;
     player.quests.current = newQuestId;
     savePlayer(player);
 }
 
 /**
- * Calcule la distance entre deux points géographiques en utilisant la formule de Haversine simplifiée.
- * @param {object} loc1 - Premier point avec lat et lng.
- * @param {object} loc2 - Deuxième point avec lat et lng.
- * @returns {number} La distance en mètres.
+ * Calcule la distance entre deux points géographiques.
  */
 function calculateDistance(loc1, loc2) {
-    const R = 6371e3; // Rayon de la Terre en mètres
+    const R = 6371e3;
     const lat1 = loc1.lat * Math.PI / 180;
     const lat2 = loc2.lat * Math.PI / 180;
     const deltaLat = (loc2.lat - loc1.lat) * Math.PI / 180;
@@ -170,12 +161,11 @@ function calculateDistance(loc1, loc2) {
         Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c; // Distance en mètres
+    return R * c;
 }
 
 /**
- * Met à jour les informations du donjon sélectionné dans l'interface utilisateur.
- * @param {object} dungeon - L'objet donjon sélectionné.
+ * Met à jour les informations du donjon sélectionné.
  */
 function updateDungeonDetails(dungeon) {
     selectedDungeon = dungeon;
@@ -188,13 +178,10 @@ function updateDungeonDetails(dungeon) {
 }
 
 /**
- * Charge et affiche les donjons sur la carte en fonction de la position du joueur.
- * Gère les donjons du tutoriel et les donjons dynamiques via l'API Overpass.
- * @param {object} player - L'objet joueur.
- * @param {object} playerLatLng - La position actuelle du joueur.
+ * Charge et affiche les donjons sur la carte.
  */
 async function loadDungeons(player, playerLatLng) {
-    if (!player) return; // Vérification ajoutée pour éviter les erreurs
+    if (!player) return;
     if (!dungeonMarkers) {
         dungeonMarkers = L.layerGroup().addTo(map);
     }
@@ -202,7 +189,6 @@ async function loadDungeons(player, playerLatLng) {
     selectedDungeon = null;
     dungeonDetails.style.display = 'none';
 
-    // Affiche le donjon du tutoriel si le lieu sécurisé est défini
     if (player.safePlaceLocation) {
         const tutorialDungeon = {
             id: 'tutorial_dungeon_poi',
@@ -265,7 +251,6 @@ out skel qt;
 
             const displayedIds = new Set();
 
-            // Ajoute les donjons basés sur des "ways" (chemins/ruines étendues)
             ways.forEach(element => {
                 if (element.bounds && !displayedIds.has(element.id)) {
                     const center = L.latLngBounds(element.bounds.minlat, element.bounds.minlon, element.bounds.maxlat, element.bounds.maxlon).getCenter();
@@ -288,7 +273,6 @@ out skel qt;
                 }
             });
 
-            // Ajoute les donjons basés sur des "nodes" (points précis)
             nodes.forEach(element => {
                 if (!wayNodes.has(element.id) && !displayedIds.has(element.id)) {
                     const dungeonLatLng = L.latLng(element.lat, element.lon);
@@ -325,21 +309,18 @@ out skel qt;
  * @param {object} position - L'objet de position de géolocalisation.
  */
 function updatePlayerLocation(player, position) {
-    if (!player) return; // Vérification ajoutée
+    if (!player) return;
     const { latitude, longitude } = position.coords;
     const playerLatLng = L.latLng(latitude, longitude);
 
     if (!playerMarker) {
-        // Initialise la carte et le marqueur du joueur si c'est la première fois
         playerMarker = L.marker(playerLatLng, { icon: playerIcon }).addTo(map);
         playerMarker.bindTooltip("Vous êtes ici", { permanent: true, direction: "top" });
         map.setView(playerLatLng, 15);
         loadDungeons(player, playerLatLng);
         lastKnownPosition = playerLatLng;
     } else {
-        // Met à jour la position du marqueur existant
         playerMarker.setLatLng(playerLatLng);
-        // Recharge les donjons si le joueur a parcouru plus de 50 mètres
         if (lastKnownPosition && calculateDistance(lastKnownPosition, playerLatLng) > 50) {
             loadDungeons(player, playerLatLng);
             lastKnownPosition = playerLatLng;
@@ -349,16 +330,15 @@ function updatePlayerLocation(player, position) {
 }
 
 /**
- * Gère l'affichage des boutons d'action en fonction de la position du joueur et du donjon sélectionné.
+ * Gère l'affichage des boutons d'action.
  * @param {object} player - L'objet joueur.
  * @param {object} playerLatLng - La position actuelle du joueur.
  */
 function updateActionButtons(player, playerLatLng) {
-    if (!player) return; // Vérification ajoutée
-    // Gère le bouton de bataille/d'entrée de donjon
+    if (!player) return;
     if (selectedDungeon && playerLatLng) {
         const distance = calculateDistance(playerLatLng, selectedDungeon.location);
-        if (distance <= 50) { // 50 mètres
+        if (distance <= 50) {
             startBattleBtn.style.display = 'block';
             startBattleBtn.textContent = `Entrer dans ${selectedDungeon.name}`;
             return;
@@ -374,7 +354,7 @@ onAuthStateChanged(auth, async (user) => {
         if (characterData) {
             player = characterData;
             console.log("Données du personnage chargées ! Initialisation de la carte...");
-            initMap(); // L'initialisation de la carte est déplacée ici
+            initMap(player); // Appel correct de la fonction avec l'objet player
         } else {
             console.error("Impossible de charger les données du personnage. Redirection vers la création de personnage.");
             window.location.href = "character_creation.html";
