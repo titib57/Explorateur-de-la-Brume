@@ -1,7 +1,4 @@
-﻿// Fichier : js/modules/map.js
-
-
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+﻿import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { showNotification } from '../core/notifications.js';
 import { generateDungeon } from '../core/dungeon.js';
 import { savePlayer, loadCharacter } from '../core/state.js';
@@ -106,6 +103,26 @@ async function initMap(player) {
         });
     }
 
+    // Gestion du bouton "Lieu sûr"
+    if (setSafePlaceBtn) {
+        setSafePlaceBtn.addEventListener('click', () => {
+            if (playerMarker) {
+                player.safePlaceLocation = {
+                    lat: playerMarker.getLatLng().lat,
+                    lng: playerMarker.getLatLng().lng
+                };
+                savePlayer(player);
+                updateQuestProgress('lieu_sur', 1);
+                setSafePlaceBtn.style.display = 'none';
+                showNotification("Votre lieu sûr a été défini !", "success");
+                loadDungeons(player, playerMarker.getLatLng());
+            } else {
+                showNotification("Impossible de définir le lieu sûr sans connaître votre position.", "warning");
+            }
+        });
+    }
+
+
     // Démarrage de la géolocalisation
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
@@ -190,6 +207,15 @@ async function loadDungeons(player, playerLatLng) {
     selectedDungeon = null;
     dungeonDetails.style.display = 'none';
 
+    // Affiche le bouton si la quête "Lieu sûr" est active et que le lieu n'a pas été défini
+    if (isSetSafePlaceQuest(player) && !player.safePlaceLocation) {
+        setSafePlaceBtn.style.display = 'block';
+        showNotification("Définissez un lieu sûr pour continuer la quête !", "info");
+    } else {
+        setSafePlaceBtn.style.display = 'none';
+    }
+
+
     if (player.safePlaceLocation) {
         const tutorialDungeon = {
             id: 'tutorial_dungeon_poi',
@@ -211,7 +237,8 @@ async function loadDungeons(player, playerLatLng) {
         });
     }
 
-    if (!isSetSafePlaceQuest && player.safePlaceLocation) {
+    // Le reste du code de chargement des donjons
+    if (!isSetSafePlaceQuest(player) && player.safePlaceLocation) {
         const searchRadius = 0.2;
         const overpassQuery = `
 [out:json][timeout:25];
@@ -337,6 +364,14 @@ function updatePlayerLocation(player, position) {
  */
 function updateActionButtons(player, playerLatLng) {
     if (!player) return;
+
+    // Masque le bouton de lieu sûr si la quête n'est pas active ou si le lieu est déjà défini
+    if (isSetSafePlaceQuest(player) && !player.safePlaceLocation) {
+        setSafePlaceBtn.style.display = 'block';
+    } else {
+        setSafePlaceBtn.style.display = 'none';
+    }
+
     if (selectedDungeon && playerLatLng) {
         const distance = calculateDistance(playerLatLng, selectedDungeon.location);
         if (distance <= 50) {
