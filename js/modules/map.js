@@ -47,7 +47,7 @@ let dungeonDifficultyDisplay;
  * @param {object} player - L'objet joueur.
  */
 async function initMap(player) {
-    if (map) return; // Si la carte est déjà initialisée, ne rien faire
+    if (map) return;
 
     // Initialisation des éléments du DOM
     mapElement = document.getElementById('map');
@@ -354,7 +354,7 @@ onAuthStateChanged(auth, async (user) => {
         if (characterData) {
             player = characterData;
             console.log("Données du personnage chargées ! Initialisation de la carte...");
-            initMap(player); // Appel correct de la fonction avec l'objet player
+            initMap(player);
         } else {
             console.error("Impossible de charger les données du personnage. Redirection vers la création de personnage.");
             window.location.href = "character_creation.html";
