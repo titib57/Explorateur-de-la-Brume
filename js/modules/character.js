@@ -30,15 +30,19 @@ let currentIndex = 0;
 
 // --- Fonctions utilitaires pour l'UI ---
 function showUI(element) {
-    element.style.display = 'block'; // Utilisation de block pour les sections
+    if (element) {
+        element.style.display = 'block';
+    }
 }
 
 function hideUI(element) {
-    element.style.display = 'none';
+    if (element) {
+        element.style.display = 'none';
+    }
 }
 
 function showPopup() {
-    popupOverlay.style.display = 'flex';
+    showUI(popupOverlay);
     setTimeout(() => {
         popupContent.style.opacity = '1';
         popupContent.style.transform = 'scale(1)';
@@ -49,7 +53,7 @@ function hidePopup() {
     popupContent.style.opacity = '0';
     popupContent.style.transform = 'scale(0.95)';
     setTimeout(() => {
-        popupOverlay.style.display = 'none';
+        hideUI(popupOverlay);
     }, 300);
 }
 
@@ -67,39 +71,43 @@ function updateCarousel() {
 }
 
 function setupCarousel() {
-    prevBtn.addEventListener('click', () => {
-        currentIndex = (currentIndex > 0) ? currentIndex - 1 : carouselItems.length - 1;
-        updateCarousel();
-    });
+    if (prevBtn && nextBtn) {
+        prevBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex > 0) ? currentIndex - 1 : carouselItems.length - 1;
+            updateCarousel();
+        });
 
-    nextBtn.addEventListener('click', () => {
-        currentIndex = (currentIndex < carouselItems.length - 1) ? currentIndex + 1 : 0;
+        nextBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex < carouselItems.length - 1) ? currentIndex + 1 : 0;
+            updateCarousel();
+        });
         updateCarousel();
-    });
-
-    // Initialisation
-    updateCarousel();
+    }
 }
 
 // --- Mise à jour de l'UI en fonction de l'état du personnage ---
 function updateUI(character) {
+    const noCharacterSection = document.getElementById('no-character-section');
+    const characterSection = document.getElementById('character-section');
+
     if (character) {
-        // Un personnage existe : afficher la page de gestion du personnage
-        hideUI(document.getElementById('no-character-section'));
-        showUI(document.getElementById('character-section'));
-        // ... Logique de remplissage des informations
-        document.getElementById('character-display').innerHTML = `
-            <h3>Nom : ${character.name}</h3>
-            <p>Niveau : ${character.level}</p>
-            <p>XP : ${character.xp}</p>
-            <p>Classe : ${character.class}</p>
-        `;
+        hideUI(noCharacterSection);
+        showUI(characterSection);
+        
+        const characterDisplay = document.getElementById('character-display');
+        if (characterDisplay) {
+            characterDisplay.innerHTML = `
+                <h3>Nom : ${character.name}</h3>
+                <p>Niveau : ${character.level}</p>
+                <p>XP : ${character.xp}</p>
+                <p>Classe : ${character.class}</p>
+            `;
+        }
         showUI(playBtn);
         showUI(deleteBtn);
     } else {
-        // Aucun personnage : afficher le formulaire de création
-        hideUI(document.getElementById('character-section'));
-        showUI(document.getElementById('no-character-section'));
+        hideUI(characterSection);
+        showUI(noCharacterSection);
     }
     hideUI(loadingMessage);
 }
@@ -115,7 +123,9 @@ function updateUI(character) {
         return;
     }
 
-    userIdDisplay.textContent = userId;
+    if (userIdDisplay) {
+        userIdDisplay.textContent = userId;
+    }
 
     const { onSnapshot, doc } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js");
     const characterRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
@@ -129,48 +139,55 @@ function updateUI(character) {
         updateUI(null);
     });
 
-    // Écouteur pour la soumission du formulaire de création
-    characterForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = charNameInput.value.trim();
-        if (!name) {
-            showNotification("Veuillez donner un nom à votre personnage.", 'error');
-            return;
-        }
+    if (characterForm) {
+        characterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = charNameInput.value.trim();
+            if (!name) {
+                showNotification("Veuillez donner un nom à votre personnage.", 'error');
+                return;
+            }
 
-        const newCharacterData = {
-            name: name,
-            age: parseInt(charAgeInput.value),
-            height: parseInt(charHeightInput.value),
-            weight: parseInt(charWeightInput.value),
-            class: charClassSelect.value,
-            xp: 0,
-            level: 1,
-            quests: {
-                current: {
-                    questId: 'lieu_sur',
-                    currentProgress: 0
+            const newCharacterData = {
+                name: name,
+                age: parseInt(charAgeInput.value),
+                height: parseInt(charHeightInput.value),
+                weight: parseInt(charWeightInput.value),
+                class: charClassSelect.value,
+                xp: 0,
+                level: 1,
+                quests: {
+                    current: {
+                        questId: 'lieu_sur',
+                        currentProgress: 0
+                    },
+                    completed: {}
                 },
-                completed: {}
-            },
-            createdAt: new Date().toISOString(),
-            lastPlayed: new Date().toISOString()
-        };
-        savePlayer(newCharacterData);
-    });
+                createdAt: new Date().toISOString(),
+                lastPlayed: new Date().toISOString()
+            };
+            savePlayer(newCharacterData);
+        });
+    }
+
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', showPopup);
+    }
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', () => {
+            deleteCharacterData();
+            hidePopup();
+        });
+    }
+    if (cancelDeleteBtn) {
+        cancelDeleteBtn.addEventListener('click', hidePopup);
+    }
     
-    // Logique de suppression
-    deleteBtn.addEventListener('click', showPopup);
-    confirmDeleteBtn.addEventListener('click', () => {
-        deleteCharacterData();
-        hidePopup();
-    });
-    cancelDeleteBtn.addEventListener('click', hidePopup);
-    
-    // Logique pour le bouton "Commencer l'aventure"
-    playBtn.addEventListener('click', () => {
-        window.location.href = 'world_map.html';
-    });
+    if (playBtn) {
+        playBtn.addEventListener('click', () => {
+            window.location.href = 'world_map.html';
+        });
+    }
 
     setupCarousel();
 })();
