@@ -6,7 +6,7 @@
 // Importations des données et des modules nécessaires
 import { questsData } from '../core/questsData.js';
 // import { giveRewards } from './rewards.js'; // Supposons un nouveau module de récompenses
-import * as shelterManager from './shelterManager.js';
+import { getShelterLocation } from './shelterManager.js';
 
 // =========================================================================
 // GESTION DES QUÊTES
@@ -75,7 +75,7 @@ export function updateQuestProgress(characterData, objectiveType, payload) {
                 console.warn("Impossible de définir l'abri. L'objectif pourrait être déjà terminé ou la position est invalide.");
             }
             break;
-
+        
         default:
             // Logique par défaut pour les quêtes de type 'récolter', 'vaincre', etc.
             // On incrémente la progression si la cible correspond
@@ -91,5 +91,39 @@ export function updateQuestProgress(characterData, objectiveType, payload) {
         return completeQuest(characterData);
     }
     
+    return characterData;
+}
+
+/**
+ * Gère la complétion d'une quête et le passage à la suivante.
+ * @param {Object} characterData - Les données du personnage.
+ * @returns {Object} Les données du personnage mises à jour.
+ */
+function completeQuest(characterData) {
+    const currentQuest = characterData.quests.current;
+    const questDefinition = questsData[currentQuest.questId];
+
+    console.log(`Quête terminée : '${questDefinition.title}' !`);
+
+    // 1. Donne les récompenses
+    giveRewards(characterData, questDefinition.rewards);
+
+    // 2. Déplace la quête vers la liste des quêtes terminées
+    characterData.quests.completed[currentQuest.questId] = { ...currentQuest, status: 'completed' };
+    
+    // 3. Définir la prochaine quête si elle existe
+    const nextQuestId = questDefinition.nextQuestId;
+    if (nextQuestId) {
+        const nextQuestDefinition = questsData[nextQuestId];
+        characterData.quests.current = {
+            questId: nextQuestId,
+            currentProgress: 0,
+            ...nextQuestDefinition
+        };
+        console.log(`Nouvelle quête acceptée : '${nextQuestDefinition.title}'`);
+    } else {
+        characterData.quests.current = null; // Aucune quête en cours
+    }
+
     return characterData;
 }
