@@ -5,18 +5,18 @@
 
 // Importez les fonctions nécessaires de Firebase
 import { doc, getDoc, setDoc, runTransaction } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import { auth, db } from "../core/firebase_config.js";
+import { auth, db } from "..//firebase_config.js";
 
 const COLLECTION_NAME = "users";
 const DOC_NAME = "shelter";
 
-export const shelterManager = {
+
     /**
      * Définit l'abri à la position actuelle du joueur et le sauvegarde sur Firestore.
      * @param {Object} location - L'objet de position du joueur (ex: { x: 10, y: 25 }).
      * @returns {Promise<boolean>} Une promesse qui résout à true si l'abri est défini, false sinon.
      */
-    async defineShelter(location) {
+export async function defineShelter(location) {
         const user = auth.currentUser;
         if (!user) {
             console.error("Aucun utilisateur n'est connecté.");
@@ -53,13 +53,13 @@ export const shelterManager = {
             }
             return false;
         }
-    },
+}
 
     /**
      * Récupère la position de l'abri depuis Firestore.
      * @returns {Promise<object|null>} Une promesse qui résout à la position de l'abri ou null si non défini.
      */
-    async getShelterLocation() {
+    export async function getShelterLocation() {
         const user = auth.currentUser;
         if (!user) {
             console.warn("Aucun utilisateur n'est connecté.");
@@ -82,14 +82,14 @@ export const shelterManager = {
             console.error("Erreur lors de la récupération de l'abri depuis Firestore:", error);
             return null;
         }
-    },
+    }
 
     /**
      * Améliore l'abri en augmentant son niveau et ses statistiques de défense.
      * @param {string} upgradeType - Le type d'amélioration (ex: 'murs', 'portail').
      * @returns {Promise<boolean>} Vrai si l'amélioration est réussie.
      */
-    async upgradeShelter(upgradeType) {
+    export async function upgradeShelter(upgradeType) {
         const user = auth.currentUser;
         if (!user) {
             console.error("Erreur : Aucun utilisateur n'est connecté.");
@@ -128,4 +128,3 @@ export const shelterManager = {
             return false;
         }
     }
-};
