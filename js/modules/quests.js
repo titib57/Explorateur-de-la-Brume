@@ -21,14 +21,17 @@ import { defineShelter } from './shelterManager.js';
  * @property {object} quests.completed
  */
 
-/**
- * Vérifie si la quête "Établir un abri" est la quête active.
- * @param {CharacterData} characterData - Les données complètes du personnage.
- * @returns {boolean} Vrai si la quête est active et a l'ID "set_shelter", sinon faux.
  */
-export const isSetSafePlaceQuest = (characterData) => {
-    return characterData?.quests?.current?.questId === 'set_shelter';
-};
+/**
+ * Vérifie si la quête pour définir un lieu sûr est active.
+ * @param {object} player - L'objet du joueur.
+ * @returns {boolean} - Vrai si la quête est active.
+ */
+export function isSetSafePlaceQuest(player) {
+    if (!player || !player.quests) return false;
+    const currentQuest = player.quests.current;
+    return currentQuest && currentQuest.id === 'lieu_sur' && currentQuest.progress < 1;
+}
 
 /**
  * Accepte une quête et la rend active pour le personnage.
