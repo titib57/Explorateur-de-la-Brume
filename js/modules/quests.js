@@ -6,7 +6,7 @@
 // Importations des données et des modules nécessaires
 import { questsData } from '../core/questsData.js';
 // import { giveRewards } from './rewards.js'; // Supposons un nouveau module de récompenses
-import { getShelterLocation } from './shelterManager.js';
+import * as shelterManager from './shelterManager.js';
 
 // =========================================================================
 // GESTION DES QUÊTES
@@ -75,7 +75,7 @@ export function updateQuestProgress(characterData, objectiveType, payload) {
                 console.warn("Impossible de définir l'abri. L'objectif pourrait être déjà terminé ou la position est invalide.");
             }
             break;
-        
+
         default:
             // Logique par défaut pour les quêtes de type 'récolter', 'vaincre', etc.
             // On incrémente la progression si la cible correspond
@@ -94,8 +94,31 @@ export function updateQuestProgress(characterData, objectiveType, payload) {
     return characterData;
 }
 
+---
+
+### Fonctions ajoutées et modifiées
+
+J'ai intégré la nouvelle fonction `isSetSafePlaceQuest` et j'ai corrigé l'importation de `shelterManager`.
+
+```javascript
+/**
+ * Vérifie si la quête en cours est du type "définir un abri" (define_shelter).
+ * @param {Object} characterData - Les données du personnage.
+ * @returns {boolean} Vrai si la quête est de ce type, faux sinon.
+ */
+export function isSetSafePlaceQuest(characterData) {
+    if (!characterData || !characterData.quests.current) {
+        return false;
+    }
+    const currentQuestId = characterData.quests.current.questId;
+    const questDefinition = questsData[currentQuestId];
+    // On vérifie l'existence de la définition de quête et que l'action est bien 'define_shelter'
+    return questDefinition?.objective?.action === 'define_shelter';
+}
+
 /**
  * Gère la complétion d'une quête et le passage à la suivante.
+ * Note: Cette fonction est interne au module et n'a pas besoin d'être exportée.
  * @param {Object} characterData - Les données du personnage.
  * @returns {Object} Les données du personnage mises à jour.
  */
@@ -106,7 +129,7 @@ function completeQuest(characterData) {
     console.log(`Quête terminée : '${questDefinition.title}' !`);
 
     // 1. Donne les récompenses
-    giveRewards(characterData, questDefinition.rewards);
+    // giveRewards(characterData, questDefinition.rewards); // Non implémenté dans le code fourni
 
     // 2. Déplace la quête vers la liste des quêtes terminées
     characterData.quests.completed[currentQuest.questId] = { ...currentQuest, status: 'completed' };
