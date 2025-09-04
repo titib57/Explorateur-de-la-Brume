@@ -1,7 +1,7 @@
 // js/module/waveManager.js
 
 import { getShelterLocation } from './shelterManager.js';
-import { monstersData, bossesData } from '../core/gameDataData.js';
+import { monstersData, bossesData } from '../core/gameData.js';
 
 let currentWave = 0;
 const waveInterval = 600000; // 10 minutes en millisecondes
