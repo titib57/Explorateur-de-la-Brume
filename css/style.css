@@ -471,7 +471,7 @@ a:hover, a:focus {
 }
 
 /* Ajustement crucial du z-index pour les boutons */
-#toggle-fullscreen-btn, #recenter-btn {
+#toggle-fullscreen-btn, #recenter-btn, #set-safe-place-btn {
     position: absolute;
     bottom: 20px;
     z-index: 10000; /* Valeur plus grande que celle de la carte */
@@ -479,6 +479,7 @@ a:hover, a:focus {
 
 #toggle-fullscreen-btn { left: 20px; }
 #recenter-btn { right: 20px; }
+#set-safe-place-btn { left : 100px;}
 
 /* Styles de l'inventaire */
 #inventory-tabs {
