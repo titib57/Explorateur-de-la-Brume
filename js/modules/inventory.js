@@ -1,16 +1,54 @@
 ﻿// Fichier : js/modules/inventory.js
 
-import { player, savePlayer, loadCharacter } from '../core/state.js';
-import { itemsData, itemSets } from '../core/gameData.js';
+import { player } from '../core/state.js';
+import { itemsData } from '../core/gameData.js';
 import { showNotification } from '../core/notifications.js';
 import { recalculateDerivedStats } from './character.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-    if (!loadCharacter()) {
-        return;
+import { doc, getDoc, runTransaction } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { auth, db } from '../firebase_config.js';
+
+const USERS_COLLECTION = "users";
+
+/**
+ * Fonction utilitaire pour trouver un objet par son ID.
+ * @param {string} itemId L'ID de l'objet à trouver.
+ * @returns {object|null} L'objet trouvé ou null.
+ */
+function findItemById(itemId) {
+    if (!itemId) return null;
+    return itemsData.weapons[itemId] || itemsData.armors[itemId] || itemsData.consumables[itemId];
+}
+
+/**
+ * Gère le chargement de l'inventaire du joueur depuis Firestore.
+ */
+async function loadAndDisplayInventory() {
+    if (!auth.currentUser) return;
+
+    try {
+        const userDocRef = doc(db, USERS_COLLECTION, auth.currentUser.uid);
+        const docSnap = await getDoc(userDocRef);
+
+        if (docSnap.exists()) {
+            const userData = docSnap.data();
+            player.inventory = userData.inventory || [];
+            player.equipment = userData.equipment || { weapon: null, armor: null };
+            updateInventoryPageUI();
+            showNotification("Inventaire et équipement chargés depuis Firestore.", 'success');
+        } else {
+            console.warn("Document utilisateur introuvable. L'inventaire est vide.");
+            player.inventory = [];
+            player.equipment = { weapon: null, armor: null };
+            updateInventoryPageUI();
+        }
+    } catch (error) {
+        console.error("Erreur lors du chargement des données depuis Firestore:", error);
+        showNotification("Erreur lors du chargement des données.", 'error');
     }
-    updateInventoryPageUI();
-});
+}
+
+document.addEventListener('DOMContentLoaded', loadAndDisplayInventory);
 
 export function updateInventoryPageUI() {
     if (!player) return;
@@ -18,12 +56,14 @@ export function updateInventoryPageUI() {
     if (!inventoryItemsGrid) return;
 
     inventoryItemsGrid.innerHTML = '';
-    const items = player.inventory.map(itemId => itemsData.weapons[itemId] || itemsData.armors[itemId] || itemsData.consumables[itemId]);
     
-    items.forEach(item => {
+    player.inventory.forEach(itemId => {
+        const item = findItemById(itemId);
+        if (!item) return;
+
         const itemElement = document.createElement('div');
         itemElement.classList.add('inventory-item', `rarity-${item.rarity || 'common'}`);
-        
+
         let itemInfo = `<img src="${item.iconPath}" alt="${item.name}">
                         <span class="item-name">${item.name}</span>
                         <div class="tooltip">
@@ -32,9 +72,9 @@ export function updateInventoryPageUI() {
                             <p>${item.description}</p>`;
 
         if (item.type === 'weapon' || item.type === 'armor') {
-            itemInfo += `<button onclick="equipItem('${item.id}', '${item.type}')">Équiper</button>`;
+            itemInfo += `<button class="equip-btn" data-item-id="${item.id}" data-item-type="${item.type}">Équiper</button>`;
         } else if (item.type === 'consumable') {
-            itemInfo += `<button onclick="useItem('${item.id}')">Utiliser</button>`;
+            itemInfo += `<button class="use-btn" data-item-id="${item.id}">Utiliser</button>`;
         }
         
         itemInfo += `</div>`;
@@ -42,67 +82,175 @@ export function updateInventoryPageUI() {
         inventoryItemsGrid.appendChild(itemElement);
     });
 
-    // Update equipped items display
-    document.getElementById('equipped-weapon-name').textContent = player.equipment.weapon ? player.equipment.weapon.name : 'Aucune';
-    document.getElementById('equipped-armor-name').textContent = player.equipment.armor ? player.equipment.armor.name : 'Aucune';
+    document.querySelectorAll('.equip-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const itemId = e.target.dataset.itemId;
+            const itemType = e.target.dataset.itemType;
+            equipItem(itemId, itemType);
+        });
+    });
+
+    document.querySelectorAll('.use-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const itemId = e.target.dataset.itemId;
+            useItem(itemId);
+        });
+    });
+
+    const equippedWeapon = findItemById(player.equipment.weapon);
+    const equippedArmor = findItemById(player.equipment.armor);
     
-    document.getElementById('equipped-weapon-icon').src = player.equipment.weapon ? player.equipment.weapon.iconPath : '';
-    document.getElementById('equipped-armor-icon').src = player.equipment.armor ? player.equipment.armor.iconPath : '';
+    document.getElementById('equipped-weapon-name').textContent = equippedWeapon ? equippedWeapon.name : 'Aucune';
+    document.getElementById('equipped-armor-name').textContent = equippedArmor ? equippedArmor.name : 'Aucune';
+    
+    document.getElementById('equipped-weapon-icon').src = equippedWeapon ? equippedWeapon.iconPath : '';
+    document.getElementById('equipped-armor-icon').src = equippedArmor ? equippedArmor.iconPath : '';
+    
+    const unequipWeaponBtn = document.getElementById('unequip-weapon-btn');
+    if (unequipWeaponBtn) {
+        unequipWeaponBtn.style.display = equippedWeapon ? 'block' : 'none';
+        unequipWeaponBtn.addEventListener('click', () => unequipItem('weapon'));
+    }
+    const unequipArmorBtn = document.getElementById('unequip-armor-btn');
+    if (unequipArmorBtn) {
+        unequipArmorBtn.style.display = equippedArmor ? 'block' : 'none';
+        unequipArmorBtn.addEventListener('click', () => unequipItem('armor'));
+    }
 }
 
-export function useItem(itemId) {
-    const item = itemsData.consumables[itemId];
-    if (!item) {
-        showNotification("Cet objet ne peut pas être utilisé.", 'error');
+export async function useItem(itemId) {
+    if (!auth.currentUser) {
+        showNotification("Vous devez être connecté pour utiliser des objets.", 'error');
         return;
     }
 
-    if (item.effect.hp) {
-        player.hp = Math.min(player.maxHp, player.hp + item.effect.hp);
-        showNotification(`Vous avez récupéré ${item.effect.hp} PV.`, 'success');
-    }
-    if (item.effect.mana) {
-        player.mana = Math.min(player.maxMana, player.mana + item.effect.mana);
-        showNotification(`Vous avez récupéré ${item.effect.mana} Mana.`, 'success');
-    }
+    try {
+        await runTransaction(db, async (transaction) => {
+            const userDocRef = doc(db, USERS_COLLECTION, auth.currentUser.uid);
+            const docSnap = await transaction.get(userDocRef);
 
-    // Retirer l'objet de l'inventaire
-    const index = player.inventory.indexOf(itemId);
-    if (index > -1) {
-        player.inventory.splice(index, 1);
-    }
-    
-    savePlayer(player);
-    updateInventoryPageUI();
-    updateConsumablesUI();
-}
-
-export function equipItem(itemId, type) {
-    const itemIndex = player.inventory.findIndex(item => item.id === itemId);
-    if (itemIndex > -1) {
-        const item = player.inventory[itemIndex];
-        if (item.type === type) {
-            if (player.equipment[type]) {
-                player.inventory.push(player.equipment[type].id);
+            if (!docSnap.exists()) {
+                throw new Error("Document utilisateur introuvable.");
             }
-            player.equipment[type] = item;
-            player.inventory.splice(itemIndex, 1);
-            recalculateDerivedStats();
-            savePlayer(player);
-            updateInventoryPageUI();
-            showNotification(`${item.name} a été équipé.`, 'success');
-        }
+
+            const userData = docSnap.data();
+            const currentInventory = userData.inventory || [];
+            const item = findItemById(itemId);
+            
+            const itemIndex = currentInventory.indexOf(itemId);
+            if (itemIndex > -1 && item && item.type === 'consumable') {
+                currentInventory.splice(itemIndex, 1);
+                
+                if (item.effect.hp) player.hp = Math.min(player.maxHp, player.hp + item.effect.hp);
+                if (item.effect.mana) player.mana = Math.min(player.maxMana, player.mana + item.effect.mana);
+
+                transaction.update(userDocRef, { inventory: currentInventory });
+            } else {
+                throw new Error("L'objet n'est pas dans l'inventaire ou ne peut pas être utilisé.");
+            }
+        });
+
+        // Mise à jour de l'UI et affichage de la notification uniquement après la transaction réussie
+        updateInventoryPageUI();
+        showNotification(`Vous avez utilisé ${findItemById(itemId).name}.`, 'success');
+    } catch (error) {
+        console.error("Erreur lors de l'utilisation de l'objet:", error);
+        showNotification(error.message || "Erreur lors de l'utilisation de l'objet.", 'error');
     }
 }
 
-export function unequipItem(type) {
-    const item = player.equipment[type];
-    if (item) {
-        player.inventory.push(item.id);
-        player.equipment[type] = null;
+export async function equipItem(itemId, type) {
+    if (!auth.currentUser) {
+        showNotification("Vous devez être connecté pour équiper des objets.", 'error');
+        return;
+    }
+
+    try {
+        const result = await runTransaction(db, async (transaction) => {
+            const userDocRef = doc(db, USERS_COLLECTION, auth.currentUser.uid);
+            const docSnap = await transaction.get(userDocRef);
+            if (!docSnap.exists()) {
+                throw new Error("Document utilisateur introuvable.");
+            }
+
+            const userData = docSnap.data();
+            const currentEquipment = userData.equipment || {};
+            const currentInventory = userData.inventory || [];
+            const item = findItemById(itemId);
+
+            const itemIndex = currentInventory.indexOf(itemId);
+            if (itemIndex > -1 && item && item.type === type) {
+                if (currentEquipment[type]) {
+                    currentInventory.push(currentEquipment[type]);
+                }
+                currentEquipment[type] = itemId;
+                currentInventory.splice(itemIndex, 1);
+                
+                transaction.update(userDocRef, {
+                    inventory: currentInventory,
+                    equipment: currentEquipment
+                });
+                return { currentEquipment, currentInventory };
+            } else {
+                 throw new Error("Cet objet ne peut pas être équipé.");
+            }
+        });
+        
+        // Mise à jour de l'état local et de l'UI après la transaction réussie
+        player.equipment = result.currentEquipment;
+        player.inventory = result.currentInventory;
         recalculateDerivedStats();
-        savePlayer(player);
         updateInventoryPageUI();
-        showNotification(`${item.name} a été déséquipé.`, 'info');
+        showNotification(`${findItemById(itemId).name} a été équipé.`, 'success');
+
+    } catch (error) {
+        console.error("Erreur lors de l'équipement de l'objet:", error);
+        showNotification(error.message || "Erreur lors de l'équipement de l'objet.", 'error');
+    }
+}
+
+export async function unequipItem(type) {
+    if (!auth.currentUser) {
+        showNotification("Vous devez être connecté pour déséquiper des objets.", 'error');
+        return;
+    }
+
+    try {
+        const result = await runTransaction(db, async (transaction) => {
+            const userDocRef = doc(db, USERS_COLLECTION, auth.currentUser.uid);
+            const docSnap = await transaction.get(userDocRef);
+            if (!docSnap.exists()) {
+                throw new Error("Document utilisateur introuvable.");
+            }
+
+            const userData = docSnap.data();
+            const currentEquipment = userData.equipment || {};
+            const currentInventory = userData.inventory || [];
+            const equippedItemId = currentEquipment[type];
+
+            if (equippedItemId) {
+                currentInventory.push(equippedItemId);
+                currentEquipment[type] = null;
+                
+                transaction.update(userDocRef, {
+                    inventory: currentInventory,
+                    equipment: currentEquipment
+                });
+                return { currentEquipment, currentInventory };
+            } else {
+                 throw new Error("Rien n'est équipé.");
+            }
+        });
+        
+        // Mise à jour de l'état local et de l'UI après la transaction réussie
+        player.equipment = result.currentEquipment;
+        player.inventory = result.currentInventory;
+        recalculateDerivedStats();
+        updateInventoryPageUI();
+        showNotification(`L'objet a été déséquipé.`, 'info');
+
+    } catch (error) {
+        console.error("Erreur lors du déséquipement:", error);
+        showNotification(error.message || "Erreur lors du déséquipement.", 'error');
     }
 }
