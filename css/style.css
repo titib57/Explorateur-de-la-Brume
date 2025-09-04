@@ -139,6 +139,12 @@ body {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Ajoute une ombre plus prononcée */
 }
 
+.bouton-groupe {
+    display: flex; /* Active Flexbox */
+    gap: 10px; /* Ajoute un espace de 10 pixels entre les boutons */
+    align-items: center; /* Aligne les boutons verticalement au centre */
+}
+
 .btn-flee {
     background-color: var(--accent-color-red);
     color: var(--text-color-light);
