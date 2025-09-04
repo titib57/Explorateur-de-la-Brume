@@ -4,7 +4,8 @@
 // Importations des modules de l'application
 import { showNotification } from '../core/notifications.js';
 import { auth, db } from '../core/firebase_config.js';
-import { player, savePlayer, deleteCharacterData, userId, authPromise } from '../core/firebase_config.js';
+import { savePlayer, deleteCharacterData, userId, authPromise } from '../core/firebase_config.js';
+import { player, loadCharacter, createCharacter, updateStats, updateStatsDisplay } from './core/state.js';
 
 /**
  * Initialise le personnage avec la quête de départ.
