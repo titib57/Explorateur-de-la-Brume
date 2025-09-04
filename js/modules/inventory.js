@@ -3,7 +3,6 @@
 import { player } from '../core/state.js';
 import { itemsData } from '../core/gameData.js';
 import { showNotification } from '../core/notifications.js';
-import { recalculateDerivedStats } from './character.js';
 
 import { doc, getDoc, runTransaction } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { auth, db } from '../firebase_config.js';
@@ -11,9 +10,7 @@ import { auth, db } from '../firebase_config.js';
 const USERS_COLLECTION = "users";
 
 /**
- * Structure de données optimisée pour une recherche rapide des objets.
- * Ceci est une amélioration par rapport à la recherche dans des objets séparés.
- * @type {object}
+ * Structure de données optimisée pour une recherche rapide de tous les objets.
  */
 const allItems = {
     ...itemsData.weapons,
@@ -23,9 +20,6 @@ const allItems = {
 
 /**
  * Fonction utilitaire pour trouver un objet par son ID.
- * Utilise la structure de données optimisée pour une recherche en O(1).
- * @param {string} itemId L'ID de l'objet à trouver.
- * @returns {object|null} L'objet trouvé ou null.
  */
 function findItemById(itemId) {
     if (!itemId) return null;
@@ -33,7 +27,7 @@ function findItemById(itemId) {
 }
 
 /**
- * Gère le chargement de l'inventaire du joueur depuis Firestore.
+ * Gère le chargement de l'inventaire et de l'équipement du joueur depuis Firestore.
  */
 async function loadAndDisplayInventory() {
     if (!auth.currentUser) return;
@@ -67,8 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /**
  * Configure un seul écouteur d'événements sur le conteneur de l'inventaire
- * pour gérer les clics sur les boutons d'équiper et d'utiliser.
- * Cette approche de délégation d'événements est plus performante.
+ * pour gérer les clics sur les boutons d'utilisation.
  */
 function setupInventoryEventListeners() {
     const inventoryItemsGrid = document.getElementById('inventory-items-grid');
@@ -76,26 +69,15 @@ function setupInventoryEventListeners() {
 
     inventoryItemsGrid.addEventListener('click', (e) => {
         const target = e.target;
-        if (target.classList.contains('equip-btn')) {
-            const itemId = target.dataset.itemId;
-            const itemType = target.dataset.itemType;
-            equipItem(itemId, itemType);
-        } else if (target.classList.contains('use-btn')) {
+        // On ne gère plus que l'utilisation ici
+        if (target.classList.contains('use-btn')) {
             const itemId = target.dataset.itemId;
             useItem(itemId);
         }
     });
 
-    const unequipWeaponBtn = document.getElementById('unequip-weapon-btn');
-    if (unequipWeaponBtn) {
-        unequipWeaponBtn.addEventListener('click', () => unequipItem('weapon'));
-    }
-    const unequipArmorBtn = document.getElementById('unequip-armor-btn');
-    if (unequipArmorBtn) {
-        unequipArmorBtn.addEventListener('click', () => unequipItem('armor'));
-    }
+    // Les écouteurs pour les boutons déséquiper seront gérés ailleurs (équipement.js)
 }
-
 
 export function updateInventoryPageUI() {
     if (!player) return;
@@ -118,9 +100,8 @@ export function updateInventoryPageUI() {
                             <p>Rareté: ${item.rarity || 'common'}</p>
                             <p>${item.description}</p>`;
 
-        if (item.type === 'weapon' || item.type === 'armor') {
-            itemInfo += `<button class="equip-btn" data-item-id="${item.id}" data-item-type="${item.type}">Équiper</button>`;
-        } else if (item.type === 'consumable') {
+        // Seuls les consommables ont un bouton 'utiliser' ici
+        if (item.type === 'consumable') {
             itemInfo += `<button class="use-btn" data-item-id="${item.id}">Utiliser</button>`;
         }
         
@@ -129,6 +110,7 @@ export function updateInventoryPageUI() {
         inventoryItemsGrid.appendChild(itemElement);
     });
 
+    // L'affichage de l'équipement sera géré par une autre fonction dans un autre fichier
     const equippedWeapon = findItemById(player.equipment.weapon);
     const equippedArmor = findItemById(player.equipment.armor);
     
@@ -138,6 +120,7 @@ export function updateInventoryPageUI() {
     document.getElementById('equipped-weapon-icon').src = equippedWeapon ? equippedWeapon.iconPath : '';
     document.getElementById('equipped-armor-icon').src = equippedArmor ? equippedArmor.iconPath : '';
     
+    // On ne gère plus l'affichage des boutons déséquiper ici
     const unequipWeaponBtn = document.getElementById('unequip-weapon-btn');
     if (unequipWeaponBtn) {
         unequipWeaponBtn.style.display = equippedWeapon ? 'block' : 'none';
@@ -148,6 +131,46 @@ export function updateInventoryPageUI() {
     }
 }
 
+/**
+ * Ajoute un objet à l'inventaire du joueur dans Firestore.
+ * Cette opération est atomique grâce à la transaction.
+ * @param {string} itemId L'ID de l'objet.
+ */
+export async function addItem(itemId) {
+    if (!auth.currentUser) {
+        showNotification("Vous devez être connecté pour ajouter des objets.", 'error');
+        return;
+    }
+
+    try {
+        await runTransaction(db, async (transaction) => {
+            const userDocRef = doc(db, USERS_COLLECTION, auth.currentUser.uid);
+            const docSnap = await transaction.get(userDocRef);
+            if (!docSnap.exists()) {
+                throw new Error("Document utilisateur introuvable.");
+            }
+
+            const userData = docSnap.data();
+            const currentInventory = userData.inventory || [];
+            currentInventory.push(itemId);
+            
+            transaction.update(userDocRef, { inventory: currentInventory });
+        });
+
+        const item = findItemById(itemId);
+        // Mettre à jour l'état local après la réussite de la transaction
+        player.inventory.push(itemId);
+        updateInventoryPageUI(); // Mise à jour de l'UI
+        showNotification(`L'objet ${item.name} a été ajouté à l'inventaire.`, 'success');
+    } catch (error) {
+        console.error("Erreur lors de l'ajout de l'objet:", error);
+        showNotification(error.message || "Erreur lors de l'ajout de l'objet.", 'error');
+    }
+}
+
+/**
+ * Gère l'utilisation d'un objet consomptible via une transaction Firestore.
+ */
 export async function useItem(itemId) {
     if (!auth.currentUser) {
         showNotification("Vous devez être connecté pour utiliser des objets.", 'error');
@@ -185,99 +208,5 @@ export async function useItem(itemId) {
     } catch (error) {
         console.error("Erreur lors de l'utilisation de l'objet:", error);
         showNotification(error.message || "Erreur lors de l'utilisation de l'objet.", 'error');
-    }
-}
-
-export async function equipItem(itemId, type) {
-    if (!auth.currentUser) {
-        showNotification("Vous devez être connecté pour équiper des objets.", 'error');
-        return;
-    }
-
-    try {
-        const result = await runTransaction(db, async (transaction) => {
-            const userDocRef = doc(db, USERS_COLLECTION, auth.currentUser.uid);
-            const docSnap = await transaction.get(userDocRef);
-            if (!docSnap.exists()) {
-                throw new Error("Document utilisateur introuvable.");
-            }
-
-            const userData = docSnap.data();
-            const currentEquipment = userData.equipment || {};
-            const currentInventory = userData.inventory || [];
-            const item = findItemById(itemId);
-
-            const itemIndex = currentInventory.indexOf(itemId);
-            if (itemIndex > -1 && item && item.type === type) {
-                if (currentEquipment[type]) {
-                    currentInventory.push(currentEquipment[type]);
-                }
-                currentEquipment[type] = itemId;
-                currentInventory.splice(itemIndex, 1);
-                
-                transaction.update(userDocRef, {
-                    inventory: currentInventory,
-                    equipment: currentEquipment
-                });
-                return { currentEquipment, currentInventory };
-            } else {
-                 throw new Error("Cet objet ne peut pas être équipé.");
-            }
-        });
-        
-        player.equipment = result.currentEquipment;
-        player.inventory = result.currentInventory;
-        recalculateDerivedStats();
-        updateInventoryPageUI();
-        showNotification(`${findItemById(itemId).name} a été équipé.`, 'success');
-
-    } catch (error) {
-        console.error("Erreur lors de l'équipement de l'objet:", error);
-        showNotification(error.message || "Erreur lors de l'équipement de l'objet.", 'error');
-    }
-}
-
-export async function unequipItem(type) {
-    if (!auth.currentUser) {
-        showNotification("Vous devez être connecté pour déséquiper des objets.", 'error');
-        return;
-    }
-
-    try {
-        const result = await runTransaction(db, async (transaction) => {
-            const userDocRef = doc(db, USERS_COLLECTION, auth.currentUser.uid);
-            const docSnap = await transaction.get(userDocRef);
-            if (!docSnap.exists()) {
-                throw new Error("Document utilisateur introuvable.");
-            }
-
-            const userData = docSnap.data();
-            const currentEquipment = userData.equipment || {};
-            const currentInventory = userData.inventory || [];
-            const equippedItemId = currentEquipment[type];
-
-            if (equippedItemId) {
-                currentInventory.push(equippedItemId);
-                currentEquipment[type] = null;
-                
-                transaction.update(userDocRef, {
-                    inventory: currentInventory,
-                    equipment: currentEquipment
-                });
-                return { currentEquipment, currentInventory };
-            } else {
-                 throw new Error("Rien n'est équipé.");
-            }
-        });
-        
-        player.equipment = result.currentEquipment;
-        player.inventory = result.currentInventory;
-        recalculateDerivedStats();
-        updateInventoryPageUI();
-        showNotification(`L'objet a été déséquipé.`, 'info');
-
-    } catch (error) {
-        console.error("Erreur lors du déséquipement:", error);
-        showNotification(error.message || "Erreur lors du déséquipement.", 'error');
     }
 }
