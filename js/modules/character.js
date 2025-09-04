@@ -146,7 +146,7 @@ function updateUI(character) {
             xp: 0,
             level: 1,
             quests: {
-                current: 'lieu_sur'
+                current: 'initial_adventure_quest'
             },
             createdAt: new Date().toISOString(),
             lastPlayed: new Date().toISOString()

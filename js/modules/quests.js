@@ -30,7 +30,7 @@ import { defineShelter } from './shelterManager.js';
 export function isSetSafePlaceQuest(player) {
     if (!player || !player.quests) return false;
     const currentQuest = player.quests.current;
-    return currentQuest && currentQuest.id === 'lieu_sur' && currentQuest.progress < 1;
+    return currentQuest && currentQuest.questId === 'lieu_sur' && currentQuest.currentProgress < 1;
 }
 
 /**
