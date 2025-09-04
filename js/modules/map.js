@@ -5,7 +5,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/fi
 import { showNotification } from '../core/notifications.js';
 import { generateDungeon } from '../core/dungeon.js';
 import { savePlayer, loadCharacter } from '../core/state.js';
-import { isSetSafePlaceQuest, updateQuestObjective } from './quests.js';
+import { isSetSafePlaceQuest, updateQuestProgress } from './quests.js';
 import { auth } from '../core/firebase_config.js';
 
 // Définition des icônes personnalisées
