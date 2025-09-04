@@ -7,55 +7,78 @@ let currentWave = 0;
 const waveInterval = 600000; // 10 minutes en millisecondes
 
 /**
- * Lance la prochaine vague de monstres après un certain délai.
+ * Lance le minuteur pour démarrer la prochaine vague de monstres.
  */
 export function startNextWaveTimer() {
     setTimeout(async () => {
         currentWave++;
         console.log(`Vague de monstres n°${currentWave} en approche !`);
         await spawnWave(currentWave);
-        startNextWaveTimer(); // Relance le minuteur pour la prochaine vague
+        startNextWaveTimer();
     }, waveInterval);
 }
 
 /**
- * Gère l'apparition et l'attaque d'une vague de monstres.
- * @param {number} waveNumber - Le numéro de la vague.
+ * Gère l'apparition des ennemis pour une vague donnée.
+ * @param {number} waveNumber - Le numéro de la vague actuelle.
  */
 async function spawnWave(waveNumber) {
     const shelterLocation = await getShelterLocation();
     if (!shelterLocation) {
-        console.warn("L'abri n'a pas été trouvé, la vague de monstres est annulée.");
+        console.warn("L'abri n'a pas été trouvé. La vague de monstres est annulée.");
         return;
     }
 
-    // Définir la composition de la vague en fonction du niveau
     const enemies = generateEnemiesForWave(waveNumber);
 
-    // Démarrer l'attaque
     for (const enemy of enemies) {
-        // Logique pour que l'ennemi se déplace vers l'abri
         console.log(`Un ${enemy.name} se dirige vers votre abri !`);
-        // Simuler le combat (cela serait géré dans votre logique de jeu)
-        // const shelterStats = await getShelterStats(); // Supposons cette fonction
-        // if (enemy.attack > shelterStats.defense) {
-        //     damageShelter(enemy.attack - shelterStats.defense);
-        // }
+        // Logique de mouvement et de combat à ajouter ici
     }
 }
 
 /**
- * Génère une liste de monstres pour la vague donnée.
+ * Crée une liste d'ennemis pour une vague spécifique, avec des stats ajustées.
  * @param {number} waveNumber - Le numéro de la vague.
- * @returns {Array} Une liste d'objets de monstres.
+ * @returns {Array} Une liste d'objets représentant les ennemis de la vague.
  */
 function generateEnemiesForWave(waveNumber) {
-    // Exemple : Plus la vague est haute, plus les monstres sont forts et nombreux
     const enemies = [];
-    const baseEnemyCount = waveNumber * 2;
-    for (let i = 0; i < baseEnemyCount; i++) {
-        // Créer des monstres plus forts pour les vagues plus élevées
-        enemies.push(getEnemyData('Goblin', waveNumber)); // Exemple de récupération de données de monstres
+    const bossWaveInterval = 5; // Un boss toutes les 5 vagues
+
+    // Vague de boss
+    if (waveNumber > 0 && waveNumber % bossWaveInterval === 0) {
+        const bossName = 'chef_des_gobelins'; // Nom de l'ID du boss dans vos données
+        const bossBaseData = bossesData[bossName];
+        
+        if (bossBaseData) {
+            const multiplier = 1 + (waveNumber / bossWaveInterval - 1) * 0.5;
+            enemies.push({
+                ...bossBaseData,
+                hp: Math.round(bossBaseData.hp * multiplier),
+                attack: Math.round(bossBaseData.attack * multiplier),
+            });
+        }
+    } else {
+        // Vague de monstres normaux
+        const monsterKeys = Object.keys(monstersData);
+        // Exclure le mannequin d'entraînement des vagues normales
+        const availableMonsters = monsterKeys.filter(key => !monstersData[key].isTutorial);
+        const baseEnemyCount = waveNumber * 2;
+
+        for (let i = 0; i < baseEnemyCount; i++) {
+            const randomKey = availableMonsters[Math.floor(Math.random() * availableMonsters.length)];
+            const monsterBaseData = monstersData[randomKey];
+
+            if (monsterBaseData) {
+                const multiplier = 1 + (waveNumber - 1) * 0.2;
+                enemies.push({
+                    ...monsterBaseData,
+                    hp: Math.round(monsterBaseData.hp * multiplier),
+                    attack: Math.round(monsterBaseData.attack * multiplier),
+                });
+            }
+        }
     }
     return enemies;
 }
