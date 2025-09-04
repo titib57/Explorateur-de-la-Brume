@@ -21,7 +21,7 @@ import { defineShelter } from './shelterManager.js';
  * @property {object} quests.completed
  */
 
- */
+
 /**
  * Vérifie si la quête pour définir un lieu sûr est active.
  * @param {object} player - L'objet du joueur.
