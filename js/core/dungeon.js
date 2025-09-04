@@ -7,15 +7,14 @@
 import { pointsOfInterest, dungeonTypes, monstersData, bossesData } from './gameData.js';
 import { questsData } from './questsData.js';
 import { showNotification } from './notifications.js';
-import { giveRewards } from './rewards.js'; // Importez la fonction de récompenses
 
 // Importations Firebase
-import { doc, runTransaction, getDoc } from "firebase/firestore";
+import { doc, runTransaction } from "firebase/firestore";
 // Assurez-vous d'importer votre instance de base de données Firestore
 import { db } from '../core/firebaseConfig.js';
 
 /**
- * Calcule la distance entre deux points géographiques.
+ * Calcule la distance entre deux points géographiques en utilisant la formule de Haversine simplifiée.
  * @param {object} loc1 Le premier emplacement { lat, lng }.
  * @param {object} loc2 Le deuxième emplacement { lat, lng }.
  * @returns {number} La distance entre les deux points en mètres.
@@ -38,30 +37,23 @@ function calculateDistance(loc1, loc2) {
 }
 
 /**
- * Crée un objet de données de donjon avec des statistiques mises à l'échelle.
- * Cette fonction est réutilisable pour le tutoriel ou un donjon dynamique.
+ * Crée un objet de données de donjon avec des statistiques mises à l'échelle en fonction du niveau du joueur.
  * @param {object} poi - Le point d'intérêt.
  * @param {object} dungeonType - Le type de donjon.
  * @param {number} playerLevel - Le niveau du joueur.
- * @returns {object} Un objet de données de donjon.
+ * @returns {object} Un objet de données de donjon prêt à être sauvegardé.
  */
 function createDungeonData(poi, dungeonType, playerLevel) {
     const isTutorial = poi.isTutorial;
-    const levelFactor = Math.max(0, playerLevel - 1); // Utilisation de Math.max pour éviter les niveaux négatifs
+    const levelFactor = Math.max(0, playerLevel - 1);
 
-    let selectedMonsterData;
-    let selectedBossData;
+    const monsterBase = monstersData[dungeonType.monsterPool[Math.floor(Math.random() * dungeonType.monsterPool.length)]];
+    const bossBase = bossesData[dungeonType.bossPool[Math.floor(Math.random() * dungeonType.bossPool.length)]];
 
-    if (isTutorial) {
-        selectedMonsterData = monstersData['mannequin_dentrainement'];
-        selectedBossData = bossesData['mannequin_dentrainement'];
-    } else {
-        const monsterPool = dungeonType.monsterPool.map(id => monstersData[id]);
-        const bossPool = dungeonType.bossPool.map(id => bossesData[id]);
-        selectedMonsterData = monsterPool[Math.floor(Math.random() * monsterPool.length)];
-        selectedBossData = bossPool[Math.floor(Math.random() * bossPool.length)];
-    }
-    
+    // Les monstres de tutoriel n'ont pas d'échelle
+    const monsterToScale = isTutorial ? monstersData['mannequin_dentrainement'] : monsterBase;
+    const bossToScale = isTutorial ? bossesData['mannequin_dentrainement'] : bossBase;
+
     // Fonction utilitaire pour la mise à l'échelle des entités
     const scaleEntity = (entity) => ({
         ...entity,
@@ -72,8 +64,8 @@ function createDungeonData(poi, dungeonType, playerLevel) {
         goldReward: entity.goldReward + (levelFactor * (isTutorial ? 0 : 5))
     });
 
-    const scaledMonster = scaleEntity(selectedMonsterData);
-    const scaledBoss = scaleEntity(selectedBossData);
+    const scaledMonster = scaleEntity(monsterToScale);
+    const scaledBoss = scaleEntity(bossToScale);
     
     return {
         id: poi.id,
@@ -91,6 +83,7 @@ function createDungeonData(poi, dungeonType, playerLevel) {
 
 /**
  * Génère un donjon pour le joueur et met à jour son état sur Firestore.
+ * Cette fonction utilise une transaction pour garantir la cohérence des données.
  * @param {string} characterId L'ID unique du personnage.
  * @param {object|string} locationInfo La position du joueur { lat, lng } ou la chaîne de caractères 'tutoriel'.
  * @returns {Promise<boolean>} Vrai si un donjon a été généré et sauvegardé, faux sinon.
@@ -118,11 +111,14 @@ export async function generateDungeon(characterId, locationInfo) {
                     throw new Error("Aucun lieu remarquable à proximité !");
                 }
                 
-                // Utilisation de .reduce() pour trouver le POI le plus proche
+                // Trouve le POI le plus proche de manière plus efficace
                 closestPOI = nonTutorialPOIs.reduce((closest, current) => {
-                    const distance = calculateDistance(locationInfo, current.location);
-                    return distance < calculateDistance(locationInfo, closest.location) ? current : closest;
-                }, nonTutorialPOIs[0]);
+                    const currentDistance = calculateDistance(locationInfo, current.location);
+                    if (!closest || currentDistance < closest.distance) {
+                        return { poi: current, distance: currentDistance };
+                    }
+                    return closest;
+                }, null).poi;
             }
 
             const dungeonType = dungeonTypes[closestPOI.dungeonType];
@@ -132,19 +128,16 @@ export async function generateDungeon(characterId, locationInfo) {
             
             const dungeonData = createDungeonData(closestPOI, dungeonType, playerLevel);
 
-            // Création de l'objet de mise à jour pour la transaction
             const updates = {
                 currentDungeon: dungeonData,
             };
 
-            // Vérification et ajout de la quête
             const newQuestId = closestPOI.questId;
             if (newQuestId) {
                 const newQuest = questsData[newQuestId];
                 const quests = characterData.quests || {};
                 const completedQuests = quests.completed || {};
                 
-                // Ajout de la quête si elle n'est pas déjà en cours ou terminée
                 if (newQuest && !quests.current && !completedQuests[newQuestId]) {
                     updates['quests.current'] = {
                         questId: newQuestId,
@@ -155,9 +148,7 @@ export async function generateDungeon(characterId, locationInfo) {
                 }
             }
 
-            // Exécution de toutes les mises à jour en une seule fois
             transaction.update(characterRef, updates);
-
             showNotification(`Vous entrez dans ${dungeonData.name}! ${dungeonData.description}`, 'info');
         });
         return true;
