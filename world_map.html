@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carte du monde-Explorateur de la Brume</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>     
     <link rel="stylesheet" href="css/style.css">
 
 </head>
@@ -24,13 +24,15 @@
 
         <h2>Carte du monde</h2>
         <h3>Explorez la Brume pour trouver des donjons et des quêtes !</h3>
-            <div id="character-info-display"></div>
+        <div id="character-info-display">
+            <div id="equipment-display"></div>
+        </div>
         <div class="map-container">
 
             <div id="map"></div>
     
     <div class="map-info">
-            <div id="dungeon-details" class="hidden">
+        <div id="dungeon-details" class="hidden">
     <h3>Informations sur le donjon</h3>
     <p>Nom : <span id="dungeon-name"></span></p>
     <p>Description : <span id="dungeon-description"></span></p>
