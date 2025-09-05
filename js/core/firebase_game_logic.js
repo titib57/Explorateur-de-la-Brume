@@ -117,18 +117,8 @@ function renderCharacter(character) {
         }
     }
     
-    // 4. Section "Inventaire"
-    if (inventoryDisplay && character.inventory) {
-        const inventoryKeys = Object.keys(character.inventory);
-        if (inventoryKeys.length > 0) {
-            inventoryDisplay.innerHTML = inventoryKeys.map(key => {
-                const item = character.inventory[key];
-                return `<p>${item.name} (x${item.quantity})</p>`;
-            }).join('');
-        } else {
-            inventoryDisplay.innerHTML = '<p>Votre inventaire est vide.</p>';
-        }
-    }
+    // 4. Section "Inventaire" ------------> geré dans inventory.js
+
     
     // 5. Section "Équipement"
     if (equipmentDisplay && character.equipment) {
