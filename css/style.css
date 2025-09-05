@@ -1,486 +1,600 @@
-Le code CSS a été optimisé en utilisant des sélecteurs multiples pour regrouper les propriétés communes et en ajoutant de nouveaux sélecteurs pour d'autres éléments. Cela permet de réduire la redondance et de rendre le fichier plus lisible et plus facile à maintenir.
-
------
-
-### Changements principaux
-
-Les modifications se concentrent sur le regroupement des règles qui partagent les mêmes propriétés, telles que les conteneurs, les boutons et les états de survol.
-
-1.  **Regroupement des styles de panneaux et de conteneurs**
-    Les classes `.panel`, `.quest-container`, `#player-stats`, `#monster-stats`, `.tab-content` et `.map-container` partagent de nombreuses propriétés visuelles. Elles ont été regroupées pour appliquer ces styles en une seule fois. Les styles uniques à chaque classe ont été conservés séparément.
-
-2.  **Styles de boutons unifiés**
-    Les règles de survol (`:hover`) pour `.btn-primary`, `.btn-flee`, et `.btn-ability` avaient des propriétés redondantes. Un nouveau sélecteur `.btn:hover:not(.btn-stat)` a été créé pour appliquer les effets de transformation et d'ombre commune à tous les boutons, sauf `btn-stat`, qui a un style de survol unique.
-
-3.  **Refactorisation des états de compétences**
-    Les styles de survol et les états (`.unlocked`, `.available`, `.locked`) pour `.skill-node` et `.class-node` ont été combinés pour plus de concision, car ils avaient les mêmes propriétés.
-
-4.  **Optimisation de l'inventaire et des tooltips**
-    Les styles des `inventory-item` et leurs `tooltips` ont été légèrement simplifiés en regroupant les sélecteurs.
-
------
-
-### Code CSS mis à jour
-
-```css
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@400;700&display=swap');
 
-/* === 1. Variables de Couleurs & Typographie === */
+/* === Variables de Couleurs & Typographie === */
 :root {
-  --bg-color-dark: #0A0914;
-  --bg-color-medium: #151421;
-  --text-color-light: #E0E0E0;
-  --text-color-accent: #FFD700;
-  --border-color: #3f3e53;
+  --bg-color-dark: #0A0914;
+  --bg-color-medium: #151421;
+  --text-color-light: #E0E0E0;
+  --text-color-accent: #FFD700;
+  --border-color: #3f3e53;
 
-  --accent-color-blue: #007acc;
-  --accent-color-green: #27ae60;
-  --accent-color-red: #e74c3c;
-  --accent-color-purple: #9b59b6;
-  --accent-color-yellow: #f1c40f;
+  --accent-color-blue: #007acc;
+  --accent-color-green: #27ae60;
+  --accent-color-red: #e74c3c;
+  --accent-color-purple: #9b59b6;
+  --accent-color-yellow: #f1c40f;
 
-  --fantasy-font: 'Cinzel', serif;
-  --main-font: 'Inter', sans-serif;
+  --fantasy-font: 'Cinzel', serif;
+  --main-font: 'Inter', sans-serif;
 }
 
-/* === 2. Styles Généraux & de Base === */
+/* === Styles Généraux & de Base === */
 * {
-  box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body {
-  font-family: var(--main-font);
-  background: var(--bg-color-dark);
-  color: var(--text-color-light);
-  user-select: none;
-  overflow-x: hidden;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  font-family: var(--main-font);
+  background: var(--bg-color-dark);
+  color: var(--text-color-light);
+  user-select: none;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 h1, h2, h3 {
-  font-family: var(--fantasy-font);
-  color: var(--text-color-accent);
+  font-family: var(--fantasy-font);
+  color: var(--text-color-accent);
 }
 
 a {
-  color: var(--text-color-light);
-  text-decoration: none;
-  transition: color 0.3s;
+  color: var(--text-color-light);
+  text-decoration: none;
+  transition: color 0.3s;
 }
 
 a:hover, a:focus {
-  color: var(--text-color-accent);
+  color: var(--text-color-accent);
 }
 
 .hidden {
-  display: none;
+  display: none;
 }
 
-/* === 3. Panneaux et éléments de conteneur (Regroupement) === */
-.panel, .quest-container, #player-stats, #monster-stats, .tab-content, .map-container, .grid-pele-mele .item {
-  padding: 20px;
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  background-color: var(--bg-color-medium);
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-}
-.quest-container { margin-bottom: 20px; }
-#player-stats, #monster-stats { flex-basis: 45%; }
-.tab-content { background-color: var(--bg-color-dark); }
-.map-container {
-  text-align: center;
-  border-bottom: 2px solid var(--border-color);
-  box-shadow: none;
-}
-.grid-pele-mele .item {
-  padding: 15px;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-  transition: transform 0.2s, box-shadow 0.2s;
+/* === Panneaux (Conteneurs) Génériques === */
+.panel {
+  padding: 20px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-color-medium);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
-/* === 4. Boutons Génériques (Regroupement) === */
+/* === Boutons Génériques === */
 .btn {
-  font-family: var(--main-font);
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
-  text-decoration: none;
-  display: inline-block;
-  border: none;
-  color: var(--text-color-light);
+  font-family: var(--main-font);
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+  text-decoration: none;
+  display: inline-block;
+  border: none;
+  color: var(--text-color-light);
 }
 
 .btn:focus {
-  outline: 2px solid var(--text-color-accent);
-  outline-offset: 2px;
-}
-
-.btn-primary, .btn-flee, .btn-ability {
-  transform: translateY(0);
-}
-
-/* Sélecteur multiple pour les effets de survol */
-.btn-primary:hover,
-.btn-flee:hover,
-.btn-ability:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  outline: 2px solid var(--text-color-accent);
+  outline-offset: 2px;
 }
 
 .btn-primary { background-color: var(--accent-color-blue); }
-.btn-primary:hover { background-color: color-mix(in srgb, var(--accent-color-blue) 80%, black); }
+.btn-primary:hover {
+  background-color: color-mix(in srgb, var(--accent-color-blue) 80%, black);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
 
 .btn-flee { background-color: var(--accent-color-red); }
 .btn-flee:hover {
-  background-color: color-mix(in srgb, var(--accent-color-red) 80%, black);
-  box-shadow: 5px 15px rgba(0, 0, 0, 0.3);
+  background-color: color-mix(in srgb, var(--accent-color-red) 80%, black);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .btn-ability { background-color: var(--accent-color-purple); }
-.btn-ability:hover { background-color: color-mix(in srgb, var(--accent-color-purple) 80%, black); }
-
+.btn-ability:hover {
+  background-color: color-mix(in srgb, var(--accent-color-purple) 80%, black);
+  transform: translateY(-2px) scale(1.05);
+}
 
 .tab-button {
-  background-color: var(--bg-color-dark);
-  border: 2px solid var(--border-color);
+  background-color: var(--bg-color-dark);
+  border: 2px solid var(--border-color);
 }
+
 .tab-button.active {
-  background-color: var(--accent-color-blue);
-  border-color: var(--accent-color-blue);
+  background-color: var(--accent-color-blue);
+  border-color: var(--accent-color-blue);
 }
 
 .btn-stat {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  font-size: 1.2rem;
-  background-color: var(--accent-color-blue);
+  width: 30px;
+  height: 30px;
+  background-color: var(--accent-color-blue);
+  border-radius: 50%;
+  font-size: 1.2rem;
 }
-.btn-stat[data-action="minus"] { background-color: var(--accent-color-red); }
 
+.btn-stat[data-action="minus"] {
+  background-color: var(--accent-color-red);
+}
 
 #logout-button {
-  background-color: var(--accent-color-red);
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 0.8em;
-  font-weight: bold;
-  text-transform: uppercase;
-  transition: background-color 0.3s ease;
+  background-color: var(--accent-color-red);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.8em;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: background-color 0.3s ease;
 }
-#logout-button:hover { background-color: #ff0800; }
-#logout-button:active { background-color: #a02824; }
 
-/* === 5. Barres de progression === */
+#logout-button:hover {
+  background-color: #ff0800;
+}
+
+#logout-button:active {
+  background-color: #a02824;
+}
+
+/* === Barres de progression === */
 .progress-bar-container {
-  background-color: #333;
-  border: 1px solid var(--border-color);
-  border-radius: 5px;
-  height: 15px;
-  overflow: hidden;
-  margin-top: 5px;
+  background-color: #333;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  height: 15px;
+  overflow: hidden;
+  margin-top: 5px;
 }
+
 .progress-bar {
-  height: 100%;
-  transition: width 0.5s ease-in-out;
+  height: 100%;
+  transition: width 0.5s ease-in-out;
 }
+
 .hp-bar { background: linear-gradient(90deg, var(--accent-color-green) 0%, #32CD32 100%); }
 .mana-bar { background: linear-gradient(90deg, var(--accent-color-blue) 0%, #00BFFF 100%); }
 .xp-bar { background: linear-gradient(90deg, var(--accent-color-purple) 0%, #BA55D3 100%); }
 
-/* === 6. Notifications === */
+/* === Notifications === */
 #notification-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 10000;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
 }
+
 .notification {
-  padding: 15px 25px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  color: var(--text-color-light);
-  font-weight: bold;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  animation: fadeIn 0.5s ease-out, fadeOut 0.5s ease-in 4.5s;
+  padding: 15px 25px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  color: var(--text-color-light);
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.5s ease-out, fadeOut 0.5s ease-in 4.5s;
 }
+
 .notification.info { background-color: var(--accent-color-blue); }
 .notification.success { background-color: var(--accent-color-green); }
 .notification.warning { background-color: var(--accent-color-yellow); }
 .notification.error { background-color: var(--accent-color-red); }
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
+
 @keyframes fadeOut {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-20px); }
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-20px); }
 }
 
-/* === 7. Popups === */
+/* === Popups === */
 .popup-overlay {
-  display: none;
-  justify-content: center;
-  align-items: center;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
 }
+
 .popup-content {
-  background: rgb(0, 0, 0, 0.6);
-  padding: 20px;
-  border-radius: 8px;
-  text-align: center;
+  background: rgb(0, 0, 0, 0.6);
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
 }
 
-/* === 8. Styles de mise en page et conteneurs de page === */
+/* === Styles de mise en page === */
 .game-header {
-  background-color: var(--bg-color-medium);
-  padding: 20px;
-  text-align: center;
-  border-bottom: 2px solid var(--border-color);
+  background-color: var(--bg-color-medium);
+  padding: 20px;
+  text-align: center;
+  border-bottom: 2px solid var(--border-color);
 }
+
 .game-header h1 {
-  margin: 0;
-  font-size: 2.5rem;
-  text-shadow: 0 0 10px var(--text-color-accent);
+  margin: 0;
+  font-size: 2.5rem;
+  text-shadow: 0 0 10px var(--text-color-accent);
 }
-.game-header nav { margin-top: 10px; }
-.game-header nav a { margin: 0 15px; font-weight: bold; }
+
+.game-header nav {
+    margin-top: 10px;
+}
+
+.game-header nav a {
+    margin: 0 15px;
+    font-weight: bold;
+}
+
 .game-container {
-  margin: 20px auto;
-  flex-grow: 1;
+  margin: 20px auto;
+  flex-grow: 1;
+  /* Les styles spécifiques sont gérés par la classe .panel */
 }
+
 .game-footer {
-  background-color: #333;
-  color: #fff;
-  text-align: center;
-  font-size: 12px;
-  bottom: 0;
-  width: 100%;
-  margin-top: auto;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  font-size: 12px;
+  bottom: 0;
+  width: 100%;
+  margin-top: auto;
 }
-.action-buttons { margin-top: 20px; text-align: center; }
-.bouton-groupe { display: flex; gap: 10px; align-items: center; }
 
+.action-buttons {
+  text-align: center;
+  margin-top: 20px;
+}
 
-/* === 9. Styles de l'arbre de compétences === */
+.bouton-groupe {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* === Styles de l'arbre de compétences === */
 #skill-tree-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-  padding: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  padding: 20px;
 }
-.skill-node, .class-node {
-  width: 120px;
-  height: 120px;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-  transition: transform 0.2s, box-shadow 0.2s;
-  border: 2px solid transparent;
+
+.skill-node {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  background-color: #333;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  border: 2px solid transparent;
 }
+
+.skill-node img {
+  width: 60px;
+  height: 60px;
+}
+
+.skill-node p {
+  margin-top: 5px;
+  font-size: 0.8rem;
+}
+
 .skill-node:not(.unlocked):hover, .class-node:not(.unlocked):hover {
-  transform: translateY(-5px) scale(1.1);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
+  transform: translateY(-5px) scale(1.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
 }
+
 .skill-node.unlocked, .class-node.unlocked {
-  border-color: var(--accent-color-green);
-  background-color: #1e3a24;
-  cursor: default;
+  border-color: var(--accent-color-green);
+  background-color: #1e3a24;
+  cursor: default;
 }
+
 .skill-node.available, .class-node.available {
-  border-color: var(--accent-color-blue);
-  animation: pulse 2s infinite;
+  border-color: var(--accent-color-blue);
+  animation: pulse 2s infinite;
 }
+
 .skill-node.locked, .class-node.locked {
-  background-color: #1e1e1e;
-  border-color: #cc3333;
-  cursor: not-allowed;
-  filter: grayscale(100%);
+  background-color: #1e1e1e;
+  border-color: #cc3333;
+  cursor: not-allowed;
+  filter: grayscale(100%);
 }
-.skill-node img { width: 60px; height: 60px; }
-.skill-node p { margin-top: 5px; font-size: 0.8rem; }
+
 @keyframes pulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
-  70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
 }
 
+/* === Styles spécifiques aux pages === */
 
-/* === 10. Page de quêtes === */
-.quest-list { list-style-type: none; padding: 0; }
+/* Page de quêtes */
+.quest-container {
+    margin-bottom: 20px;
+    /* Styles de base fournis par .panel */
+}
+
+.quest-list {
+    list-style-type: none;
+    padding: 0;
+}
+
 .quest-item {
-  margin-bottom: 10px;
-  padding: 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 5px;
-  background-color: var(--bg-color-medium);
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--bg-color-medium);
 }
-.quest-item.completed { text-decoration: line-through; opacity: 0.6; }
 
+.quest-item.completed {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
 
-/* === 11. Page de combat === */
+/* Page de combat */
 #combat-info {
-  display: flex;
-  justify-content: space-around;
-  align-items: flex-start;
-  text-align: center;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  text-align: center;
 }
-#combat-info h3 { margin-top: 0; }
-.tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
+
+#player-stats, #monster-stats {
+    flex-basis: 45%;
+    /* Styles de base fournis par .panel */
+}
+
+#combat-info h3 {
+    margin-top: 0;
+}
+
+.combat-actions {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tab-content {
+  border: 2px solid var(--border-color);
+  padding: 20px;
+  border-radius: 8px;
+  background-color: var(--bg-color-dark);
+}
+
 .combat-log {
-  background-color: var(--bg-color-dark);
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  padding: 10px;
-  margin-top: 20px;
-  max-height: 200px;
-  overflow-y: auto;
-  font-size: 0.9em;
+  background-color: var(--bg-color-dark);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 20px;
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 0.9em;
 }
-.combat-log p { margin: 5px 0; line-height: 1.2; animation: slideIn 0.3s ease-out; }
+
+.combat-log p {
+  margin: 5px 0;
+  line-height: 1.2;
+  animation: slideIn 0.3s ease-out;
+}
+
 @keyframes slideIn {
-  from { opacity: 0; transform: translateX(-20px); }
-  to { opacity: 1; transform: translateX(0); }
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
+
 .combat-log .log-player { color: var(--text-color-accent); }
 .combat-log .log-monster { color: var(--accent-color-red); }
 
-/* === 12. Page de statistiques === */
+/* Page de statistiques */
 #stats-allocation .stat-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
-#current-stats, #stats-allocation { margin-top: 20px; }
 
+#current-stats, #stats-allocation {
+    /* Styles de base fournis par .panel */
+    margin-top: 20px;
+}
 
-/* === 13. Carte du monde === */
-.world-map-page .game-container { max-width: none; flex-grow: 1; }
-.world-map-page main { flex-grow: 1; display: flex; flex-direction: column; }
+/* Carte du monde */
+
+.world-map-page .game-container {
+    max-width: none;
+    flex-grow: 1;
+}
+
+.world-map-page main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.map-container {
+    background-color: var(--bg-color-medium);
+    padding: 20px;
+    text-align: center;
+    border-bottom: 2px solid var(--border-color);
+}
+
 .map {
-  height: 100%;
-  width: 100%;
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  transition: all 0.3s ease-in-out;
+    height: 100%; /* La carte occupe 100% de la hauteur de son conteneur */
+    width: 100%; /* La carte occupe 100% de la largeur de son conteneur */
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
 }
+
 #map.fullscreen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 9999;
-}
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+}s
+
+/* Ajustement crucial du z-index pour les boutons */
 #toggle-fullscreen-btn, #recenter-btn, #set-safe-place-btn {
-  position: absolute;
-  bottom: 20px;
-  z-index: 10000;
+    position: absolute;
+    bottom: 20px;
+    z-index: 10000; /* Valeur plus grande que celle de la carte */
 }
+
 #toggle-fullscreen-btn { left: 20px; }
 #recenter-btn { right: 20px; }
 #set-safe-place-btn { left : 100px;}
 
+/* Styles de l'inventaire */
+#inventory-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
 
-/* === 14. Styles de l'inventaire === */
-#inventory-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
 #inventory-items-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 15px;
-  padding: 10px;
-  background-color: var(--bg-color-medium);
-  border-radius: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 15px;
+  padding: 10px;
+  background-color: var(--bg-color-medium);
+  border-radius: 8px;
 }
+
 .inventory-item {
-  background-color: var(--bg-color-dark);
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  padding: 10px;
-  text-align: center;
-  cursor: pointer;
-  position: relative;
-  transition: transform 0.2s;
+  background-color: var(--bg-color-dark);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s;
 }
-.inventory-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); }
-.inventory-item img { width: 60px; height: 60px; border-radius: 4px; }
+
+.inventory-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.inventory-item img {
+  width: 60px;
+  height: 60px;
+  border-radius: 4px;
+}
+
 .inventory-item .item-name {
-  display: block;
-  margin-top: 5px;
-  font-size: 0.8em;
-  font-weight: bold;
+  display: block;
+  margin-top: 5px;
+  font-size: 0.8em;
+  font-weight: bold;
 }
 
-
-/* === 15. Bulles d'aide (Tooltips) === */
+/* Bulles d'aide */
 .tooltip {
-  visibility: hidden;
-  background-color: rgba(0, 0, 0, 0.9);
-  color: var(--text-color-light);
-  text-align: left;
-  border-radius: 6px;
-  padding: 10px;
-  position: absolute;
-  z-index: 1;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 0.3s;
-  white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  visibility: hidden;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: var(--text-color-light);
+  text-align: left;
+  border-radius: 6px;
+  padding: 10px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
-.inventory-item:hover .tooltip { visibility: visible; opacity: 1; }
 
+.inventory-item:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
 
-/* === 16. Styles pour le pêle-mêle === */
+/* Styles pour le pêle-mêle et la colonne */
 .grid-pele-mele {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  grid-auto-rows: minmax(150px, auto);
-  gap: 20px;
-  padding: 20px;
-  margin: 20px auto;
-  max-width: 1200px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-auto-rows: minmax(150px, auto);
+  gap: 20px;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 1200px;
 }
+
+.grid-pele-mele .item {
+  background-color: var(--bg-color-medium);
+  padding: 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
 .grid-pele-mele .item:nth-child(2) { grid-column: span 2; }
 .grid-pele-mele .item:nth-child(4) { grid-row: span 2; }
 .grid-pele-mele .item:nth-child(5) { grid-column: span 2; }
 
-
-/* === 17. MEDIA QUERY pour les écrans de petite taille === */
+/* MEDIA QUERY pour les écrans de petite taille */
 @media (max-width: 768px) {
-  .grid-pele-mele {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  .grid-pele-mele .item {
-    grid-column: auto !important;
-    grid-row: auto !important;
-  }
+  .grid-pele-mele {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .grid-pele-mele .item {
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
 }
-```
+
+/* Masquer le bouton de création de personnage si nécessaire */
+#no-character-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
