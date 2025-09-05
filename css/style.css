@@ -463,7 +463,7 @@ a:hover, a:focus {
 }
 
 #map {
-    height: 100%; /* La carte prendra la hauteur de son parent */
+    height: 600px; /* Choisissez la hauteur que vous souhaitez pour la carte */
     width: 100%;
     border: 2px solid var(--border-color);
     border-radius: 8px;
