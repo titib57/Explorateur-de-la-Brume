@@ -200,6 +200,14 @@ export function createCharacter(name, playerClass, age, height, weight) {
     recalculateDerivedStats(newPlayer);
     player = newPlayer;
 
+ // Ajoute des objets de départ à l'inventaire du joueur
+    newPlayer.addItem(itemsData["lame_stase"]);
+    newPlayer.addItem(itemsData["veste_survivant"]);
+    newPlayer.addItem(itemsData["fragment_ataraxie"]);
+    newPlayer.addItem(itemsData["mnemonique"]);
+
+
+
     // Ajoute la première quête ici, en utilisant la nouvelle méthode startQuest
     player.startQuest("initial_adventure_quest"); 
     
