@@ -84,6 +84,7 @@ a:hover, a:focus {
 }
 
 .btn-primary { background-color: var(--accent-color-blue); }
+.btn-primary.hidden { background-color: var(--accent-color-blue); }
 .btn-primary:hover {
   background-color: color-mix(in srgb, var(--accent-color-blue) 80%, black);
   transform: translateY(-2px) scale(1.05);
@@ -480,7 +481,10 @@ a:hover, a:focus {
 
 #toggle-fullscreen-btn { left: 20px; }
 #recenter-btn { right: 20px; }
-#set-safe-place-btn { left : 100px;}
+#set-safe-place-btn {
+  width: 200px; /* Doit avoir une largeur */
+  margin: 0 auto;
+}
 
 /* Styles de l'inventaire */
 #inventory-tabs {
