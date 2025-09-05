@@ -459,11 +459,12 @@ a:hover, a:focus {
     padding: 20px;
     text-align: center;
     border-bottom: 2px solid var(--border-color);
+    flex-grow: 1; /* AJOUTEZ CETTE LIGNE */
 }
 
-.map {
-    height: 100%; /* La carte occupe 100% de la hauteur de son conteneur */
-    width: 100%; /* La carte occupe 100% de la largeur de son conteneur */
+#map {
+    height: 100%; /* La carte prendra la hauteur de son parent */
+    width: 100%;
     border: 2px solid var(--border-color);
     border-radius: 8px;
     transition: all 0.3s ease-in-out;
