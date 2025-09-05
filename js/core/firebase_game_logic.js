@@ -4,26 +4,35 @@ import { auth, db } from "./firebase_config.js";
 import { showNotification } from './notifications.js';
 import { questsData } from './questsData.js';
 
+// Fonction utilitaire pour récupérer un élément du DOM de manière sécurisée
+function getElement(id) {
+    const element = document.getElementById(id);
+    if (!element) {
+        console.warn(`Element with ID '${id}' not found. Make sure the HTML page includes this element.`);
+    }
+    return element;
+}
+
 // =========================================================================
 // VARIABLES GLOBALES (sauf celles qui changent d'une page à l'autre)
 // =========================================================================
-const noCharacterSection = document.getElementById('no-character-section');
-const characterSection = document.getElementById('character-section');
-const characterDisplay = document.getElementById('character-display');
-const loadingMessage = document.getElementById('loading-message');
-const playBtn = document.getElementById('play-btn');
-const deleteBtn = document.getElementById('delete-btn');
-const updateBtn = document.getElementById('update-btn');
-const statsDisplay = document.getElementById('stats-display');
-const questsDisplay = document.getElementById('quests-display');
-const inventoryDisplay = document.getElementById('inventory-display');
-const equipmentDisplay = document.getElementById('equipment-display');
-const characterInfoDisplay = document.getElementById('character-info-display');
-const characterForm = document.getElementById('character-form');
-const characterExistsSection = document.getElementById('character-exists-section');
-const existingCharacterDisplay = document.getElementById('existing-character-display');
-const deleteBtnOnCharacterPage = document.getElementById('delete-btn-creation-page');
-const logoutLink = document.getElementById('logout-link');
+const noCharacterSection = getElement('no-character-section');
+const characterSection = getElement('character-section');
+const characterDisplay = getElement('character-display');
+const loadingMessage = getElement('loading-message');
+const playBtn = getElement('play-btn');
+const deleteBtn = getElement('delete-btn');
+const updateBtn = getElement('update-btn');
+const statsDisplay = getElement('stats-display');
+const questsDisplay = getElement('quests-display');
+const inventoryDisplay = getElement('inventory-display');
+const equipmentDisplay = getElement('equipment-display');
+const characterInfoDisplay = getElement('character-info-display');
+const characterForm = getElement('character-form');
+const characterExistsSection = getElement('character-exists-section');
+const existingCharacterDisplay = getElement('existing-character-display');
+const deleteBtnOnCharacterPage = getElement('delete-btn-creation-page');
+const logoutLink = getElement('logout-link');
 
 // =========================================================================
 // FONCTIONS DE GESTION DE L'AFFICHAGE
@@ -54,9 +63,9 @@ function renderCharacter(character) {
     
     // 3. Section "Quêtes"
     if (questsDisplay && character.quests) {
-        const activeQuestsList = document.getElementById('active-quests-list');
-        const unstartedQuestsList = document.getElementById('unstarted-quests-list');
-        const completedQuestsList = document.getElementById('completed-quests-list');
+        const activeQuestsList = getElement('active-quests-list');
+        const unstartedQuestsList = getElement('unstarted-quests-list');
+        const completedQuestsList = getElement('completed-quests-list');
         
         if (activeQuestsList) activeQuestsList.innerHTML = '';
         if (unstartedQuestsList) unstartedQuestsList.innerHTML = '';
@@ -132,7 +141,7 @@ function renderCharacter(character) {
     // Afficher les sections
     const sectionsToDisplay = ['character-section', 'stats-section', 'quest-section', 'inventory-section', 'equipement-section'];
     sectionsToDisplay.forEach(id => {
-        const section = document.getElementById(id);
+        const section = getElement(id);
         if (section) section.classList.remove('hidden');
     });
 
@@ -312,6 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // Fonction pour supprimer les données du personnage
     async function deleteCharacterData(user) {
         const characterRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
         try {
@@ -324,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Gère la suppression du personnage
+    // Gère la suppression du personnage sur la page de création
     if (deleteBtnOnCharacterPage) {
         deleteBtnOnCharacterPage.addEventListener('click', async () => {
             const user = auth.currentUser;
@@ -333,6 +343,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Gère la suppression du personnage sur la page de gestion
     if (deleteBtn) {
         deleteBtn.addEventListener('click', async () => {
             const user = auth.currentUser;
