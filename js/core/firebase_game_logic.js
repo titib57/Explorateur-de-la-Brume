@@ -3,6 +3,8 @@ import { doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebase
 import { auth, db } from "./firebase_config.js";
 import { showNotification } from './notifications.js';
 import { questsData } from './questsData.js';
+import { updateQuestProgress } from '../modules/quests.js';
+
 
 // Fonction utilitaire pour récupérer un élément du DOM de manière sécurisée
 function getElement(id) {
