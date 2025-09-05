@@ -112,7 +112,7 @@ async function initMap(player) {
                     lng: playerMarker.getLatLng().lng
                 };
                 savePlayer(player);
-                updateQuestProgress('lieu_sur', 1);
+                updateQuestProgress('initial_adventure_quest', 1);
                 setSafePlaceBtn.style.display = 'none';
                 showNotification("Votre lieu sûr a été défini !", "success");
                 loadDungeons(player, playerMarker.getLatLng());
@@ -223,7 +223,7 @@ async function loadDungeons(player, playerLatLng) {
             location: player.safePlaceLocation,
             dungeonType: 'tutoriel',
             difficulty: 0,
-            questId: 'lieu_sur',
+            questId: 'initial_adventure_quest',
             isTutorial: true,
         };
         const tutorialLatLng = L.latLng(tutorialDungeon.location.lat, tutorialDungeon.location.lng);
