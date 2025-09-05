@@ -21,9 +21,7 @@
 
     <main class="game-container">
         <section class="grid-pele-mele">
-            <button id="prev-btn" class="carousel-nav-btn">&lt;</button>
-            <div class="carousel-content">
-                <section id="character-section" class="carousel-item">
+                <section id="character-section" class="hidden">
                     <h2>Mon personnage</h2>
                     <div id="character-display">
                         <p id="loading-message">Chargement des données...</p>
@@ -39,25 +37,25 @@
                     </div>
                 </section>
 
-                <section id="shelter-info" class="carousel-item hidden">
+                <section id="shelter-info" class="hidden">
                     <h2>Votre Abri</h2>
                     <p>Niveau : <span id="shelter-level">0</span></p>
                     <p>Défense : <span id="shelter-defense">0</span></p>
                     <button id="upgradeShelterBtn" class="btn-primary">Améliorer l'abri</button>
                 </section>
 
-                <section id="wave-info" class="carousel-item hidden">
+                <section id="wave-info" class="hidden">
                     <h2>Vagues de monstres</h2>
                     <p>Vague actuelle : <span id="current-wave">0</span></p>
                     <p>Prochaine vague dans : <span id="wave-timer"></span></p>
                 </section>
 
-                <section id="stats-section" class="carousel-item hidden">
+                <section id="stats-section" class="hidden">
                     <h2>Statistiques</h2>
                     <div id="stats-display"></div>
                 </section>
 
-                <section id="quest-section" class="carousel-item hidden">
+                <section id="quest-section" class="hidden">
                     <h2>Quêtes</h2>
                     <div id="quests-display">
                         <div id="quest-log">
@@ -71,17 +69,17 @@
                     </div>
                 </section>
 
-                <section id="inventory-section" class="carousel-item hidden">
+                <section id="inventory-section" class="hidden">
                     <h2>Inventaire</h2>
                     <div id="inventory-display"></div>
                 </section>
 
-                <section id="equipement-section" class="carousel-item hidden">
+                <section id="equipement-section" class="hidden">
                     <h2>Equipement</h2>
                     <div id="equipement-display"></div>
                 </section>
 
-                <section id="no-character-section" class="carousel-item hidden">
+                <section id="no-character-section" class="hidden">
                     <h2>Préparez-vous à l'aventure</h2>
                     <p>Vous n'avez pas encore de personnage. Créez-en un pour commencer à jouer !</p>
                     <button>
@@ -90,8 +88,6 @@
                 </section>
 
             </div>
-            <button id="next-btn" class="carousel-nav-btn">&gt;</button>
-
         <div id="notification-container" class="notification-container"></div>
         <div id="progress-bar" class="progress-bar hidden"></div>
         </section>
