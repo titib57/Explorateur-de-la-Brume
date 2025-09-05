@@ -177,18 +177,6 @@ function showCharacterExistsView(character) {
     renderExistingCharacterOnCreationPage(character);
 }
     
-// Ancienne fonction : a été remplacée par renderJournal pour être plus complète
-// function renderWorldMapCharacterInfo(character) {
-//     if (characterInfoDisplay) {
-//         characterInfoDisplay.innerHTML = `
-//             <div class="player-info">
-//                 <span>Personnage : **${character.name}**</span>
-//                 <span>Niveau : **${character.level}**</span>
-//                 <span>PV : **${character.hp}**</span>
-//             </div>
-//         `;
-//     }
-// }
 
 // Nouvelle fonction pour mettre à jour le journal de bord
 function renderJournal(character) {
@@ -248,6 +236,49 @@ async function loadCharacterData(user) {
         showNotification("Erreur lors du chargement des données. Veuillez réessayer.", "error");
     }
 }
+
+// NOUVELLE FONCTION: Accepter une quête et la sauvegarder sur Firestore
+async function acceptQuestAndSave(questId, user) {
+    const characterRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
+    try {
+        const docSnap = await getDoc(characterRef);
+        if (docSnap.exists()) {
+            const characterData = docSnap.data();
+
+            if (characterData.quests && characterData.quests.current) {
+                showNotification("Vous avez déjà une quête en cours. Terminez-la d'abord !", "warning");
+                return;
+            }
+
+            const questDefinition = questsData[questId];
+            if (!questDefinition) {
+                showNotification("Erreur: Cette quête n'existe pas.", "error");
+                return;
+            }
+            
+            const newQuestData = {
+                questId: questId,
+                currentProgress: 0
+            };
+            
+            const updatedQuests = characterData.quests || { completed: {} };
+            updatedQuests.current = newQuestData;
+            
+            await setDoc(characterRef, { quests: updatedQuests }, { merge: true });
+            
+            showNotification(`Quête "${questDefinition.title}" acceptée !`, "success");
+            
+            // Recharger les données pour mettre à jour l'affichage
+            loadCharacterData(user);
+        } else {
+            showNotification("Erreur: Personnage non trouvé.", "error");
+        }
+    } catch (error) {
+        console.error("Erreur lors de l'acceptation de la quête:", error);
+        showNotification("Une erreur est survenue lors de l'acceptation de la quête.", "error");
+    }
+}
+
 
 // =========================================================================
 // GESTION DES ÉVÉNEMENTS
@@ -400,6 +431,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (updateBtn) {
         updateBtn.addEventListener('click', () => { window.location.href = "character.html"; });
     }
+
+    // NOUVEL ÉCOUTEUR D'ÉVÉNEMENTS : Gère les clics sur les boutons "Accepter" des quêtes
+    document.addEventListener('click', (event) => {
+        if (event.target.classList.contains('accept-quest-btn')) {
+            const user = auth.currentUser;
+            if (user) {
+                const questId = event.target.dataset.questId;
+                acceptQuestAndSave(questId, user);
+            } else {
+                showNotification("Vous devez être connecté pour accepter une quête.", "error");
+            }
+        }
+    });
 
     // Gestion de l'état d'authentification
     onAuthStateChanged(auth, (user) => {
