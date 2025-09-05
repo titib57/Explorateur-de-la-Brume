@@ -259,15 +259,21 @@ a:hover, a:focus {
   margin-top: auto;
 }
 
-.action-buttons {
-  text-align: center;
-  margin-top: 20px;
+.bouton-groupe {
+    display: flex; /* Déjà présent */
+    gap: 10px; /* Déjà présent */
+    align-items: center; /* Déjà présent */
+    justify-content: center; /* AJOUTEZ CETTE LIGNE */
+    margin-top: 20px; /* AJOUTEZ CETTE LIGNE pour un peu d'espace */
 }
 
-.bouton-groupe {
-  display: flex;
-  gap: 10px;
-  align-items: center;
+.action-buttons {
+    text-align: center;
+    margin-top: 20px;
+    /* Utilisez aussi Flexbox pour plus de flexibilité */
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }
 
 /* === Styles de l'arbre de compétences === */
