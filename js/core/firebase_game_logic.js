@@ -279,6 +279,41 @@ async function acceptQuestAndSave(questId, user) {
     }
 }
 
+/**
+ * Gère la complétion d'un objectif de quête de manière générique.
+ * @param {string} objectiveAction - Le type d'action de l'objectif (par ex. 'define_shelter', 'gather').
+ * @param {any} [payload] - Données supplémentaires nécessaires à la mise à jour (par ex. l'ID de l'objet collecté).
+ */
+async function completeQuestObjective(objectiveAction, payload = null) {
+    const user = auth.currentUser;
+    if (!user) {
+        showNotification("Vous devez être connecté pour mettre à jour la quête.", "error");
+        return;
+    }
+
+    try {
+        const characterRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
+        const docSnap = await getDoc(characterRef);
+
+        if (docSnap.exists()) {
+            let characterData = docSnap.data();
+
+            // Appel de la fonction de logique de quête avec les paramètres génériques.
+            characterData = await updateQuestProgress(characterData, objectiveAction, payload);
+            
+            if (characterData) {
+                // Sauvegarde le personnage mis à jour dans Firestore.
+                await setDoc(characterRef, characterData);
+                showNotification("Objectif de quête mis à jour !", "success");
+                renderJournal(characterData);
+            }
+        }
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour de l'objectif de quête :", error);
+        showNotification("Erreur lors de la mise à jour de la quête. Veuillez réessayer.", "error");
+    }
+}
+
 
 // =========================================================================
 // GESTION DES ÉVÉNEMENTS
@@ -444,6 +479,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+
+// ... (vos écouteurs d'événements à la fin du fichier, comme celui pour le bouton de validation de l'abri)
+const validateShelterBtn = getElement('validate-shelter-btn');
+if (validateShelterBtn) {
+    validateShelterBtn.addEventListener('click', () => {
+        completeQuestObjective("define_shelter");
+    });
+}
 
     // Gestion de l'état d'authentification
     onAuthStateChanged(auth, (user) => {
