@@ -454,20 +454,44 @@ a:hover, a:focus {
     flex-direction: column;
 }
 
+/* Nouveau conteneur pour la mise en page de la carte et du journal */
+.world-map-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+/* Conteneur principal qui encapsule la carte et ses informations */
+.map-and-info-container {
+    flex-grow: 1; /* Permet au conteneur de la carte d'occuper l'espace restant */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Le conteneur de la carte lui-même */
 .map-container {
-    background-color: var(--bg-color-medium);
-    padding: 20px;
-    text-align: center;
-    border-bottom: 2px solid var(--border-color);
-    flex-grow: 1; /* AJOUTEZ CETTE LIGNE */
+    /* Styles existants */
+    flex-grow: 1;
 }
 
 #map {
-    height: 600px; /* Choisissez la hauteur que vous souhaitez pour la carte */
+    height: 600px; /* Hauteur fixe pour que la carte s'affiche au chargement */
     width: 100%;
+}
+
+/* Le journal de bord */
+#sidebar-journal {
+    width: 300px; /* Largeur fixe pour le journal */
+    min-width: 250px;
+    background-color: var(--bg-color-medium);
     border: 2px solid var(--border-color);
     border-radius: 8px;
-    transition: all 0.3s ease-in-out;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    /* Rendre le journal de bord défilable si le contenu est trop long */
+    overflow-y: auto; 
+    position: sticky;
+    top: 20px;
 }
 
 #map.fullscreen {

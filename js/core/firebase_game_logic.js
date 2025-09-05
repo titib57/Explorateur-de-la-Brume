@@ -34,6 +34,14 @@ const existingCharacterDisplay = getElement('existing-character-display');
 const deleteBtnOnCharacterPage = getElement('delete-btn-creation-page');
 const logoutLink = getElement('logout-link');
 
+// Variables pour le journal de bord
+const currentQuestTitle = getElement('current-quest-title');
+const currentQuestDescription = getElement('current-quest-description');
+const currentQuestProgress = getElement('current-quest-progress');
+const hpValue = getElement('hp-value');
+const goldValue = getElement('gold-value');
+const levelValue = getElement('level-value');
+
 // =========================================================================
 // FONCTIONS DE GESTION DE L'AFFICHAGE
 // =========================================================================
@@ -169,15 +177,48 @@ function showCharacterExistsView(character) {
     renderExistingCharacterOnCreationPage(character);
 }
     
-function renderWorldMapCharacterInfo(character) {
-    if (characterInfoDisplay) {
-        characterInfoDisplay.innerHTML = `
-            <div class="player-info">
-                <span>Personnage : **${character.name}**</span>
-                <span>Niveau : **${character.level}**</span>
-                <span>PV : **${character.hp}**</span>
-            </div>
-        `;
+// Ancienne fonction : a été remplacée par renderJournal pour être plus complète
+// function renderWorldMapCharacterInfo(character) {
+//     if (characterInfoDisplay) {
+//         characterInfoDisplay.innerHTML = `
+//             <div class="player-info">
+//                 <span>Personnage : **${character.name}**</span>
+//                 <span>Niveau : **${character.level}**</span>
+//                 <span>PV : **${character.hp}**</span>
+//             </div>
+//         `;
+//     }
+// }
+
+// Nouvelle fonction pour mettre à jour le journal de bord
+function renderJournal(character) {
+    if (!character) return;
+
+    // Mise à jour de la quête en cours
+    if (currentQuestTitle) {
+        if (character.quests && character.quests.current) {
+            const currentQuestData = questsData[character.quests.current.questId];
+            if (currentQuestData) {
+                currentQuestTitle.textContent = currentQuestData.title;
+                currentQuestDescription.textContent = currentQuestData.description;
+                currentQuestProgress.textContent = `Progression : ${character.quests.current.currentProgress || 0} / ${currentQuestData.objective.required}`;
+            }
+        } else {
+            currentQuestTitle.textContent = "Aucune quête active.";
+            currentQuestDescription.textContent = "";
+            currentQuestProgress.textContent = "";
+        }
+    }
+    
+    // Mise à jour des statistiques
+    if (hpValue && character.stats) {
+        hpValue.textContent = `${character.stats.hp} / ${character.stats.maxHp}`;
+    }
+    if (goldValue) {
+        goldValue.textContent = character.gold;
+    }
+    if (levelValue) {
+        levelValue.textContent = character.level;
     }
 }
 
@@ -188,14 +229,15 @@ async function loadCharacterData(user) {
         if (docSnap.exists()) {
             const characterData = docSnap.data();
             // On vérifie sur quelle page on est et on affiche le bon contenu
-            if (characterSection) {
+            if (window.location.pathname.includes('gestion_personnage.html')) {
                 renderCharacter(characterData);
-                characterSection.classList.remove('hidden');
                 if (noCharacterSection) noCharacterSection.classList.add('hidden');
-            } else if (characterExistsSection) {
+                characterSection.classList.remove('hidden');
+            } else if (window.location.pathname.includes('character.html')) {
                 showCharacterExistsView(characterData);
-            } else if (characterInfoDisplay) {
-                renderWorldMapCharacterInfo(characterData);
+            } else if (window.location.pathname.includes('world_map.html')) {
+                // Appeler la nouvelle fonction de rendu pour la page de la carte
+                renderJournal(characterData);
             }
         } else {
             showNoCharacterView();
