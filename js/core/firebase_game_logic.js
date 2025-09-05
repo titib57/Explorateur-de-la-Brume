@@ -482,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // ... (vos écouteurs d'événements à la fin du fichier, comme celui pour le bouton de validation de l'abri)
-const validateShelterBtn = getElement('validate-shelter-btn');
+const validateShelterBtn = getElement('set-safe-place-btn');
 if (validateShelterBtn) {
     validateShelterBtn.addEventListener('click', () => {
         completeQuestObjective("define_shelter");
