@@ -204,18 +204,18 @@ export function createCharacter(name, playerClass, age, height, weight) {
     recalculateDerivedStats(newPlayer);
     player = newPlayer;
 
- // Ajoute des objets de départ à l'inventaire du joueur
+    // Ajoute des objets de départ à l'inventaire du joueur
     newPlayer.addItem(itemsData["lame_stase"]);
     newPlayer.addItem(itemsData["veste_survivant"]);
     newPlayer.addItem(itemsData["fragment_ataraxie"]);
     newPlayer.addItem(itemsData["mnemonique"]);
 
-
-
     // Ajoute la première quête ici, en utilisant la nouvelle méthode startQuest
     player.startQuest("initial_adventure_quest"); 
     
-    savePlayer(player);
+    // Suppression de cette ligne car savePlayer est déjà appelé dans startQuest.
+    // savePlayer(player); 
+    
     return player;
 }
 
@@ -235,7 +235,7 @@ export function giveXP(xpAmount) {
 export async function loadCharacter(user) {
     await authPromise;
 
-    if (!userId) {
+    if (!user || !user.uid) {
         console.log("Aucun utilisateur n'est connecté. Impossible de charger un personnage.");
         return null;
     }
@@ -249,8 +249,8 @@ export async function loadCharacter(user) {
             const char = new Character(
                 savedPlayer.name, savedPlayer.playerClass, savedPlayer.level, savedPlayer.xp, savedPlayer.gold,
                 savedPlayer.stats, savedPlayer.quests, savedPlayer.inventory, savedPlayer.equipment,
-                savedPlayer.abilities, savedPlayer.hp, savedPlayer.maxHp, savedBuilder.mana, savedBuilder.maxMana, // Correction de "savedBuilder" en "savedPlayer"
-                savedPlayer.age, savedPlayer.height, savedPlayer.weight, savedPlayer.safePlaceLocation // AJOUT DE CETTE LIGNE
+                savedPlayer.abilities, savedPlayer.hp, savedPlayer.maxHp, savedPlayer.mana, savedPlayer.maxMana,
+                savedPlayer.age, savedPlayer.height, savedPlayer.weight, savedPlayer.safePlaceLocation
             );
             char.statPoints = savedPlayer.statPoints;
             char.xpToNextLevel = savedPlayer.xpToNextLevel;

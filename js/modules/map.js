@@ -1,7 +1,7 @@
 ﻿import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { showNotification } from '../core/notifications.js';
 import { generateDungeon } from '../core/dungeon.js';
-import { player, savePlayer, loadCharacter } from '../core/state.js';
+import { savePlayer, loadCharacter, player } from '../core/state.js';
 import { isSetSafePlaceQuest, updateQuestProgress } from './quests.js';
 import { auth } from '../core/firebase_config.js';
 
