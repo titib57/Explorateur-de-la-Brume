@@ -105,17 +105,26 @@ async function initMap(player) {
 
     // Gestion du bouton "Lieu sûr"
     if (setSafePlaceBtn) {
-        setSafePlaceBtn.addEventListener('click', () => {
+        setSafePlaceBtn.addEventListener('click', async () => {
             if (playerMarker) {
                 player.safePlaceLocation = {
                     lat: playerMarker.getLatLng().lat,
                     lng: playerMarker.getLatLng().lng
                 };
-                savePlayer(player);
+                
+                // Assurez-vous d'abord de mettre à jour la quête avant la sauvegarde
                 updateQuestProgress('initial_adventure_quest', 1);
-                setSafePlaceBtn.style.display = 'none';
-                showNotification("Votre lieu sûr a été défini !", "success");
-                loadDungeons(player, playerMarker.getLatLng());
+
+                try {
+                    // La sauvegarde est maintenant attendue
+                    await savePlayer(player); 
+                    setSafePlaceBtn.style.display = 'none';
+                    showNotification("Votre lieu sûr a été défini !", "success");
+                    loadDungeons(player, playerMarker.getLatLng());
+                } catch (error) {
+                    console.error("Erreur lors de la sauvegarde du lieu sûr :", error);
+                    showNotification("Erreur lors de la sauvegarde du lieu sûr. Veuillez réessayer.", "error");
+                }
             } else {
                 showNotification("Impossible de définir le lieu sûr sans connaître votre position.", "warning");
             }
