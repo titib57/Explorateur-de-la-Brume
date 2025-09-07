@@ -106,27 +106,32 @@ async function initMap(player) {
     // Gestion du bouton "Lieu sûr"
     if (setSafePlaceBtn) {
         setSafePlaceBtn.addEventListener('click', async () => {
+            // Vérifiez si le marqueur du joueur existe avant d'accéder à ses propriétés
             if (playerMarker) {
+                // 1. Mettre à jour l'objet player local
                 player.safePlaceLocation = {
                     lat: playerMarker.getLatLng().lat,
                     lng: playerMarker.getLatLng().lng
                 };
 
-                // Mettre à jour la progression de la quête
+                // 2. Mettre à jour la progression de la quête
                 updateQuestProgress('initial_adventure_quest', 1);
 
                 try {
-                    // Attendre la fin de la sauvegarde sur Firebase
+                    // 3. Appeler la fonction de sauvegarde de l'abri
                     await savePlayer(player);
+                    
+                    // 4. Mettre à jour l'UI après la sauvegarde réussie
                     setSafePlaceBtn.style.display = 'none';
-                    showNotification("Votre lieu sûr a été défini !", "success");
+                    showNotification("Votre lieu sûr a été défini et sauvegardé !", "success");
                     loadDungeons(player, playerMarker.getLatLng());
                 } catch (error) {
                     console.error("Erreur lors de la sauvegarde du lieu sûr :", error);
                     showNotification("Erreur lors de la sauvegarde du lieu sûr. Veuillez réessayer.", "error");
                 }
             } else {
-                showNotification("Impossible de définir le lieu sûr sans connaître votre position.", "warning");
+                // Si le marqueur n'existe pas, informez l'utilisateur
+                showNotification("Veuillez attendre que votre position soit détectée pour définir le lieu sûr.", "warning");
             }
         });
     }
