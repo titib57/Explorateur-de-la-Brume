@@ -249,19 +249,33 @@ async function loadDungeons(player, playerLatLng) {
     // Le reste du code de chargement des donjons
     if (!isSetSafePlaceQuest(player) && player.safePlaceLocation) {
         const searchRadius = 0.2;
-        const overpassQuery = `
+        // Remplacer l'intégralité du bloc overpassQuery par celui-ci
+const overpassQuery = `
 [out:json][timeout:25];
 (
-    node["building"="castle"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
-    way["building"="castle"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
+    // Lieux historiques
+    node["historic"="castle"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
+    way["historic"="castle"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
     node["historic"="ruins"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
     way["historic"="ruins"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
-    node["landuse"="cemetery"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
-    way["landuse"="cemetery"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
     node["historic"="monument"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
     way["historic"="monument"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
+    node["historic"="wayside_shrine"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
+    way["historic"="wayside_shrine"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
+
+    // Lieux de culte
+    node["building"="church"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
+    way["building"="church"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
+    node["amenity"="place_of_worship"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
+    way["amenity"="place_of_worship"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
+
+    // Autres structures
+    node["landuse"="cemetery"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
+    way["landuse"="cemetery"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
     node["tower:type"="bell_tower"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
     way["tower:type"="bell_tower"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
+    node["building"="tower"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
+    way["building"="tower"](${playerLatLng.lat - searchRadius},${playerLatLng.lng - searchRadius},${playerLatLng.lat + searchRadius},${playerLatLng.lng + searchRadius});
 );
 out body;
 >;
