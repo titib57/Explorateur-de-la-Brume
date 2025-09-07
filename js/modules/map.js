@@ -111,13 +111,13 @@ async function initMap(player) {
                     lat: playerMarker.getLatLng().lat,
                     lng: playerMarker.getLatLng().lng
                 };
-                
-                // Assurez-vous d'abord de mettre à jour la quête avant la sauvegarde
+
+                // Mettre à jour la progression de la quête
                 updateQuestProgress('initial_adventure_quest', 1);
 
                 try {
-                    // La sauvegarde est maintenant attendue
-                    await savePlayer(player); 
+                    // Attendre la fin de la sauvegarde sur Firebase
+                    await savePlayer(player);
                     setSafePlaceBtn.style.display = 'none';
                     showNotification("Votre lieu sûr a été défini !", "success");
                     loadDungeons(player, playerMarker.getLatLng());
@@ -249,8 +249,7 @@ async function loadDungeons(player, playerLatLng) {
     // Le reste du code de chargement des donjons
     if (!isSetSafePlaceQuest(player) && player.safePlaceLocation) {
         const searchRadius = 0.2;
-        // Remplacer l'intégralité du bloc overpassQuery par celui-ci
-const overpassQuery = `
+        const overpassQuery = `
 [out:json][timeout:25];
 (
     // Lieux historiques
