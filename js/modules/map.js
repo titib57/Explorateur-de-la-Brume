@@ -114,13 +114,13 @@ async function initMap(player) {
                     lng: playerMarker.getLatLng().lng
                 };
 
-                // 2. Mettre à jour la progression de la quête
-                updateQuestProgress('initial_adventure_quest', 1);
-
                 try {
-                    // 3. Appeler la fonction de sauvegarde de l'abri
+                    // 2. Appeler la fonction de sauvegarde de l'abri
                     await savePlayer(player);
                     
+                    // 3. Mettre à jour la progression de la quête après la sauvegarde
+                    updateQuestProgress('initial_adventure_quest', 1);
+
                     // 4. Mettre à jour l'UI après la sauvegarde réussie
                     setSafePlaceBtn.style.display = 'none';
                     showNotification("Votre lieu sûr a été défini et sauvegardé !", "success");
