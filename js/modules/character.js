@@ -5,7 +5,7 @@
 import { showNotification } from '../core/notifications.js';
 // Correction des importations pour cibler les bons fichiers.
 import { auth, db, app } from '../core/firebase_config.js';
-import { player, loadCharacter, createCharacter, updateStats, updateStatsDisplay, savePlayer, deleteCharacterData, userId } from '../core/state.js';
+import { savePlayer, deleteCharacterData, userId } from '../core/state.js';
 
 
 /**
