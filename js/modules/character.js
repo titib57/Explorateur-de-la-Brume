@@ -3,8 +3,10 @@
 
 // Importations des modules de l'application
 import { showNotification } from '../core/notifications.js';
-import { app, auth, db, savePlayer, deleteCharacterData, userId } from '../core/firebase_config.js';
-import { player, loadCharacter, createCharacter, updateStats, updateStatsDisplay } from '../core/state.js';
+// Correction des importations pour cibler les bons fichiers.
+import { auth, db, app } from '../core/firebase_config.js';
+import { player, loadCharacter, createCharacter, updateStats, updateStatsDisplay, savePlayer, deleteCharacterData, userId } from '../core/state.js';
+
 
 /**
  * Initialise le personnage avec la quête de départ.
@@ -50,7 +52,6 @@ function hideUI(element) {
 function showPopup() {
     showUI(popupOverlay);
     setTimeout(() => {
-        // Ajoute les classes de transition ici si vous les remettez
         popupContent.style.opacity = '1';
         popupContent.style.transform = 'scale(1)';
     }, 10);
@@ -109,7 +110,7 @@ function updateUI(character) {
 
     // Écouteur en temps réel pour le document du personnage
     const { onSnapshot, doc } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js");
-    const characterRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
+    const characterRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
 
     onSnapshot(characterRef, (docSnapshot) => {
         const characterData = docSnapshot.exists() ? docSnapshot.data() : null;
@@ -155,13 +156,19 @@ function updateUI(character) {
     });
 
     // Écouteur pour le bouton de suppression
-    deleteBtn.addEventListener('click', () => {
+    deleteBtn.addEventListener('click', async () => {
         showPopup();
     });
 
-    confirmDeleteBtn.addEventListener('click', () => {
-        deleteCharacterData();
-        hidePopup();
+    confirmDeleteBtn.addEventListener('click', async () => {
+        // La fonction deleteCharacterData est maintenant asynchrone et attend un objet utilisateur
+        if (auth.currentUser) {
+            await deleteCharacterData(auth.currentUser);
+            hidePopup();
+        } else {
+            console.error("Aucun utilisateur connecté pour la suppression.");
+            hidePopup();
+        }
     });
 
     cancelDeleteBtn.addEventListener('click', () => {
