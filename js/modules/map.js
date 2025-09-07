@@ -420,7 +420,7 @@ onAuthStateChanged(auth, async (user) => {
             initMap(player);
         } else {
             console.error("Impossible de charger les données du personnage. Redirection vers la création de personnage.");
-            window.location.href = "character_creation.html";
+            window.location.href = "character.html";
         }
     } else {
         console.log("Utilisateur non connecté. Redirection...");
