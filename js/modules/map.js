@@ -26,6 +26,7 @@ let playerMarker;
 let selectedDungeon = null;
 let dungeonMarkers;
 let lastKnownPosition = null;
+let player = null; // Initialisation à null
 let mapElement;
 
 // Éléments du DOM
