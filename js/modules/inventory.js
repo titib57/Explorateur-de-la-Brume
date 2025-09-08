@@ -5,7 +5,7 @@ import { itemsData } from '../core/gameData.js';
 import { showNotification } from '../core/notifications.js';
 
 import { doc, getDoc, runTransaction } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import { auth, db } from '../firebase_config.js';
+import { auth, db } from '../core/firebase_config.js';
 
 const USERS_COLLECTION = "users";
 
