@@ -1,25 +1,31 @@
-﻿// Fichier : js/core/dungeon.js
+﻿// Fichier : js/game/dungeon.js
 // Ce module gère la logique de la génération de donjons et leur persistance.
 
 // Importations des données et des utilitaires nécessaires
-import { pointsOfInterest, questsData } from './questsData.js'; // Assurez-vous d'avoir ce point d'entrée pour les données
-import { showNotification } from './notifications.js';
+import { dungeonTypes, pointsOfInterest, questsData } from '../data/gameData.js';
+import { showNotification } from '../core/notifications.js';
 import { createDungeonData } from './dungeonGenerator.js';
 import { calculateDistance } from '../utils/geoUtils.js';
 
-// Importations Firebase
+// Importations de l'état central
+import { getDB, getUserId } from '../core/state.js';
 import { doc, runTransaction } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import { db } from './firebase_config.js';
 
 /**
  * Génère un donjon pour le joueur et met à jour son état sur Firestore.
- * Cette fonction utilise une transaction pour garantir la cohérence des données.
- * @param {string} characterId L'ID unique du personnage.
  * @param {object|string} locationInfo La position du joueur { lat, lng } ou la chaîne de caractères 'tutoriel'.
  * @returns {Promise<boolean>} Vrai si un donjon a été généré et sauvegardé, faux sinon.
  */
-export async function generateDungeon(characterId, locationInfo) {
-    const characterRef = doc(db, 'characters', characterId);
+export async function generateDungeon(locationInfo) {
+    const userId = getUserId();
+    const db = getDB();
+
+    if (!userId) {
+        showNotification("Impossible de générer un donjon : utilisateur non connecté.", 'error');
+        return false;
+    }
+
+    const characterRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
 
     try {
         await runTransaction(db, async (transaction) => {
@@ -28,7 +34,7 @@ export async function generateDungeon(characterId, locationInfo) {
                 throw new Error("Le document du personnage n'existe pas.");
             }
             const characterData = characterDoc.data();
-            const playerLevel = characterData.stats?.level || 1;
+            const playerLevel = characterData.level || 1;
 
             let closestPOI;
             const isTutorial = locationInfo === 'tutoriel';
@@ -68,11 +74,12 @@ export async function generateDungeon(characterId, locationInfo) {
                 const quests = characterData.quests || {};
                 const completedQuests = quests.completed || {};
                 
+                // N'ajoute la quête que si le joueur n'en a pas déjà une active
+                // et n'a pas déjà terminé celle-ci.
                 if (newQuest && !quests.current && !completedQuests[newQuestId]) {
                     updates['quests.current'] = {
                         questId: newQuestId,
                         currentProgress: 0,
-                        ...newQuest
                     };
                     showNotification(`Nouvelle quête acceptée : ${newQuest.name}`, 'quest');
                 }
