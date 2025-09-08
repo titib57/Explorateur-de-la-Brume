@@ -2,6 +2,7 @@
 // Ce module gère la mise à jour de l'interface utilisateur (UI).
 
 import { player, currentMonster } from "../core/state.js";
+import { questsData } from '../questsData.js'; // Importez les données de quêtes
 // Fonctions manquantes, à importer une fois les fichiers correspondants disponibles.
 // import { getAbilityById } from "./skills.js";
 // import { useItem } from "./inventory.js";
@@ -26,14 +27,17 @@ export function updateBattleUI() {
     document.getElementById('player-armor-display').textContent = player.equipment.armor ? player.equipment.armor.name : 'Aucune';
     
     // Mise à jour de l'UI du monstre
-    document.getElementById('monster-name').textContent = currentMonster.name;
-    document.getElementById('monster-hp').textContent = currentMonster.hp;
-    document.getElementById('monster-max-hp').textContent = currentMonster.maxHp;
-    document.getElementById('monster-hp-bar').style.width = `${(currentMonster.hp / currentMonster.maxHp) * 100}%`;
-    document.getElementById('monster-attack-display').textContent = currentMonster.attackDamage;
-    document.getElementById('monster-defense-display').textContent = currentMonster.defense;
+    if (currentMonster) {
+        document.getElementById('monster-name').textContent = currentMonster.name;
+        document.getElementById('monster-hp').textContent = currentMonster.hp;
+        document.getElementById('monster-max-hp').textContent = currentMonster.maxHp;
+        document.getElementById('monster-hp-bar').style.width = `${(currentMonster.hp / currentMonster.maxHp) * 100}%`;
+        document.getElementById('monster-attack-display').textContent = currentMonster.attackDamage;
+        document.getElementById('monster-defense-display').textContent = currentMonster.defense;
+    }
 }
 
+---
 /**
  * Met à jour l'interface de la page des statistiques.
  * @param {object} tempPlayer L'objet joueur temporaire avec les stats modifiables.
@@ -58,6 +62,7 @@ export function updateStatsUI(tempPlayer) {
     document.getElementById('defense-display').textContent = tempPlayer.defense;
 }
 
+---
 /**
  * Met à jour l'interface de la page d'accueil ou de la page de profil du joueur.
  * Cette fonction est ajoutée pour afficher les statistiques du joueur global.
@@ -85,6 +90,7 @@ export function updatePlayerProfileUI() {
     document.getElementById('player-defense').textContent = player.defense;
 }
 
+---
 /**
  * Met à jour l'interface des quêtes du joueur.
  * @param {object} player L'objet joueur.
@@ -99,16 +105,18 @@ export function updateQuestsUI(player) {
     questsContainer.innerHTML = '';
 
     // Afficher la quête en cours
-    if (player.quests.current) {
-        const currentQuest = player.quests.current;
-        const currentQuestElement = document.createElement('div');
-        currentQuestElement.className = 'quest-item current-quest';
-        currentQuestElement.innerHTML = `
-            <h4>Quête en cours : ${currentQuest.title}</h4>
-            <p>Objectif : ${currentQuest.description}</p>
-            <p>Progression : ${currentQuest.currentProgress}/${currentQuest.objective.required}</p>
-        `;
-        questsContainer.appendChild(currentQuestElement);
+    if (player.quests.current && player.quests.current.questId) {
+        const questDetails = questsData[player.quests.current.questId];
+        if (questDetails) {
+            const currentQuestElement = document.createElement('div');
+            currentQuestElement.className = 'quest-item current-quest';
+            currentQuestElement.innerHTML = `
+                <h4>Quête en cours : ${questDetails.title}</h4>
+                <p>Objectif : ${questDetails.description}</p>
+                <p>Progression : ${player.quests.current.currentProgress}/${questDetails.objective.required}</p>
+            `;
+            questsContainer.appendChild(currentQuestElement);
+        }
     } else {
         questsContainer.innerHTML = '<p>Pas de quête en cours.</p>';
     }
@@ -125,6 +133,7 @@ export function updateQuestsUI(player) {
     }
 }
 
+---
 /**
  * Met à jour l'interface de la carte du monde avec les informations du joueur.
  * @param {object} player L'objet joueur.
@@ -162,4 +171,34 @@ export function updateWorldMapUI(player) {
     if (playerWeaponElement && player.equipment.weapon) {
         playerWeaponElement.textContent = player.equipment.weapon.name;
     }
+}
+
+---
+/**
+ * Met à jour l'interface du journal de bord du joueur.
+ * @param {object} player L'objet joueur.
+ */
+export function updateJournalDisplay(player) {
+    if (!player || !player.journal) return;
+
+    const journalContainer = document.getElementById('journal-container');
+    if (!journalContainer) return;
+
+    journalContainer.innerHTML = '';
+
+    player.journal.forEach(entry => {
+        const entryElement = document.createElement('div');
+        entryElement.className = 'journal-entry';
+
+        const date = new Date(entry.timestamp).toLocaleString('fr-FR', {
+            year: 'numeric', month: 'numeric', day: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+
+        entryElement.innerHTML = `
+            <p class="journal-message">${entry.message}</p>
+            <span class="journal-timestamp">${date}</span>
+        `;
+        journalContainer.appendChild(entryElement);
+    });
 }
