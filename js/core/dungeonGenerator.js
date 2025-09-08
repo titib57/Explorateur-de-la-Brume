@@ -1,7 +1,7 @@
 // Fichier : js/core/dungeonGenerator.js
 // Ce module gère la logique de création des données d'un donjon.
 
-import { dungeonTypes } from './dungeons.js';
+import { dungeonTypes } from './dungeon.js';
 import { monstersData, bossesData } from './gameData.js';
 import { calculateDistance } from '../utils/geoUtils.js';
 
