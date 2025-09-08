@@ -1,8 +1,8 @@
 // Fichier : js/modules/questsPageManager.js
 
-import { player } from '../core/state.js';
-import { questsData } from '../core/questsData.js';
-import { showNotification } from '../core/notifications.js';
+import { player } from './state.js';
+import { questsData } from './questsData.js';
+import { showNotification } from './notifications.js';
 
 let activeTypewriterEffect = null;
 

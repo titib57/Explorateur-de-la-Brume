@@ -3,7 +3,7 @@
 
 import { player, savePlayer, deleteCharacterData, userId } from './state.js';
 import { showNotification } from './notifications.js';
-import { questsData } from '../data/gameData.js'; // Importe les données de quête
+import { questsData } from './questsData.js'; // Importe les données de quête
 import { auth, db } from './firebase_config.js';
 import { updateCharacterUI } from '../modules/characterUI.js';
 
