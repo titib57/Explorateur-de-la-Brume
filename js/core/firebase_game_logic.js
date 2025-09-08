@@ -307,7 +307,7 @@ async function completeQuestObjective(objectiveAction, payload = null) {
             let characterData = docSnap.data();
 
             // Appel de la fonction de logique de quête avec les paramètres génériques.
-            characterData = await updateQuestProgress(characterData, objectiveAction, payload);
+characterData = await updateQuestProgress(characterData, user.uid, objectiveAction, payload);
             
             if (characterData) {
                 // Sauvegarde le personnage mis à jour dans Firestore.

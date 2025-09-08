@@ -14,6 +14,7 @@ import { defineShelter } from './shelterManager.js';
 
 /**
  * @typedef {object} CharacterData
+ * @property {string} id - L'ID unique du personnage (généralement l'UID de l'utilisateur).
  * @property {object} quests
  * @property {object|null} quests.current
  * @property {string} quests.current.questId
@@ -65,11 +66,12 @@ export const acceptQuest = (characterData, questId) => {
 /**
  * Met à jour la progression d'une quête en cours.
  * @param {CharacterData} characterData - Les données du personnage.
+ * @param {string} characterId - L'ID du personnage (l'UID de l'utilisateur).
  * @param {string} objectiveAction - L'action de l'objectif (ex: 'define_shelter').
  * @param {any} [payload] - Des données additionnelles.
  * @returns {Promise<CharacterData|null>} Les données du personnage mises à jour ou null en cas d'échec.
  */
-export const updateQuestProgress = async (characterData, objectiveAction, payload) => {
+export const updateQuestProgress = async (characterData, characterId, objectiveAction, payload) => {
     if (!characterData?.quests?.current) {
         console.warn("Pas de quête en cours.");
         return null;
@@ -88,7 +90,8 @@ export const updateQuestProgress = async (characterData, objectiveAction, payloa
     // Utilise une logique de progression pour chaque type d'objectif
     const progressHandlers = {
         "define_shelter": async () => {
-            const success = await defineShelter(payload);
+            // Passe l'ID du personnage et le payload à la fonction defineShelter
+            const success = await defineShelter(characterId, payload); 
             if (success) {
                 currentQuest.currentProgress = 1;
                 console.log("Objectif 'définir l'abri' accompli. 🎉");
@@ -115,7 +118,8 @@ export const updateQuestProgress = async (characterData, objectiveAction, payloa
     }
 
     if (progressUpdated && currentQuest.currentProgress >= objective.required) {
-        return await completeQuest(characterData);
+        // Passe l'ID du personnage à la fonction de complétion de quête
+        return await completeQuest(characterData, characterId);
     }
     
     return characterData;
@@ -128,15 +132,18 @@ export const updateQuestProgress = async (characterData, objectiveAction, payloa
 /**
  * Gère la complétion d'une quête.
  * @param {CharacterData} characterData - Les données du personnage.
+ * @param {string} characterId - L'ID du personnage.
  * @returns {Promise<CharacterData>} Les données du personnage mises à jour.
  */
-const completeQuest = async (characterData) => {
+const completeQuest = async (characterData, characterId) => {
     const currentQuest = characterData.quests.current;
     const questDefinition = questsData[currentQuest.questId];
 
     console.log(`Quête terminée : '${questDefinition.title}' ! 🏆`);
+    
+    // Appel correct de giveRewards avec l'ID du personnage et les récompenses
+    await giveRewards(characterId, questDefinition.rewards);
 
-await giveRewards(characterId, questDefinition.rewards);
     characterData.quests.completed[currentQuest.questId] = { ...currentQuest, status: 'completed' };
     
     const { nextQuestId } = questDefinition;
