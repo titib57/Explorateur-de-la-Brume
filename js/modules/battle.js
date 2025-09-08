@@ -2,7 +2,7 @@
 
 import { player, currentMonster, currentDungeon, savePlayer, loadCharacter } from '../core/state.js';
 import { giveXP } from '../core/state.js';
-import { updateQuestsUI, updateQuestObjective } from './quests.js';
+import { updateQuestsUI, updateQuestProgress } from './quests.js';
 import { updateBattleUI, updateWorldMapUI } from './ui.js';
 import { calculateElementalDamage } from './elements.js';
 import { addToCombatLog } from '../core/utils.js';
