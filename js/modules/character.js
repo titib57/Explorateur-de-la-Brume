@@ -1,177 +1,149 @@
-﻿// Ce module gère la logique d'interaction avec l'état du personnage.
-// La gestion de l'état elle-même est centralisée dans le module core/state.js.
+﻿// Fichier : js/game/character.js
+// Définit la classe Character et ses méthodes.
 
-// Importations des modules de l'application
-import { showNotification } from '../core/notifications.js';
-// Correction des importations pour cibler les bons fichiers.
-import { auth, db, app } from '../core/firebase_config.js';
-import { savePlayer, deleteCharacterData, userId } from '../core/state.js';
+import { questsData } from '../data/gameData.js';
+import { itemsData } from '../data/gameData.js';
+import { classBases } from '../data/gameData.js';
 
+export class Character {
+    constructor(data) {
+        this.name = data.name;
+        this.playerClass = data.playerClass;
+        this.level = data.level || 1;
+        this.xp = data.xp || 0;
+        this.xpToNextLevel = this.level * 100;
+        this.gold = data.gold || 100;
+        this.stats = data.stats || { strength: 1, intelligence: 1, speed: 1, dexterity: 1 };
+        this.quests = data.quests || { current: null, completed: {} };
+        this.inventory = data.inventory || {};
+        this.equipment = data.equipment || {};
+        this.abilities = data.abilities || [];
+        this.hp = data.hp || 0;
+        this.maxHp = data.maxHp || 0;
+        this.mana = data.mana || 0;
+        this.maxMana = data.maxMana || 0;
+        this.statPoints = data.statPoints || 5;
+        this.safePlaceLocation = data.safePlaceLocation || null;
+        this.journal = data.journal || [];
+        this.age = data.age;
+        this.height = data.height;
+        this.weight = data.weight;
+    }
+
+    addXp(amount) {
+        this.xp += amount;
+    }
+
+    levelUp() {
+        this.level++;
+        this.xp -= this.xpToNextLevel;
+        this.xpToNextLevel = this.level * 100;
+        this.statPoints += 3;
+    }
+
+    addItem(item) {
+        if (!this.inventory[item.id]) {
+            this.inventory[item.id] = { ...item, quantity: 1 };
+        } else {
+            this.inventory[item.id].quantity++;
+        }
+    }
+
+    startQuest(questId) {
+        const quest = questsData[questId];
+        if (quest) {
+            this.quests.current = { questId: questId, currentProgress: 0 };
+        }
+    }
+
+    updateQuestProgress(questId, amount) {
+        if (this.quests.current && this.quests.current.questId === questId) {
+            this.quests.current.currentProgress += amount;
+        }
+    }
+
+    completeQuest(questId) {
+        const quest = questsData[questId];
+        if (quest && this.quests.current && this.quests.current.questId === questId) {
+            this.quests.completed[questId] = {
+                completionDate: Date.now()
+            };
+            this.quests.current = null;
+        }
+    }
+    
+    addToJournal(message) {
+        this.journal.unshift({
+            timestamp: Date.now(),
+            message: message
+        });
+        if (this.journal.length > 50) {
+            this.journal.pop();
+        }
+    }
+
+    recalculateDerivedStats() {
+        const newMaxHp = 100 + (this.stats.strength * 10);
+        const newMaxMana = 50 + (this.stats.intelligence * 10);
+
+        if (this.maxHp > 0) {
+            this.hp = Math.floor(this.hp * (newMaxHp / this.maxHp));
+        } else {
+            this.hp = newMaxHp;
+        }
+        if (this.maxMana > 0) {
+            this.mana = Math.floor(this.mana * (newMaxMana / this.maxMana));
+        } else {
+            this.mana = newMaxMana;
+        }
+        this.maxHp = newMaxHp;
+        this.maxMana = newMaxMana;
+
+        const weaponData = this.equipment.weapon ? itemsData[this.equipment.weapon.id] : null;
+        const armorData = this.equipment.armor ? itemsData[this.equipment.armor.id] : null;
+
+        this.attackDamage = (this.stats.strength * 0.8) + (weaponData ? weaponData.attackDamage || 0 : 0);
+        this.defense = (this.stats.strength * 0.5) + (armorData ? armorData.defense || 0 : 0);
+
+        this.hp = Math.min(this.hp, this.maxHp);
+        this.mana = Math.min(this.mana, this.maxMana);
+    }
+}
 
 /**
- * Initialise le personnage avec la quête de départ.
+ * Crée un nouvel objet de données de personnage avec des statistiques de base.
+ * @param {object} formData Les données du formulaire de création de personnage.
+ * @returns {object} Un nouvel objet de données de personnage.
  */
-export function initializeCharacter(player) {
-    if (player) {
-        // Initialise la quête de départ si le joueur n'en a pas déjà une
-        if (!player.quests || !player.quests.current) {
-            player.quests = {
-                current: 'initial_adventure_quest',
-            };
-            savePlayer(player);
-        }
-    }
+export function createNewCharacterData(formData) {
+    const baseStats = classBases[formData.class] ? classBases[formData.class].stats : { strength: 1, intelligence: 1, speed: 1, dexterity: 1 };
+    
+    return {
+        name: formData.name,
+        age: parseInt(formData.age),
+        height: parseInt(formData.height),
+        weight: parseInt(formData.weight),
+        playerClass: formData.class || "Adventurer",
+        level: 1,
+        xp: 0,
+        xpToNextLevel: 100,
+        gold: 100,
+        stats: baseStats,
+        quests: {
+            current: 'initial_adventure_quest',
+            completed: {}
+        },
+        inventory: {},
+        equipment: {},
+        abilities: [],
+        hp: 0,
+        maxHp: 0,
+        mana: 0,
+        maxMana: 0,
+        statPoints: 5,
+        safePlaceLocation: null,
+        journal: [],
+        createdAt: new Date().toISOString(),
+        lastPlayed: new Date().toISOString()
+    };
 }
-
-// --- Éléments du DOM ---
-const loadingMessage = document.getElementById('loading-message');
-const formTitle = document.getElementById('form-title');
-const actionButtons = document.getElementById('action-buttons');
-const characterForm = document.getElementById('character-form');
-const deleteBtn = document.getElementById('delete-char-btn');
-const charNameInput = document.getElementById('char-name');
-const charAgeInput = document.getElementById('char-age');
-const charHeightInput = document.getElementById('char-height');
-const charWeightInput = document.getElementById('char-weight');
-const charClassSelect = document.getElementById('char-class');
-const popupOverlay = document.getElementById('popup-overlay');
-const popupContent = document.getElementById('popup-content');
-const confirmDeleteBtn = document.getElementById('confirm-delete');
-const cancelDeleteBtn = document.getElementById('cancel-delete');
-const userIdDisplay = document.getElementById('user-id-display');
-
-// --- Fonctions utilitaires pour l'UI ---
-function showUI(element) {
-    element.style.display = 'flex';
-}
-
-function hideUI(element) {
-    element.style.display = 'none';
-}
-
-function showPopup() {
-    showUI(popupOverlay);
-    setTimeout(() => {
-        popupContent.style.opacity = '1';
-        popupContent.style.transform = 'scale(1)';
-    }, 10);
-}
-
-function hidePopup() {
-    popupContent.style.opacity = '0';
-    popupContent.style.transform = 'scale(0.95)';
-    setTimeout(() => {
-        hideUI(popupOverlay);
-    }, 300);
-}
-
-// --- Mise à jour de l'UI en fonction de l'état du personnage ---
-function updateUI(character) {
-    if (character) {
-        // Si un personnage existe
-        formTitle.textContent = "Votre personnage";
-        hideUI(characterForm);
-        showUI(actionButtons);
-        // Pré-remplir le formulaire (bien qu'il soit caché)
-        charNameInput.value = character.name;
-        charAgeInput.value = character.age;
-        charHeightInput.value = character.height;
-        charWeightInput.value = character.weight;
-        charClassSelect.value = character.class;
-        charNameInput.disabled = true;
-
-    } else {
-        // Si aucun personnage n'existe
-        formTitle.textContent = "Création de personnage";
-        hideUI(actionButtons);
-        showUI(characterForm);
-        charNameInput.disabled = false;
-        // Réinitialiser le formulaire
-        characterForm.reset();
-    }
-    hideUI(loadingMessage);
-}
-
-// --- Gestion des événements et Initialisation ---
-// Utilisation d'une fonction asynchrone pour attendre la résolution de l'authentification
-(async () => {
-    showUI(loadingMessage);
-
-    // Attendre que l'authentification soit terminée
-    await auth;
-
-    if (!userId) {
-        console.log("Utilisateur non connecté après l'authentification.");
-        updateUI(null);
-        return;
-    }
-
-    userIdDisplay.textContent = userId;
-
-    // Écouteur en temps réel pour le document du personnage
-    const { onSnapshot, doc } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js");
-    const characterRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
-
-    onSnapshot(characterRef, (docSnapshot) => {
-        const characterData = docSnapshot.exists() ? docSnapshot.data() : null;
-        if (characterData) {
-            initializeCharacter(characterData);
-        } else {
-            // Pas de personnage, on réinitialise l'état
-        }
-        updateUI(characterData);
-    }, (error) => {
-        console.error("Erreur lors de l'écoute du personnage : ", error);
-        showNotification("Erreur de synchronisation des données.", 'error');
-        updateUI(null);
-    });
-
-
-    // Écouteur pour la soumission du formulaire
-    characterForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-
-        const name = charNameInput.value.trim();
-        if (!name) {
-            showNotification("Veuillez donner un nom à votre personnage.", 'error');
-            return;
-        }
-
-        const newCharacterData = {
-            name: name,
-            age: parseInt(charAgeInput.value),
-            height: parseInt(charHeightInput.value),
-            weight: parseInt(charWeightInput.value),
-            class: charClassSelect.value,
-            xp: 0,
-            level: 1,
-            quests: {
-                current: 'initial_adventure_quest'
-            },
-            createdAt: new Date().toISOString(),
-            lastPlayed: new Date().toISOString()
-        };
-
-        savePlayer(newCharacterData);
-    });
-
-    // Écouteur pour le bouton de suppression
-    deleteBtn.addEventListener('click', async () => {
-        showPopup();
-    });
-
-    confirmDeleteBtn.addEventListener('click', async () => {
-        // La fonction deleteCharacterData est maintenant asynchrone et attend un objet utilisateur
-        if (auth.currentUser) {
-            await deleteCharacterData(auth.currentUser);
-            hidePopup();
-        } else {
-            console.error("Aucun utilisateur connecté pour la suppression.");
-            hidePopup();
-        }
-    });
-
-    cancelDeleteBtn.addEventListener('click', () => {
-        hidePopup();
-    });
-})();
