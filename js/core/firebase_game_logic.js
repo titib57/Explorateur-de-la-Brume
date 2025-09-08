@@ -1,3 +1,9 @@
+/**
+* @fileoverview Module de gestion de la logique des quêtes du jeu.
+* Gère l'acceptation, la mise à jour de la progression et la complétion des quêtes.
+*/
+
+// Importations des données et des modules nécessaires
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { auth, db } from "./firebase_config.js";
@@ -282,10 +288,10 @@ async function acceptQuestAndSave(questId, user) {
 }
 
 /**
- * Gère la complétion d'un objectif de quête de manière générique.
- * @param {string} objectiveAction - Le type d'action de l'objectif (par ex. 'define_shelter', 'gather').
- * @param {any} [payload] - Données supplémentaires nécessaires à la mise à jour (par ex. l'ID de l'objet collecté).
- */
+* Gère la complétion d'un objectif de quête de manière générique.
+* @param {string} objectiveAction - Le type d'action de l'objectif (par ex. 'define_shelter', 'gather').
+* @param {any} [payload] - Données supplémentaires nécessaires à la mise à jour (par ex. l'ID de l'objet collecté).
+*/
 async function completeQuestObjective(objectiveAction, payload = null) {
     const user = auth.currentUser;
     if (!user) {
@@ -487,7 +493,11 @@ document.addEventListener('DOMContentLoaded', () => {
 const validateShelterBtn = getElement('set-safe-place-btn');
 if (validateShelterBtn) {
     validateShelterBtn.addEventListener('click', () => {
-        completeQuestObjective("define_shelter");
+        // --- LIGNE CORRIGÉE ---
+        // Simule la récupération de la position de l'abri.
+        // Remplacez cette ligne par la logique de votre jeu pour obtenir les coordonnées de la carte.
+        const shelterLocation = { lat: 48.97, lng: 6.15 }; 
+        completeQuestObjective("define_shelter", shelterLocation);
     });
 }
 
