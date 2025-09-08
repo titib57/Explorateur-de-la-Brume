@@ -2,12 +2,12 @@
 // Ce module gère l'authentification et la synchronisation des données avec Firestore.
 
 import { auth, db } from './firebase_config.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import { Character, setPlayer, recalculateDerivedStats } from './state.js';
+import { Character, setPlayer, recalculateDerivedStats, createCharacterData } from './state.js';
 import { showNotification } from './notifications.js';
-import { updateWorldMapUI } from '../modules/ui.js';
-import { initGame } from './gameEngine.js'; // Import de la fonction d'initialisation du jeu
+import { initGame } from './gameEngine.js';
+import { updateUIBasedOnPage, showNoCharacterView, showCharacterExistsView } from '../modules/ui.js';
 
 export let userId = null;
 
@@ -45,6 +45,7 @@ export async function saveCharacterData(playerData) {
         console.log("Personnage sauvegardé sur Firestore !");
     } catch (error) {
         console.error("Erreur lors de la sauvegarde du personnage sur Firestore : ", error);
+        showNotification("Erreur lors de la sauvegarde.", 'error');
     }
 }
 
@@ -81,40 +82,70 @@ export async function loadCharacter(user) {
 }
 
 /**
+ * Gère la création d'un nouveau personnage.
+ * @param {string} name Le nom du personnage.
+ * @param {string} charClass La classe du personnage.
+ */
+export async function createNewCharacter(name, charClass) {
+    if (!userId) {
+        showNotification("Veuillez vous connecter pour créer un personnage.", "error");
+        return;
+    }
+    const newCharacterData = createCharacterData(name, charClass);
+    try {
+        await saveCharacterData(newCharacterData);
+        showNotification("Personnage créé avec succès !", "success");
+        setTimeout(() => { window.location.href = "gestion_personnage.html"; }, 1500);
+    } catch (error) {
+        console.error("Erreur lors de la création du personnage :", error);
+        showNotification("Erreur lors de la création. Veuillez réessayer.", "error");
+    }
+}
+
+/**
+ * Gère la suppression du personnage actuel.
+ */
+export async function deleteCharacter() {
+    if (!userId) {
+        showNotification("Vous devez être connecté pour supprimer un personnage.", "error");
+        return;
+    }
+    const characterRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
+    try {
+        await deleteDoc(characterRef);
+        showNotification("Personnage supprimé avec succès !", "info");
+        setTimeout(() => { window.location.href = "character.html"; }, 1500);
+    } catch (error) {
+        console.error("Erreur lors de la suppression du personnage :", error);
+        showNotification("Erreur lors de la suppression. Veuillez réessayer.", "error");
+    }
+}
+
+/**
  * Démarre l'écoute de l'état d'authentification et des données du joueur.
  */
 export function startAuthListener() {
-    let isInitialLoad = true;
     onAuthStateChanged(auth, (user) => {
         if (user) {
             userId = user.uid;
             const characterRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
-            
-            // Écouteur en temps réel des données du joueur
+
             onSnapshot(characterRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const savedPlayer = docSnap.data();
+                const characterData = docSnap.exists() ? docSnap.data() : null;
+                if (characterData) {
                     const char = new Character(
-                        savedPlayer.name, savedPlayer.playerClass, savedPlayer.level, savedPlayer.xp, savedPlayer.gold,
-                        savedPlayer.stats, savedPlayer.quests, savedPlayer.inventory, savedPlayer.equipment,
-                        savedPlayer.abilities, savedPlayer.hp, savedPlayer.maxHp, savedPlayer.mana, savedPlayer.maxMana,
-                        savedPlayer.safePlaceLocation, savedPlayer.journal
+                        characterData.name, characterData.playerClass, characterData.level, characterData.xp, characterData.gold,
+                        characterData.stats, characterData.quests, characterData.inventory, characterData.equipment,
+                        characterData.abilities, characterData.hp, characterData.maxHp, characterData.mana, characterData.maxMana,
+                        characterData.safePlaceLocation, characterData.journal
                     );
-                    char.statPoints = savedPlayer.statPoints;
+                    char.statPoints = characterData.statPoints;
                     recalculateDerivedStats(char);
                     setPlayer(char);
-                    
-                    if (isInitialLoad) {
-                        initGame();
-                        isInitialLoad = false;
-                    }
-                    updateWorldMapUI(char);
+                    updateUIBasedOnPage(char); // Appel centralisé pour la mise à jour de l'UI
                 } else {
                     setPlayer(null);
-                    console.log("Aucun document de personnage trouvé.");
-                    if (window.location.pathname.includes('world_map.html') || window.location.pathname.includes('gestion_personnage.html')) {
-                        window.location.href = "character.html";
-                    }
+                    updateUIBasedOnPage(null); // Gère l'affichage "pas de personnage"
                 }
             }, (error) => {
                 console.error("Erreur de synchronisation en temps réel:", error);
@@ -123,7 +154,24 @@ export function startAuthListener() {
         } else {
             userId = null;
             setPlayer(null);
-            window.location.href = "login.html";
+            updateUIBasedOnPage(null);
+            const protectedPages = ['world_map.html', 'gestion_personnage.html', 'quests.html'];
+            const currentPage = window.location.pathname.split('/').pop();
+            if (protectedPages.includes(currentPage)) {
+                window.location.href = "login.html";
+            }
         }
+    });
+}
+
+/**
+ * Gère la déconnexion de l'utilisateur.
+ */
+export function handleSignOut() {
+    signOut(auth).then(() => {
+        window.location.href = "login.html";
+    }).catch((error) => {
+        console.error("Erreur de déconnexion :", error);
+        showNotification("Erreur de déconnexion. Veuillez réessayer.", 'error');
     });
 }

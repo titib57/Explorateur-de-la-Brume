@@ -1,13 +1,12 @@
 // Fichier : js/core/gameEngine.js
 // Ce module gère la logique de jeu (récompenses, quêtes, progression).
 
-import { player, setPlayer, saveDungeon, resetDungeon, giveXP, recalculateDerivedStats } from './state.js';
+import { player, recalculateDerivedStats } from './state.js';
 import { questsData } from './questsData.js';
 import { itemsData } from './gameData.js';
 import { showNotification } from './notifications.js';
-import { startNextWaveTimer } from '../modules/waveManager.js';
-import { saveCharacterData } from './authManager.js';
-import { updateJournalDisplay } from '../modules/ui.js';
+import { saveCharacterData, userId } from './authManager.js';
+import { updateUIBasedOnPage } from '../modules/ui.js';
 
 let gameInitialized = false;
 
@@ -17,37 +16,9 @@ let gameInitialized = false;
 export function initGame() {
     if (gameInitialized) return;
     gameInitialized = true;
-
     console.log("Jeu initialisé pour le joueur :", player.name);
-
-    startNextWaveTimer();
-    // Ajoutez ici les listeners pour les boutons qui dépendent du joueur
-    const upgradeShelterBtn = document.getElementById('upgradeShelterBtn');
-    if (upgradeShelterBtn) {
-        upgradeShelterBtn.addEventListener('click', async () => {
-            if (!player) {
-                showNotification("Le personnage n'est pas encore chargé.", "warning");
-                return;
-            }
-            // Exemple d'appel à une fonction de logique de jeu
-            // const success = await upgradeShelter('murs');
-            // if (success) {
-            //     console.log("Amélioration réussie !");
-            // } else {
-            //     console.log("Échec de l'amélioration.");
-            // }
-        });
-    }
-
-    if (player.journal.length === 0) {
-        player.addToJournal(`Bienvenue, ${player.name} ! L'aventure commence.`);
-        player.addItem(itemsData["lame_stase"]);
-        player.addItem(itemsData["veste_survivant"]);
-        player.addItem(itemsData["fragment_ataraxie"]);
-        player.addItem(itemsData["mnemonique"]);
-        player.startQuest("initial_adventure_quest");
-        saveCharacterData(player);
-    }
+    // Ajoutez ici les listeners pour les boutons qui dépendent du joueur.
+    // Par exemple, les listeners de la carte du monde, du combat, etc.
 }
 
 /**
@@ -81,7 +52,7 @@ export function applyRewards(rewards) {
         });
     }
     saveCharacterData(player);
-    updateJournalDisplay(player);
+    updateUIBasedOnPage(player);
 }
 
 /**
@@ -92,13 +63,16 @@ export function giveQuestReward(reward) {
     applyRewards(reward);
 }
 
-// Mettre à jour l'état de la quête et vérifier si elle est terminée
+/**
+ * Met à jour l'état de la quête et vérifie si elle est terminée.
+ * @param {string} questId L'ID de la quête.
+ */
 export function checkQuestCompletion(questId) {
     if (!player || !player.quests.current || player.quests.current.questId !== questId) return;
 
     const questDetails = questsData[questId];
     if (player.quests.current.currentProgress >= questDetails.objective.required) {
-        player.completeQuest(questId);
+        player.completeQuest();
         player.addToJournal(`Quête terminée : "${questDetails.title}".`);
         giveQuestReward(questDetails.rewards);
         if (questDetails.nextQuest) {
@@ -107,4 +81,38 @@ export function checkQuestCompletion(questId) {
         }
     }
     saveCharacterData(player);
+    updateUIBasedOnPage(player);
+}
+
+// Nouvelle fonction pour accepter une quête depuis l'UI
+export function acceptQuest(questId) {
+    if (!player) {
+        showNotification("Vous devez avoir un personnage pour accepter une quête.", 'warning');
+        return;
+    }
+    if (player.quests.current) {
+        showNotification("Vous avez déjà une quête en cours. Terminez-la d'abord !", "warning");
+        return;
+    }
+    player.startQuest(questId);
+    player.addToJournal(`Quête "${questsData[questId].title}" acceptée !`);
+    saveCharacterData(player);
+    updateUIBasedOnPage(player);
+    showNotification(`Quête "${questsData[questId].title}" acceptée !`, "success");
+}
+
+/**
+ * Met à jour la progression d'une quête et vérifie si elle est terminée.
+ * @param {string} objectiveAction Le type d'action.
+ * @param {any} payload Les données supplémentaires.
+ */
+export async function updateQuestProgress(objectiveAction, payload = null) {
+    if (!player || !player.quests.current) return;
+    const currentQuestData = questsData[player.quests.current.questId];
+    if (currentQuestData.objective.action === objectiveAction) {
+        if (objectiveAction === 'define_shelter') {
+            player.updateQuestProgress(1); // Met à jour la progression d'une unité
+        }
+        checkQuestCompletion(player.quests.current.questId);
+    }
 }

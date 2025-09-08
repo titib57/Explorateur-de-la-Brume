@@ -3,197 +3,302 @@
 
 import { player, currentMonster } from "../core/state.js";
 import { questsData } from '../questsData.js';
-// Fonctions manquantes, à importer une fois les fichiers correspondants disponibles.
-// import { getAbilityById } from "./skills.js";
-// import { useItem } from "./inventory.js";
-// import { startBattle, flee } from "./battle.js";
+import { acceptQuest, updateQuestProgress } from '../core/gameEngine.js';
+import { createNewCharacter, deleteCharacter, handleSignOut } from '../core/authManager.js';
+import { showNotification } from "../core/notifications.js";
+
+// Récupération des éléments du DOM
+const getElement = id => document.getElementById(id);
+
+const noCharacterSection = getElement('no-character-section');
+const characterSection = getElement('character-section');
+const characterDisplay = getElement('character-display');
+const loadingMessage = getElement('loading-message');
+const playBtn = getElement('play-btn');
+const deleteBtn = getElement('delete-btn');
+const updateBtn = getElement('update-btn');
+const statsDisplay = getElement('stats-display');
+const questsDisplay = getElement('quests-display');
+const inventoryDisplay = getElement('inventory-display');
+const equipmentDisplay = getElement('equipment-display');
+const characterInfoDisplay = getElement('character-info-display');
+const characterForm = getElement('character-form');
+const characterExistsSection = getElement('character-exists-section');
+const existingCharacterDisplay = getElement('existing-character-display');
+const deleteBtnOnCharacterPage = getElement('delete-btn-creation-page');
+const logoutLink = getElement('logout-link');
+
+// Variables pour le journal de bord
+const currentQuestTitle = getElement('current-quest-title');
+const currentQuestDescription = getElement('current-quest-description');
+const currentQuestProgress = getElement('current-quest-progress');
+const hpValue = getElement('hp-value');
+const goldValue = getElement('gold-value');
+const levelValue = getElement('level-value');
+const validateShelterBtn = getElement('set-safe-place-btn');
+
+
+// =========================================================================
+// FONCTIONS DE GESTION DE L'AFFICHAGE
+// =========================================================================
 
 /**
- * Met à jour l'interface de combat.
+ * Met à jour l'affichage des informations de quête sur la page de gestion.
+ * @param {object} character Les données du personnage.
  */
-export function updateBattleUI() {
-    const battleInterface = document.getElementById('battle-interface');
-    if (!battleInterface) return;
+export function renderQuestDisplay(character) {
+    if (!character || !questsDisplay) return;
 
-    // Mise à jour de l'UI du joueur
-    document.getElementById('player-name').textContent = player.name;
-    document.getElementById('player-hp').textContent = player.hp;
-    document.getElementById('player-max-hp').textContent = player.maxHp;
-    document.getElementById('player-hp-bar').style.width = `${(player.hp / player.maxHp) * 100}%`;
-    document.getElementById('player-mana').textContent = player.mana;
-    document.getElementById('player-max-mana').textContent = player.maxMana;
-    document.getElementById('player-mana-bar').style.width = `${(player.mana / player.maxMana) * 100}%`;
-    document.getElementById('player-weapon-display').textContent = player.equipment.weapon ? player.equipment.weapon.name : 'Aucune';
-    document.getElementById('player-armor-display').textContent = player.equipment.armor ? player.equipment.armor.name : 'Aucune';
+    const activeQuestsList = getElement('active-quests-list');
+    const unstartedQuestsList = getElement('unstarted-quests-list');
+    const completedQuestsList = getElement('completed-quests-list');
 
-    // Mise à jour de l'UI du monstre
-    if (currentMonster) {
-        document.getElementById('monster-name').textContent = currentMonster.name;
-        document.getElementById('monster-hp').textContent = currentMonster.hp;
-        document.getElementById('monster-max-hp').textContent = currentMonster.maxHp;
-        document.getElementById('monster-hp-bar').style.width = `${(currentMonster.hp / currentMonster.maxHp) * 100}%`;
-        document.getElementById('monster-attack-display').textContent = currentMonster.attackDamage;
-        document.getElementById('monster-defense-display').textContent = currentMonster.defense;
-    }
-}
+    if (activeQuestsList) activeQuestsList.innerHTML = '';
+    if (unstartedQuestsList) unstartedQuestsList.innerHTML = '';
+    if (completedQuestsList) completedQuestsList.innerHTML = '';
 
-/**
- * Met à jour l'interface de la page des statistiques.
- * @param {object} tempPlayer L'objet joueur temporaire avec les stats modifiables.
- */
-export function updateStatsUI(tempPlayer) {
-    if (!tempPlayer) return;
-
-    const stats = tempPlayer.stats;
-    const statPoints = tempPlayer.statPoints;
-
-    document.getElementById('stat-points-display').textContent = statPoints;
-
-    document.getElementById('strength-display').textContent = stats.strength;
-    document.getElementById('intelligence-display').textContent = stats.intelligence;
-    document.getElementById('speed-display').textContent = stats.speed;
-    document.getElementById('dexterity-display').textContent = stats.dexterity;
-
-    // Mise à jour des stats dérivées
-    document.getElementById('max-hp-display').textContent = tempPlayer.maxHp;
-    document.getElementById('max-mana-display').textContent = tempPlayer.maxMana;
-    document.getElementById('attack-damage-display').textContent = tempPlayer.attackDamage;
-    document.getElementById('defense-display').textContent = tempPlayer.defense;
-}
-
-/**
- * Met à jour l'interface de la page d'accueil ou de la page de profil du joueur.
- * Cette fonction est ajoutée pour afficher les statistiques du joueur global.
- */
-export function updatePlayerProfileUI() {
-    if (!player) return;
-
-    // Mise à jour des informations de base du personnage sur le profil
-    document.getElementById('player-name-display').textContent = player.name;
-    document.getElementById('player-class-display').textContent = player.playerClass;
-    document.getElementById('player-level-display').textContent = player.level;
-    document.getElementById('player-hp').textContent = `${player.hp}/${player.maxHp}`;
-    document.getElementById('player-mana').textContent = `${player.mana}/${player.maxMana}`;
-    document.getElementById('player-gold').textContent = player.gold;
-    document.getElementById('player-xp').textContent = player.xp;
-
-    // Mise à jour des statistiques de base
-    document.getElementById('player-strength').textContent = player.stats.strength;
-    document.getElementById('player-intelligence').textContent = player.stats.intelligence;
-    document.getElementById('player-speed').textContent = player.stats.speed;
-    document.getElementById('player-dexterity').textContent = player.stats.dexterity;
-
-    // Mise à jour des stats dérivées
-    document.getElementById('player-attack').textContent = player.attackDamage;
-    document.getElementById('player-defense').textContent = player.defense;
-}
-
-/**
- * Met à jour l'interface des quêtes du joueur.
- * @param {object} player L'objet joueur.
- */
-export function updateQuestsUI(player) {
-    if (!player || !player.quests) return;
-
-    const questsContainer = document.getElementById('quests-container');
-    if (!questsContainer) return;
-
-    // Vider le conteneur pour éviter les doublons
-    questsContainer.innerHTML = '';
-
-    // Afficher la quête en cours
-    if (player.quests.current && player.quests.current.questId) {
-        const questDetails = questsData[player.quests.current.questId];
-        if (questDetails) {
-            const currentQuestElement = document.createElement('div');
-            currentQuestElement.className = 'quest-item current-quest';
-            currentQuestElement.innerHTML = `
-                <h4>Quête en cours : ${questDetails.title}</h4>
-                <p>Objectif : ${questDetails.description}</p>
-                <p>Progression : ${player.quests.current.currentProgress}/${questDetails.objective.required}</p>
+    if (character.quests.current) {
+        const questData = questsData[character.quests.current.questId];
+        if (questData) {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <h4>${questData.title}</h4>
+                <p>${questData.description}</p>
+                <p>Progression : ${character.quests.current.currentProgress || 0} / ${questData.objective.required}</p>
             `;
-            questsContainer.appendChild(currentQuestElement);
+            if (activeQuestsList) activeQuestsList.appendChild(li);
         }
     } else {
-        questsContainer.innerHTML = '<p>Pas de quête en cours.</p>';
+        const li = document.createElement('li');
+        li.textContent = "Aucune quête active pour le moment.";
+        if (activeQuestsList) activeQuestsList.appendChild(li);
     }
 
-    // Afficher les quêtes terminées (si nécessaire)
-    const completedQuestsCount = Object.keys(player.quests.completed).length;
-    if (completedQuestsCount > 0) {
-        const completedQuestsElement = document.createElement('div');
-        completedQuestsElement.className = 'completed-quests-summary';
-        completedQuestsElement.innerHTML = `
-            <p>Quêtes terminées : ${completedQuestsCount}</p>
-        `;
-        questsContainer.appendChild(completedQuestsElement);
-    }
-}
-
-/**
- * Met à jour l'interface de la carte du monde avec les informations du joueur.
- * @param {object} player L'objet joueur.
- */
-export function updateWorldMapUI(player) {
-    if (!player) return;
-
-    // Mettre à jour les éléments de l'UI de la carte du monde
-    const playerGoldElement = document.getElementById('world-map-player-gold');
-    if (playerGoldElement) {
-        playerGoldElement.textContent = player.gold;
+    if (character.quests.completed) {
+        for (const questId in character.quests.completed) {
+            const questData = questsData[questId];
+            if (questData) {
+                const li = document.createElement('li');
+                li.innerHTML = `<h4>${questData.title}</h4><p>Terminée</p>`;
+                if (completedQuestsList) completedQuestsList.appendChild(li);
+            }
+        }
     }
 
-    const playerLevelElement = document.getElementById('world-map-player-level');
-    if (playerLevelElement) {
-        playerLevelElement.textContent = player.level;
-    }
+    for (const questId in questsData) {
+        const isCompleted = character.quests.completed && character.quests.completed[questId];
+        const isActive = character.quests.current && character.quests.current.questId === questId;
 
-    const playerXpElement = document.getElementById('world-map-player-xp');
-    if (playerXpElement) {
-        playerXpElement.textContent = player.xp;
-    }
-
-    const playerHpElement = document.getElementById('world-map-player-hp');
-    if (playerHpElement) {
-        playerHpElement.textContent = `${player.hp}/${player.maxHp}`;
-    }
-
-    const playerManaElement = document.getElementById('world-map-player-mana');
-    if (playerManaElement) {
-        playerManaElement.textContent = `${player.mana}/${player.maxMana}`;
-    }
-
-    const playerWeaponElement = document.getElementById('world-map-player-weapon');
-    if (playerWeaponElement && player.equipment.weapon) {
-        playerWeaponElement.textContent = player.equipment.weapon.name;
+        if (!isCompleted && !isActive) {
+            const questData = questsData[questId];
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <h4>${questData.title}</h4>
+                <p>${questData.description}</p>
+                <button class="accept-quest-btn" data-quest-id="${questId}">Accepter</button>
+            `;
+            if (unstartedQuestsList) unstartedQuestsList.appendChild(li);
+        }
     }
 }
 
 /**
- * Met à jour l'interface du journal de bord du joueur.
- * @param {object} player L'objet joueur.
+ * Met à jour l'affichage complet du personnage sur la page de gestion.
+ * @param {object} character Les données du personnage.
  */
-export function updateJournalDisplay(player) {
-    if (!player || !player.journal) return;
+export function renderCharacter(character) {
+    if (!character) return;
 
-    const journalContainer = document.getElementById('journal-container');
-    if (!journalContainer) return;
-
-    journalContainer.innerHTML = '';
-
-    player.journal.forEach(entry => {
-        const entryElement = document.createElement('div');
-        entryElement.className = 'journal-entry';
-
-        const date = new Date(entry.timestamp).toLocaleString('fr-FR', {
-            year: 'numeric', month: 'numeric', day: 'numeric',
-            hour: '2-digit', minute: '2-digit'
-        });
-
-        entryElement.innerHTML = `
-            <p class="journal-message">${entry.message}</p>
-            <span class="journal-timestamp">${date}</span>
+    if (characterDisplay) {
+        characterDisplay.innerHTML = `
+            <h3>${character.name}</h3>
+            <p>Niveau : ${character.level}</p>
+            <p>Points de vie : ${character.hp}/${character.maxHp}</p>
+            <p>Points de magie : ${character.mana}/${character.maxMana}</p>
+            <p>Or : ${character.gold}</p>
         `;
-        journalContainer.appendChild(entryElement);
+    }
+
+    if (statsDisplay && character.stats) {
+        statsDisplay.innerHTML = `
+            <p>Force : ${character.stats.strength}</p>
+            <p>Intelligence : ${character.stats.intelligence}</p>
+            <p>Vitesse : ${character.stats.speed}</p>
+            <p>Dextérité : ${character.stats.dexterity}</p>
+        `;
+    }
+
+    renderQuestDisplay(character);
+
+    if (equipmentDisplay && character.equipment) {
+        equipmentDisplay.innerHTML = `
+            <p>Arme : ${character.equipment.weapon ? character.equipment.weapon.name : 'Aucune'}</p>
+            <p>Armure : ${character.equipment.armor ? character.equipment.armor.name : 'Aucune'}</p>
+        `;
+    }
+
+    const sectionsToDisplay = ['character-section', 'stats-section', 'quest-section', 'inventory-section', 'equipement-section'];
+    sectionsToDisplay.forEach(id => {
+        const section = getElement(id);
+        if (section) section.classList.remove('hidden');
     });
+
+    if (loadingMessage) loadingMessage.classList.add('hidden');
+    if (playBtn) playBtn.classList.remove('hidden');
+    if (deleteBtn) deleteBtn.classList.remove('hidden');
+    if (updateBtn) updateBtn.classList.remove('hidden');
 }
+
+export function renderExistingCharacterOnCreationPage(character) {
+    if (!existingCharacterDisplay) return;
+    existingCharacterDisplay.innerHTML = `
+        <div class="character-card">
+            <h3>${character.name}</h3>
+            <p>Niveau : ${character.level}</p>
+            <p>Points de vie : ${character.hp}</p>
+            <p>Points de magie : ${character.mana}</p>
+        </div>
+    `;
+    if (loadingMessage) loadingMessage.classList.add('hidden');
+}
+
+export function showNoCharacterView() {
+    if (characterSection) characterSection.classList.add('hidden');
+    if (noCharacterSection) noCharacterSection.classList.remove('hidden');
+    if (characterExistsSection) characterExistsSection.classList.add('hidden');
+    if (characterForm) characterForm.classList.remove('hidden');
+}
+
+export function showCharacterExistsView(character) {
+    if (noCharacterSection) noCharacterSection.classList.add('hidden');
+    if (characterForm) characterForm.classList.add('hidden');
+    if (characterExistsSection) characterExistsSection.classList.remove('hidden');
+    renderExistingCharacterOnCreationPage(character);
+}
+
+// Fonction pour mettre à jour le journal de bord
+export function updateJournalDisplay(character) {
+    if (!character) return;
+    const journalContainer = getElement('journal-container');
+    if (journalContainer) {
+        journalContainer.innerHTML = '';
+        character.journal.forEach(entry => {
+            const entryElement = document.createElement('div');
+            entryElement.className = 'journal-entry';
+            const date = new Date(entry.timestamp).toLocaleString('fr-FR', {
+                year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+            entryElement.innerHTML = `<p class="journal-message">${entry.message}</p><span class="journal-timestamp">${date}</span>`;
+            journalContainer.appendChild(entryElement);
+        });
+    }
+
+    if (hpValue) hpValue.textContent = `${character.hp} / ${character.maxHp}`;
+    if (goldValue) goldValue.textContent = character.gold;
+    if (levelValue) levelValue.textContent = character.level;
+}
+
+/**
+ * Fonction centrale qui met à jour l'UI en fonction de la page actuelle.
+ * @param {object} character Les données du personnage.
+ */
+export function updateUIBasedOnPage(character) {
+    const currentPage = window.location.pathname.split('/').pop();
+    switch (currentPage) {
+        case 'world_map.html':
+            if (character) updateWorldMapUI(character);
+            break;
+        case 'gestion_personnage.html':
+            if (character) renderCharacter(character);
+            else window.location.href = "character.html";
+            break;
+        case 'quests.html':
+            if (character) renderQuestsPage(character);
+            break;
+        case 'character.html':
+            if (character) showCharacterExistsView(character);
+            else showNoCharacterView();
+            break;
+        default:
+            console.warn("Mise à jour de l'UI non définie pour cette page.");
+    }
+}
+
+// Fonction utilitaire pour la carte du monde
+export function updateWorldMapUI(character) {
+    if (!character) return;
+    updateJournalDisplay(character);
+    // Ajoutez d'autres mises à jour spécifiques à la carte du monde ici.
+}
+
+/**
+ * Gère l'affichage de la page des quêtes.
+ * @param {object} character L'objet joueur.
+ */
+export function renderQuestsPage(character) {
+    const questsPageContainer = getElement('quests-page-container');
+    if (!questsPageContainer) return;
+    questsPageContainer.innerHTML = '';
+    renderQuestDisplay(character);
+}
+
+
+// =========================================================================
+// GESTION DES ÉVÉNEMENTS
+// =========================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (characterForm) {
+        characterForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('char-name').value.trim();
+            const charClass = document.getElementById('char-class').value;
+            createNewCharacter(name, charClass);
+        });
+    }
+
+    if (deleteBtnOnCharacterPage) {
+        deleteBtnOnCharacterPage.addEventListener('click', deleteCharacter);
+    }
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', deleteCharacter);
+    }
+    if (logoutLink) {
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleSignOut();
+        });
+    }
+    if (updateBtn) {
+        updateBtn.addEventListener('click', () => { window.location.href = "character.html"; });
+    }
+    document.addEventListener('click', (event) => {
+        if (event.target.classList.contains('accept-quest-btn')) {
+            const questId = event.target.dataset.questId;
+            acceptQuest(questId);
+        }
+    });
+
+    if (validateShelterBtn) {
+        validateShelterBtn.addEventListener('click', () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const shelterLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        updateQuestProgress("define_shelter", shelterLocation);
+                        showNotification("Abri de survie défini ! La quête est mise à jour.", "success");
+                    },
+                    (error) => {
+                        console.error("Erreur de géolocalisation:", error);
+                        showNotification("Impossible d'obtenir votre position. Veuillez autoriser la géolocalisation.", "error");
+                    }
+                );
+            } else {
+                showNotification("La géolocalisation n'est pas supportée par votre navigateur.", "error");
+            }
+        });
+    }
+});
