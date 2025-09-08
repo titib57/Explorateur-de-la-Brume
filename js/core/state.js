@@ -6,14 +6,11 @@ import { showNotification } from './notifications.js';
 import { questsData } from './questsData.js';
 import { auth, db } from './firebase_config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { upgradeShelter } from '../modules/shelterManager.js';
 import { startNextWaveTimer } from '../modules/waveManager.js';
+import { updateWorldMapUI } from '../modules/ui.js';
 
-
-// Global variables provided by the Canvas environment
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
 // Objets d'état globaux
 export let player = null;
@@ -21,37 +18,8 @@ export let currentDungeon = null;
 export let currentMonster = null;
 export let userId = null;
 
-let authPromiseResolved = false;
-let authPromise = new Promise(resolve => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            userId = user.uid;
-        } else {
-            userId = null;
-        }
-        if (!authPromiseResolved) {
-            resolve();
-            authPromiseResolved = true;
-            unsubscribe();
-        }
-    });
-});
-
-/**
- * Définit l'ID de l'utilisateur.
- * @param {string} newUserId L'ID de l'utilisateur.
- */
-export function setUserId(newUserId) {
-    userId = newUserId;
-}
-
-/**
- * Définit le monstre actuellement en combat.
- * @param {object} monster L'objet monstre.
- */
-export function setCurrentMonster(monster) {
-    currentMonster = monster;
-}
+// Ajoutez une variable pour indiquer si le jeu est initialisé
+let gameInitialized = false;
 
 // Classe de base pour un personnage
 class Character {
@@ -65,7 +33,7 @@ class Character {
         this.gold = gold || 3;
         this.stats = stats || { strength: 1, intelligence: 1, speed: 1, dexterity: 1 };
         // Quêtes gérées par un objet pour un suivi plus simple
-        this.quests = quests || {}; 
+        this.quests = quests || {};
         this.inventory = inventory || {};
         this.equipment = equipment || {};
         this.abilities = abilities || [];
@@ -78,7 +46,7 @@ class Character {
         this.weight = weight || null;
         this.statPoints = 0;
         // AJOUT DE CETTE LIGNE
-        this.safePlaceLocation = safePlaceLocation || null; 
+        this.safePlaceLocation = safePlaceLocation || null;
     }
 
     /**
@@ -117,7 +85,7 @@ class Character {
         }
         showNotification(`${item.name} a été ajouté à votre inventaire.`, 'info');
     }
-    
+
     /**
      * Démarre une nouvelle quête.
      * @param {string} questId L'ID de la quête à démarrer.
@@ -136,7 +104,7 @@ class Character {
             savePlayer(this);
         }
     }
-    
+
     /**
      * Met à jour la progression d'une quête.
      * @param {string} questId L'ID de la quête.
@@ -171,11 +139,9 @@ class Character {
 }
 
 // MODIFICATION: Nouvelle fonction pour créer un objet de données de base
-// Cela permet de centraliser la logique et d'éviter les champs undefined
 export function createCharacterData(name, playerClass, age, height, weight) {
-    // MODIFICATION: Attribue une valeur par défaut si playerClass est null ou undefined
     const validPlayerClass = playerClass || "Adventurer";
-    
+
     return {
         name: name,
         playerClass: validPlayerClass,
@@ -184,7 +150,10 @@ export function createCharacterData(name, playerClass, age, height, weight) {
         xpToNextLevel: 100,
         gold: 100,
         stats: { strength: 1, intelligence: 1, speed: 1, dexterity: 1 },
-        quests: {},
+        quests: {
+            current: null,
+            completed: {}
+        },
         inventory: {},
         equipment: {},
         abilities: [],
@@ -210,47 +179,30 @@ export function createCharacterData(name, playerClass, age, height, weight) {
  * @returns {Character} Le nouvel objet personnage.
  */
 export function createCharacter(name, playerClass, age, height, weight) {
-    // MODIFICATION: Utilisation de la nouvelle fonction pour créer les données
     const initialData = createCharacterData(name, playerClass, age, height, weight);
-    
     const newPlayer = new Character(
-        initialData.name,
-        initialData.playerClass,
-        initialData.level,
-        initialData.xp,
-        initialData.gold,
-        initialData.stats,
-        initialData.quests,
-        initialData.inventory,
-        initialData.equipment,
-        initialData.abilities,
-        initialData.hp,
-        initialData.maxHp,
-        initialData.mana,
-        initialData.maxMana,
-        initialData.age,
-        initialData.height,
-        initialData.weight,
-        initialData.safePlaceLocation
+        initialData.name, initialData.playerClass, initialData.level, initialData.xp, initialData.gold,
+        initialData.stats, initialData.quests, initialData.inventory, initialData.equipment,
+        initialData.abilities, initialData.hp, initialData.maxHp, initialData.mana, initialData.maxMana,
+        initialData.age, initialData.height, initialData.weight, initialData.safePlaceLocation
     );
-    
     newPlayer.statPoints = initialData.statPoints;
     recalculateDerivedStats(newPlayer);
     player = newPlayer;
 
-    // Ajoute des objets de départ à l'inventaire du joueur
     newPlayer.addItem(itemsData["lame_stase"]);
     newPlayer.addItem(itemsData["veste_survivant"]);
     newPlayer.addItem(itemsData["fragment_ataraxie"]);
     newPlayer.addItem(itemsData["mnemonique"]);
 
     // Ajoute la première quête ici, en utilisant la nouvelle méthode startQuest
-    player.startQuest("initial_adventure_quest"); 
-    
+    player.startQuest("initial_adventure_quest");
+
     return player;
 }
 
 export function giveXP(xpAmount) {
+    if (!player) return;
     player.xp += xpAmount;
     console.log(`Vous gagnez ${xpAmount} XP !`);
 
@@ -264,8 +216,6 @@ export function giveXP(xpAmount) {
  * @returns {Promise<object|null>} L'objet joueur ou null si non trouvé.
  */
 export async function loadCharacter(user) {
-    await authPromise;
-
     if (!user || !user.uid) {
         console.log("Aucun utilisateur n'est connecté. Impossible de charger un personnage.");
         return null;
@@ -314,9 +264,8 @@ export async function saveCharacterData(playerData) {
         console.error("Erreur : Utilisateur non authentifié.");
         return;
     }
-    
+
     // MODIFICATION: Création d'un objet de données propre pour la sauvegarde
-    // Cela garantit que tous les champs requis sont présents et valides
     const dataToSave = {
         name: playerData.name || 'Unknown',
         playerClass: playerData.playerClass || 'Adventurer', // Protection contre undefined
@@ -338,7 +287,6 @@ export async function saveCharacterData(playerData) {
         weight: playerData.weight || null,
         statPoints: playerData.statPoints || 0,
         safePlaceLocation: playerData.safePlaceLocation || null,
-        // Ajoutez d'autres champs ici si nécessaire
     };
 
     try {
@@ -348,7 +296,6 @@ export async function saveCharacterData(playerData) {
         console.log("Personnage sauvegardé sur Firestore !");
     } catch (error) {
         console.error("Erreur lors de la sauvegarde du personnage sur Firestore : ", error);
-        // L'erreur se produit ici si un autre champ est invalide
     }
 }
 
@@ -481,21 +428,89 @@ export function saveDungeon(dungeon) {
     localStorage.setItem('currentDungeon', JSON.stringify(dungeon));
 }
 
-// Référence aux éléments de l'interface utilisateur
-const upgradeShelterBtn = document.getElementById('upgradeShelterBtn');
 
-// Écouteur pour le bouton d'amélioration
-if (upgradeShelterBtn) {
-    upgradeShelterBtn.addEventListener('click', async () => {
-        const success = await upgradeShelter('murs'); // L'amélioration des murs
-        if (success) {
-            // Mettre à jour l'affichage de l'abri après l'amélioration
-            console.log("Amélioration réussie !");
-        } else {
-            console.log("Échec de l'amélioration.");
-        }
-    });
+// =========================================================================
+// NOUVELLE LOGIQUE D'INITIALISATION DU JEU
+// =========================================================================
+/**
+ * Initialise les composants du jeu après le chargement du personnage.
+ * Cette fonction est le point d'entrée unique pour démarrer le jeu.
+ */
+function initGame() {
+    if (gameInitialized) return;
+    gameInitialized = true;
+
+    console.log("Jeu initialisé pour le joueur :", player.name);
+
+    // Démarrez le système de vagues uniquement ici
+    startNextWaveTimer();
+
+    // Ajoutez d'autres initialisations ici si nécessaire
+    // par exemple: initMap(), initBattleSystem(), etc.
+
+    // Gère l'événement de clic du bouton d'amélioration ici,
+    // car il dépend de l'objet 'player' qui doit être chargé.
+    const upgradeShelterBtn = document.getElementById('upgradeShelterBtn');
+    if (upgradeShelterBtn) {
+        upgradeShelterBtn.addEventListener('click', async () => {
+            if (!player) {
+                showNotification("Le personnage n'est pas encore chargé.", "warning");
+                return;
+            }
+            const success = await upgradeShelter('murs');
+            if (success) {
+                console.log("Amélioration réussie !");
+            } else {
+                console.log("Échec de l'amélioration.");
+            }
+        });
+    }
 }
 
-// Démarrez le système de vagues au lancement du jeu
-startNextWaveTimer();
+// Le seul point d'entrée pour la gestion de l'état global
+document.addEventListener('DOMContentLoaded', () => {
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            userId = user.uid;
+
+            // Écouteur en temps réel pour le document du personnage
+            const characterRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
+
+            // onSnapshot est la meilleure pratique pour les données en temps réel
+            onSnapshot(characterRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const savedPlayer = docSnap.data();
+                    player = new Character(
+                        savedPlayer.name, savedPlayer.playerClass, savedPlayer.level, savedPlayer.xp, savedPlayer.gold,
+                        savedPlayer.stats, savedPlayer.quests, savedPlayer.inventory, savedPlayer.equipment,
+                        savedPlayer.abilities, savedPlayer.hp, savedPlayer.maxHp, savedPlayer.mana, savedPlayer.maxMana,
+                        savedPlayer.age, savedPlayer.height, savedPlayer.weight, savedPlayer.safePlaceLocation
+                    );
+                    player.statPoints = savedPlayer.statPoints;
+                    player.xpToNextLevel = savedPlayer.xpToNextLevel;
+                    recalculateDerivedStats(player);
+
+                    // Une fois que le joueur est chargé, on initialise le jeu
+                    if (!gameInitialized) {
+                        initGame();
+                    }
+                    // Met à jour l'interface si nécessaire
+                    updateWorldMapUI(player);
+                } else {
+                    console.log("Aucun document de personnage trouvé.");
+                    player = null;
+                    if (window.location.pathname.includes('world_map.html') || window.location.pathname.includes('gestion_personnage.html')) {
+                        window.location.href = "character.html";
+                    }
+                }
+            }, (error) => {
+                console.error("Erreur de synchronisation en temps réel:", error);
+                showNotification("Erreur de synchronisation des données.", 'error');
+            });
+        } else {
+            userId = null;
+            player = null;
+            window.location.href = "login.html";
+        }
+    });
+});
