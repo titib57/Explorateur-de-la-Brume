@@ -170,6 +170,36 @@ class Character {
     }
 }
 
+// MODIFICATION: Nouvelle fonction pour créer un objet de données de base
+// Cela permet de centraliser la logique et d'éviter les champs undefined
+export function createCharacterData(name, playerClass, age, height, weight) {
+    // MODIFICATION: Attribue une valeur par défaut si playerClass est null ou undefined
+    const validPlayerClass = playerClass || "Adventurer";
+    
+    return {
+        name: name,
+        playerClass: validPlayerClass,
+        level: 1,
+        xp: 0,
+        xpToNextLevel: 100,
+        gold: 100,
+        stats: { strength: 1, intelligence: 1, speed: 1, dexterity: 1 },
+        quests: {},
+        inventory: {},
+        equipment: {},
+        abilities: [],
+        hp: 0,
+        maxHp: 0,
+        mana: 0,
+        maxMana: 0,
+        age: age || null,
+        height: height || null,
+        weight: weight || null,
+        statPoints: 5,
+        safePlaceLocation: null,
+    };
+}
+
 /**
  * Crée un nouvel objet personnage.
  * @param {string} name Le nom du personnage.
@@ -180,27 +210,31 @@ class Character {
  * @returns {Character} Le nouvel objet personnage.
  */
 export function createCharacter(name, playerClass, age, height, weight) {
+    // MODIFICATION: Utilisation de la nouvelle fonction pour créer les données
+    const initialData = createCharacterData(name, playerClass, age, height, weight);
+    
     const newPlayer = new Character(
-        name,
-        playerClass,
-        1,
-        0,
-        100,
-        { strength: 1, intelligence: 1, speed: 1, dexterity: 1 },
-        {}, // Commence avec un objet de quêtes vide
-        {},
-        {},
-        [],
-        0,
-        0,
-        0,
-        0,
-        age,
-        height,
-        weight,
-        null // INITIALISATION DE safePlaceLocation à null
+        initialData.name,
+        initialData.playerClass,
+        initialData.level,
+        initialData.xp,
+        initialData.gold,
+        initialData.stats,
+        initialData.quests,
+        initialData.inventory,
+        initialData.equipment,
+        initialData.abilities,
+        initialData.hp,
+        initialData.maxHp,
+        initialData.mana,
+        initialData.maxMana,
+        initialData.age,
+        initialData.height,
+        initialData.weight,
+        initialData.safePlaceLocation
     );
-    newPlayer.statPoints = 5;
+    
+    newPlayer.statPoints = initialData.statPoints;
     recalculateDerivedStats(newPlayer);
     player = newPlayer;
 
@@ -212,9 +246,6 @@ export function createCharacter(name, playerClass, age, height, weight) {
 
     // Ajoute la première quête ici, en utilisant la nouvelle méthode startQuest
     player.startQuest("initial_adventure_quest"); 
-    
-    // Suppression de cette ligne car savePlayer est déjà appelé dans startQuest.
-    // savePlayer(player); 
     
     return player;
 }
@@ -283,13 +314,41 @@ export async function saveCharacterData(playerData) {
         console.error("Erreur : Utilisateur non authentifié.");
         return;
     }
+    
+    // MODIFICATION: Création d'un objet de données propre pour la sauvegarde
+    // Cela garantit que tous les champs requis sont présents et valides
+    const dataToSave = {
+        name: playerData.name || 'Unknown',
+        playerClass: playerData.playerClass || 'Adventurer', // Protection contre undefined
+        level: playerData.level || 1,
+        xp: playerData.xp || 0,
+        xpToNextLevel: playerData.xpToNextLevel || 100,
+        gold: playerData.gold || 0,
+        stats: playerData.stats || {},
+        quests: playerData.quests || {},
+        inventory: playerData.inventory || {},
+        equipment: playerData.equipment || {},
+        abilities: playerData.abilities || [],
+        hp: playerData.hp || 0,
+        maxHp: playerData.maxHp || 0,
+        mana: playerData.mana || 0,
+        maxMana: playerData.maxMana || 0,
+        age: playerData.age || null,
+        height: playerData.height || null,
+        weight: playerData.weight || null,
+        statPoints: playerData.statPoints || 0,
+        safePlaceLocation: playerData.safePlaceLocation || null,
+        // Ajoutez d'autres champs ici si nécessaire
+    };
+
     try {
         const charRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
-        // AJOUT DE playerData.safePlaceLocation DANS L'OBJET DE SAUVEGARDE
-        await setDoc(charRef, { ...playerData, safePlaceLocation: playerData.safePlaceLocation }, { merge: true });
+        // MODIFICATION: Sauvegarde du nouvel objet de données validé
+        await setDoc(charRef, dataToSave, { merge: true });
         console.log("Personnage sauvegardé sur Firestore !");
     } catch (error) {
         console.error("Erreur lors de la sauvegarde du personnage sur Firestore : ", error);
+        // L'erreur se produit ici si un autre champ est invalide
     }
 }
 
