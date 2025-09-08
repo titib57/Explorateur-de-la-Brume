@@ -5,7 +5,7 @@ import { giveXP } from '../core/state.js';
 import { updateQuestProgress } from './quests.js';
 import { updateQuestsUI, updateBattleUI, updateWorldMapUI } from './ui.js';
 import { calculateElementalDamage } from './elements.js';
-import { addToCombatLog } from '../core/utils.js';
+import { addToCombatLog } from '../utils/utils.js';
 import { showNotification } from '../core/notifications.js';
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -1,4 +1,4 @@
-﻿// Fichier : js/Utils.js
+﻿// Fichier : js/utils/Utils.js
 // Fournit des fonctions utilitaires générales pour le jeu.
 
 import { showNotification } from '../core/notifications.js';
