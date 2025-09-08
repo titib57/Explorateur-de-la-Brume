@@ -2,7 +2,8 @@
 // Ce module gère la logique de la génération de donjons et leur persistance.
 
 // Importations des données et des utilitaires nécessaires
-import { dungeonTypes, pointsOfInterest, questsData } from '../data/gameData.js';
+import { questsData } from '../data/questsData.js';
+import { dungeonTypes, pointsOfInterest } from '../data/gameData.js';
 import { showNotification } from '../core/notifications.js';
 import { createDungeonData } from './dungeonGenerator.js';
 import { calculateDistance } from '../utils/geoUtils.js';
