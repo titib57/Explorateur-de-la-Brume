@@ -6,7 +6,7 @@ import { showNotification } from './notifications.js';
 import { questsData } from './questsData.js';
 import { auth, db } from './firebase_config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { doc, setDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js"; // Ajout de getDoc
 import { upgradeShelter } from '../modules/shelterManager.js';
 import { startNextWaveTimer } from '../modules/waveManager.js';
 import { updateWorldMapUI } from '../modules/ui.js';
@@ -23,8 +23,8 @@ let gameInitialized = false;
 
 // Classe de base pour un personnage
 class Character {
-    // AJOUT DE safePlaceLocation au constructeur pour qu'il puisse être initialisé
-    constructor(name, playerClass, level, xp, gold, stats, quests, inventory, equipment, abilities, hp, maxHp, mana, maxMana, age, height, weight, safePlaceLocation) {
+    // AJOUT DE safePlaceLocation et journal au constructeur
+    constructor(name, playerClass, level, xp, gold, stats, quests, inventory, equipment, abilities, hp, maxHp, mana, maxMana, age, height, weight, safePlaceLocation, journal) {
         this.name = name;
         this.playerClass = playerClass;
         this.level = level || 1;
@@ -45,8 +45,8 @@ class Character {
         this.height = height || null;
         this.weight = weight || null;
         this.statPoints = 0;
-        // AJOUT DE CETTE LIGNE
         this.safePlaceLocation = safePlaceLocation || null;
+        this.journal = journal || []; // NOUVELLE LIGNE : Initialise le journal
     }
 
     /**
@@ -58,6 +58,8 @@ class Character {
         if (this.xp >= this.xpToNextLevel) {
             this.levelUp();
         }
+        // NOUVEAU : Ajoute une entrée au journal pour l'XP
+        this.addToJournal(`Vous gagnez ${amount} XP.`);
     }
 
     /**
@@ -71,6 +73,8 @@ class Character {
         recalculateDerivedStats(this);
         showNotification(`Montée de niveau ! Vous êtes maintenant niveau ${this.level} !`, 'success');
         showNotification(`Vous avez reçu 3 points de statistique.`, 'info');
+        // NOUVEAU : Ajoute une entrée au journal pour la montée de niveau
+        this.addToJournal(`Vous avez atteint le niveau ${this.level}.`);
     }
 
     /**
@@ -84,6 +88,8 @@ class Character {
             this.inventory[item.id].quantity++;
         }
         showNotification(`${item.name} a été ajouté à votre inventaire.`, 'info');
+        // NOUVEAU : Ajoute une entrée au journal pour l'objet
+        this.addToJournal(`Vous avez trouvé un(e) ${item.name}.`);
     }
 
     /**
@@ -93,14 +99,13 @@ class Character {
     startQuest(questId) {
         const quest = questsData[questId];
         if (quest) {
-            this.quests[questId] = {
-                status: 'in_progress',
-                objective: {
-                    current: 0,
-                    required: quest.objective.required
-                }
+            this.quests = {
+                current: { questId: questId, currentProgress: 0 },
+                completed: this.quests.completed || {}
             };
             showNotification(`Nouvelle quête : "${quest.title}"`, 'quest');
+            // NOUVEAU : Ajoute une entrée au journal pour la quête
+            this.addToJournal(`Nouvelle quête commencée : "${quest.title}".`);
             savePlayer(this);
         }
     }
@@ -111,10 +116,13 @@ class Character {
      * @param {number} amount Le montant de la progression à ajouter.
      */
     updateQuestProgress(questId, amount) {
-        if (this.quests[questId] && this.quests[questId].status === 'in_progress') {
-            this.quests[questId].objective.current += amount;
-            if (this.quests[questId].objective.current >= this.quests[questId].objective.required) {
+        if (this.quests.current && this.quests.current.questId === questId) {
+            this.quests.current.currentProgress += amount;
+            const questDetails = questsData[questId];
+            if (this.quests.current.currentProgress >= questDetails.objective.required) {
                 this.completeQuest(questId);
+            } else {
+                this.addToJournal(`Progression de quête : ${this.quests.current.currentProgress}/${questDetails.objective.required}`);
             }
             savePlayer(this);
         }
@@ -126,14 +134,36 @@ class Character {
      */
     completeQuest(questId) {
         const quest = questsData[questId];
-        if (quest && this.quests[questId]) {
-            this.quests[questId].status = 'completed';
+        if (quest && this.quests.current && this.quests.current.questId === questId) {
+            // Déplace la quête vers le journal des quêtes terminées
+            this.quests.completed[questId] = {
+                completionDate: Date.now()
+            };
+            this.quests.current = null;
+
             applyRewards(quest.rewards);
             showNotification(`Quête terminée : "${quest.title}"`, 'quest_completed');
+            // NOUVEAU : Ajoute une entrée au journal pour la quête terminée
+            this.addToJournal(`Quête terminée : "${quest.title}".`);
             if (quest.nextQuest) {
                 this.startQuest(quest.nextQuest);
             }
             savePlayer(this);
+        }
+    }
+
+    /**
+     * NOUVEAU : Ajoute une entrée au journal du joueur.
+     * @param {string} message Le message à ajouter.
+     */
+    addToJournal(message) {
+        this.journal.unshift({
+            timestamp: Date.now(),
+            message: message
+        });
+        // Garder un nombre raisonnable d'entrées
+        if (this.journal.length > 50) {
+            this.journal.pop();
         }
     }
 }
@@ -166,6 +196,7 @@ export function createCharacterData(name, playerClass, age, height, weight) {
         weight: weight || null,
         statPoints: 5,
         safePlaceLocation: null,
+        journal: [] // NOUVEAU : Ajoute la propriété journal
     };
 }
 
@@ -184,11 +215,13 @@ export function createCharacter(name, playerClass, age, height, weight) {
         initialData.name, initialData.playerClass, initialData.level, initialData.xp, initialData.gold,
         initialData.stats, initialData.quests, initialData.inventory, initialData.equipment,
         initialData.abilities, initialData.hp, initialData.maxHp, initialData.mana, initialData.maxMana,
-        initialData.age, initialData.height, initialData.weight, initialData.safePlaceLocation
+        initialData.age, initialData.height, initialData.weight, initialData.safePlaceLocation, initialData.journal
     );
     newPlayer.statPoints = initialData.statPoints;
     recalculateDerivedStats(newPlayer);
     player = newPlayer;
+
+    player.addToJournal(`Bienvenue, ${player.name} ! L'aventure commence.`);
 
     newPlayer.addItem(itemsData["lame_stase"]);
     newPlayer.addItem(itemsData["veste_survivant"]);
@@ -203,12 +236,8 @@ export function createCharacter(name, playerClass, age, height, weight) {
 
 export function giveXP(xpAmount) {
     if (!player) return;
-    player.xp += xpAmount;
-    console.log(`Vous gagnez ${xpAmount} XP !`);
-
-    if (player.xp >= player.xpToNextLevel) {
-        player.levelUp();
-    }
+    // Mise à jour de la logique pour utiliser la méthode du joueur
+    player.addXp(xpAmount);
 }
 
 /**
@@ -231,7 +260,7 @@ export async function loadCharacter(user) {
                 savedPlayer.name, savedPlayer.playerClass, savedPlayer.level, savedPlayer.xp, savedPlayer.gold,
                 savedPlayer.stats, savedPlayer.quests, savedPlayer.inventory, savedPlayer.equipment,
                 savedPlayer.abilities, savedPlayer.hp, savedPlayer.maxHp, savedPlayer.mana, savedPlayer.maxMana,
-                savedPlayer.age, savedPlayer.height, savedPlayer.weight, savedPlayer.safePlaceLocation
+                savedPlayer.age, savedPlayer.height, savedPlayer.weight, savedPlayer.safePlaceLocation, savedPlayer.journal // Ajout du journal
             );
             char.statPoints = savedPlayer.statPoints;
             char.xpToNextLevel = savedPlayer.xpToNextLevel;
@@ -287,6 +316,7 @@ export async function saveCharacterData(playerData) {
         weight: playerData.weight || null,
         statPoints: playerData.statPoints || 0,
         safePlaceLocation: playerData.safePlaceLocation || null,
+        journal: playerData.journal || [] // NOUVEAU : Sauvegarde le journal
     };
 
     try {
@@ -389,6 +419,8 @@ export function applyRewards(rewards) {
     if (rewards.gold) {
         player.gold += rewards.gold;
         showNotification(`Vous avez trouvé ${rewards.gold} pièces d'or.`, 'info');
+        // NOUVEAU : Ajoute une entrée au journal pour l'or
+        player.addToJournal(`Vous avez trouvé ${rewards.gold} pièces d'or.`);
     }
     if (rewards.items) {
         rewards.items.forEach(item => {
@@ -484,7 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         savedPlayer.name, savedPlayer.playerClass, savedPlayer.level, savedPlayer.xp, savedPlayer.gold,
                         savedPlayer.stats, savedPlayer.quests, savedPlayer.inventory, savedPlayer.equipment,
                         savedPlayer.abilities, savedPlayer.hp, savedPlayer.maxHp, savedPlayer.mana, savedPlayer.maxMana,
-                        savedPlayer.age, savedPlayer.height, savedPlayer.weight, savedPlayer.safePlaceLocation
+                        savedPlayer.age, savedPlayer.height, savedPlayer.weight, savedPlayer.safePlaceLocation, savedPlayer.journal
                     );
                     player.statPoints = savedPlayer.statPoints;
                     player.xpToNextLevel = savedPlayer.xpToNextLevel;
