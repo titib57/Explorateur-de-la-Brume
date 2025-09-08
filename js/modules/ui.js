@@ -2,10 +2,12 @@
 // Ce module gère la mise à jour de l'interface utilisateur (UI).
 
 import { player, currentMonster } from "../core/state.js";
-import { questsData } from '../questsData.js';
+import { questsData } from '../core/questsData.js';
 import { acceptQuest, updateQuestProgress } from '../core/gameEngine.js';
-import { createNewCharacter, deleteCharacter, handleSignOut } from '../core/authManager.js';
+import { createNewCharacter, deleteCharacter, handleSignOut, saveCharacterData } from '../core/authManager.js';
 import { showNotification } from "../core/notifications.js";
+import { initMap, recenterMap, isPlayerInDungeonRange, getSelectedDungeon, getPlayerMarkerPosition, setSelectedDungeon } from "./map.js";
+import { generateDungeon } from "../core/dungeon.js";
 
 // Récupération des éléments du DOM
 const getElement = id => document.getElementById(id);
@@ -35,7 +37,17 @@ const currentQuestProgress = getElement('current-quest-progress');
 const hpValue = getElement('hp-value');
 const goldValue = getElement('gold-value');
 const levelValue = getElement('level-value');
-const validateShelterBtn = getElement('set-safe-place-btn');
+
+// Variables pour la carte du monde
+const dungeonDetails = getElement('dungeon-details');
+const dungeonNameDisplay = getElement('dungeon-name');
+const dungeonDescriptionDisplay = getElement('dungeon-description');
+const dungeonDifficultyDisplay = getElement('dungeon-difficulty');
+const startBattleBtn = getElement('start-battle-btn');
+const setSafePlaceBtn = getElement('set-safe-place-btn');
+const toggleFullscreenBtn = getElement('toggle-fullscreen-btn');
+const recenterBtn = getElement('recenter-btn');
+const mapElement = getElement('map');
 
 
 // =========================================================================
@@ -199,14 +211,155 @@ export function updateJournalDisplay(character) {
 }
 
 /**
- * Fonction centrale qui met à jour l'UI en fonction de la page actuelle.
+ * Gère l'affichage de la page des quêtes.
+ * @param {object} character L'objet joueur.
+ */
+export function renderQuestsPage(character) {
+    const questsPageContainer = getElement('quests-page-container');
+    if (!questsPageContainer) return;
+    questsPageContainer.innerHTML = '';
+    renderQuestDisplay(character);
+}
+
+// =========================================================================
+// NOUVELLES FONCTIONS DE GESTION DE L'AFFICHAGE POUR LA CARTE DU MONDE
+// =========================================================================
+
+/**
+ * Met à jour l'affichage des détails du donjon sélectionné.
+ * @param {object|null} dungeon Les données du donjon.
+ */
+export function updateDungeonDetailsUI(dungeon) {
+    if (dungeon) {
+        dungeonNameDisplay.textContent = dungeon.name;
+        dungeonDescriptionDisplay.textContent = dungeon.isTutorial ?
+            'Un lieu sûr pour apprendre les bases du combat.' :
+            'Un donjon généré dynamiquement. Préparez-vous au combat !';
+        dungeonDifficultyDisplay.textContent = dungeon.difficulty || '1';
+        dungeonDetails.style.display = 'block';
+    } else {
+        dungeonDetails.style.display = 'none';
+    }
+}
+
+/**
+ * Met à jour l'état des boutons d'action sur la carte du monde.
  * @param {object} character Les données du personnage.
  */
+export function updateActionButtonsUI(character) {
+    if (!character) return;
+    
+    const selectedDungeon = getSelectedDungeon();
+    const playerPosition = getPlayerMarkerPosition();
+
+    // Gestion du bouton "Définir le lieu sûr"
+    const isDefineShelterQuest = character.quests.current && character.quests.current.questId === 'initial_adventure_quest' && !character.safePlaceLocation;
+    if (isDefineShelterQuest) {
+        setSafePlaceBtn.classList.remove('hidden');
+    } else {
+        setSafePlaceBtn.classList.add('hidden');
+    }
+
+    // Gestion du bouton "Entrer dans le donjon"
+    if (selectedDungeon && playerPosition && isPlayerInDungeonRange(playerPosition)) {
+        startBattleBtn.style.display = 'block';
+        startBattleBtn.textContent = `Entrer dans ${selectedDungeon.name}`;
+    } else {
+        startBattleBtn.style.display = 'none';
+    }
+}
+
+/**
+ * Gère le clic sur le bouton "Définir le lieu sûr".
+ */
+async function handleSetSafePlaceClick() {
+    if (!player) {
+        showNotification("Impossible de définir le lieu, personnage non chargé.", "error");
+        return;
+    }
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const safePlaceLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                player.safePlaceLocation = safePlaceLocation;
+                try {
+                    await saveCharacterData(player);
+                    await updateQuestProgress("define_shelter", safePlaceLocation);
+                    showNotification("Abri de survie défini et sauvegardé ! La quête est mise à jour.", "success");
+                } catch (error) {
+                    console.error("Erreur lors de la sauvegarde du lieu sûr:", error);
+                    showNotification("Erreur lors de la sauvegarde du lieu sûr.", "error");
+                }
+            },
+            (error) => {
+                console.error("Erreur de géolocalisation:", error);
+                showNotification("Impossible d'obtenir votre position pour définir le lieu sûr.", "error");
+            }
+        );
+    } else {
+        showNotification("La géolocalisation n'est pas supportée par votre navigateur.", "error");
+    }
+}
+
+/**
+ * Gère le clic sur le bouton "Entrer dans le donjon".
+ */
+function handleStartBattleClick() {
+    const selectedDungeon = getSelectedDungeon();
+    if (selectedDungeon) {
+        generateDungeon(selectedDungeon.isTutorial ? 'tutoriel' : { lat: selectedDungeon.location.lat, lng: selectedDungeon.location.lng });
+        window.location.href = 'battle.html';
+    } else {
+        showNotification("Veuillez sélectionner un donjon pour y entrer.", 'warning');
+    }
+}
+
+/**
+ * Gère les événements de l'UI pour la page de la carte.
+ */
+export function handleMapUIEvents() {
+    if (toggleFullscreenBtn) {
+        toggleFullscreenBtn.addEventListener('click', () => {
+            mapElement.classList.toggle('fullscreen');
+            toggleFullscreenBtn.textContent = mapElement.classList.contains('fullscreen') ? 'Quitter le plein écran' : 'Plein écran';
+            if (mapElement) {
+                mapElement.requestFullscreen();
+            }
+        });
+    }
+
+    if (recenterBtn) {
+        recenterBtn.addEventListener('click', recenterMap);
+    }
+
+    if (startBattleBtn) {
+        startBattleBtn.addEventListener('click', handleStartBattleClick);
+    }
+    
+    if (setSafePlaceBtn) {
+        setSafePlaceBtn.addEventListener('click', handleSetSafePlaceClick);
+    }
+}
+
+// =========================================================================
+// FONCTION CENTRALE DE MISE À JOUR (mise à jour)
+// =========================================================================
+
 export function updateUIBasedOnPage(character) {
     const currentPage = window.location.pathname.split('/').pop();
     switch (currentPage) {
         case 'world_map.html':
-            if (character) updateWorldMapUI(character);
+            if (character) {
+                initMap(character);
+                updateJournalDisplay(character);
+                updateActionButtonsUI(character);
+                updateDungeonDetailsUI(getSelectedDungeon());
+            } else {
+                window.location.href = 'character.html';
+            }
             break;
         case 'gestion_personnage.html':
             if (character) renderCharacter(character);
@@ -223,25 +376,6 @@ export function updateUIBasedOnPage(character) {
             console.warn("Mise à jour de l'UI non définie pour cette page.");
     }
 }
-
-// Fonction utilitaire pour la carte du monde
-export function updateWorldMapUI(character) {
-    if (!character) return;
-    updateJournalDisplay(character);
-    // Ajoutez d'autres mises à jour spécifiques à la carte du monde ici.
-}
-
-/**
- * Gère l'affichage de la page des quêtes.
- * @param {object} character L'objet joueur.
- */
-export function renderQuestsPage(character) {
-    const questsPageContainer = getElement('quests-page-container');
-    if (!questsPageContainer) return;
-    questsPageContainer.innerHTML = '';
-    renderQuestDisplay(character);
-}
-
 
 // =========================================================================
 // GESTION DES ÉVÉNEMENTS
@@ -279,26 +413,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    if (validateShelterBtn) {
-        validateShelterBtn.addEventListener('click', () => {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const shelterLocation = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-                        updateQuestProgress("define_shelter", shelterLocation);
-                        showNotification("Abri de survie défini ! La quête est mise à jour.", "success");
-                    },
-                    (error) => {
-                        console.error("Erreur de géolocalisation:", error);
-                        showNotification("Impossible d'obtenir votre position. Veuillez autoriser la géolocalisation.", "error");
-                    }
-                );
-            } else {
-                showNotification("La géolocalisation n'est pas supportée par votre navigateur.", "error");
-            }
-        });
-    }
+    // Appeler la gestion des événements de la carte une fois le DOM chargé
+    handleMapUIEvents();
 });

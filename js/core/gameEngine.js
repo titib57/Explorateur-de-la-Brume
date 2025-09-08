@@ -5,7 +5,7 @@ import { player, recalculateDerivedStats } from './state.js';
 import { questsData } from './questsData.js';
 import { itemsData } from './gameData.js';
 import { showNotification } from './notifications.js';
-import { saveCharacterData, userId } from './authManager.js';
+import { saveCharacterData } from './authManager.js';
 import { updateUIBasedOnPage } from '../modules/ui.js';
 
 let gameInitialized = false;
@@ -17,8 +17,6 @@ export function initGame() {
     if (gameInitialized) return;
     gameInitialized = true;
     console.log("Jeu initialisé pour le joueur :", player.name);
-    // Ajoutez ici les listeners pour les boutons qui dépendent du joueur.
-    // Par exemple, les listeners de la carte du monde, du combat, etc.
 }
 
 /**
@@ -104,15 +102,12 @@ export function acceptQuest(questId) {
 /**
  * Met à jour la progression d'une quête et vérifie si elle est terminée.
  * @param {string} objectiveAction Le type d'action.
- * @param {any} payload Les données supplémentaires.
  */
-export async function updateQuestProgress(objectiveAction, payload = null) {
+export function updateQuestProgress(objectiveAction) {
     if (!player || !player.quests.current) return;
     const currentQuestData = questsData[player.quests.current.questId];
     if (currentQuestData.objective.action === objectiveAction) {
-        if (objectiveAction === 'define_shelter') {
-            player.updateQuestProgress(1); // Met à jour la progression d'une unité
-        }
-        checkQuestCompletion(player.quests.current.questId);
+        player.updateQuestProgress(1); // Met à jour la progression d'une unité
     }
+    checkQuestCompletion(player.quests.current.questId);
 }
