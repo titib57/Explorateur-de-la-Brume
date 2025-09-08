@@ -84,3 +84,43 @@ export function updatePlayerProfileUI() {
     document.getElementById('player-attack').textContent = player.attackDamage;
     document.getElementById('player-defense').textContent = player.defense;
 }
+
+/**
+ * Met à jour l'interface des quêtes du joueur.
+ * @param {object} player L'objet joueur.
+ */
+export function updateQuestsUI(player) {
+    if (!player || !player.quests) return;
+
+    const questsContainer = document.getElementById('quests-container');
+    if (!questsContainer) return;
+
+    // Vider le conteneur pour éviter les doublons
+    questsContainer.innerHTML = '';
+
+    // Afficher la quête en cours
+    if (player.quests.current) {
+        const currentQuest = player.quests.current;
+        const currentQuestElement = document.createElement('div');
+        currentQuestElement.className = 'quest-item current-quest';
+        currentQuestElement.innerHTML = `
+            <h4>Quête en cours : ${currentQuest.title}</h4>
+            <p>Objectif : ${currentQuest.description}</p>
+            <p>Progression : ${currentQuest.currentProgress}/${currentQuest.objective.required}</p>
+        `;
+        questsContainer.appendChild(currentQuestElement);
+    } else {
+        questsContainer.innerHTML = '<p>Pas de quête en cours.</p>';
+    }
+
+    // Afficher les quêtes terminées (si nécessaire)
+    const completedQuestsCount = Object.keys(player.quests.completed).length;
+    if (completedQuestsCount > 0) {
+        const completedQuestsElement = document.createElement('div');
+        completedQuestsElement.className = 'completed-quests-summary';
+        completedQuestsElement.innerHTML = `
+            <p>Quêtes terminées : ${completedQuestsCount}</p>
+        `;
+        questsContainer.appendChild(completedQuestsElement);
+    }
+}
