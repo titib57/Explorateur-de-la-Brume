@@ -10,6 +10,8 @@ import { auth, db } from "./firebase_config.js";
 import { showNotification } from './notifications.js';
 import { questsData } from './questsData.js';
 import { updateQuestProgress } from '../modules/quests.js';
+import { renderQuestsPage } from '../modules/questsPageManager.js';
+import { updateJournalDisplay } from '../modules/ui.js'; // Assurez-vous d'avoir cette fonction
 
 // Variable pour stocker l'utilisateur connecté
 let currentUser = null;
@@ -55,6 +57,71 @@ const levelValue = getElement('level-value');
 // =========================================================================
 // FONCTIONS DE GESTION DE L'AFFICHAGE
 // =========================================================================
+
+/**
+ * Met à jour l'affichage des informations de quête sur la page de gestion.
+ * @param {object} character Les données du personnage.
+ */
+function renderQuestDisplay(character) {
+    if (!character || !questsDisplay) return;
+
+    const activeQuestsList = getElement('active-quests-list');
+    const unstartedQuestsList = getElement('unstarted-quests-list');
+    const completedQuestsList = getElement('completed-quests-list');
+
+    if (activeQuestsList) activeQuestsList.innerHTML = '';
+    if (unstartedQuestsList) unstartedQuestsList.innerHTML = '';
+    if (completedQuestsList) completedQuestsList.innerHTML = '';
+
+    if (character.quests.current) {
+        const questData = questsData[character.quests.current.questId];
+        if (questData) {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <h4>${questData.title}</h4>
+                <p>${questData.description}</p>
+                <p>Progression : ${character.quests.current.currentProgress || 0} / ${questData.objective.required}</p>
+            `;
+            if (activeQuestsList) activeQuestsList.appendChild(li);
+        }
+    } else {
+        const li = document.createElement('li');
+        li.textContent = "Aucune quête active pour le moment.";
+        if (activeQuestsList) activeQuestsList.appendChild(li);
+    }
+
+    if (character.quests.completed) {
+        for (const questId in character.quests.completed) {
+            const questData = questsData[questId];
+            if (questData) {
+                const li = document.createElement('li');
+                li.innerHTML = `<h4>${questData.title}</h4><p>Terminée</p>`;
+                if (completedQuestsList) completedQuestsList.appendChild(li);
+            }
+        }
+    }
+
+    for (const questId in questsData) {
+        const isCompleted = character.quests.completed && character.quests.completed[questId];
+        const isActive = character.quests.current && character.quests.current.questId === questId;
+
+        if (!isCompleted && !isActive) {
+            const questData = questsData[questId];
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <h4>${questData.title}</h4>
+                <p>${questData.description}</p>
+                <button class="accept-quest-btn" data-quest-id="${questId}">Accepter</button>
+            `;
+            if (unstartedQuestsList) unstartedQuestsList.appendChild(li);
+        }
+    }
+}
+
+/**
+ * Met à jour l'affichage complet du personnage sur la page de gestion.
+ * @param {object} character Les données du personnage.
+ */
 function renderCharacter(character) {
     if (!character) return;
 
@@ -77,57 +144,7 @@ function renderCharacter(character) {
         `;
     }
     
-    if (questsDisplay && character.quests) {
-        const activeQuestsList = getElement('active-quests-list');
-        const unstartedQuestsList = getElement('unstarted-quests-list');
-        const completedQuestsList = getElement('completed-quests-list');
-
-        if (activeQuestsList) activeQuestsList.innerHTML = '';
-        if (unstartedQuestsList) unstartedQuestsList.innerHTML = '';
-        if (completedQuestsList) completedQuestsList.innerHTML = '';
-
-        if (character.quests.current) {
-            const questData = questsData[character.quests.current.questId];
-            if (questData) {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <h4>${questData.title}</h4>
-                    <p>${questData.description}</p>
-                    <p>Progression : ${character.quests.current.currentProgress || 0} / ${questData.objective.required}</p>
-                `;
-                if (activeQuestsList) activeQuestsList.appendChild(li);
-            }
-        } else {
-            const li = document.createElement('li');
-            li.textContent = "Aucune quête active pour le moment.";
-            if (activeQuestsList) activeQuestsList.appendChild(li);
-        }
-
-        for (const questId in character.quests.completed) {
-            const questData = questsData[questId];
-            if (questData) {
-                const li = document.createElement('li');
-                li.innerHTML = `<h4>${questData.title}</h4><p>Terminée</p>`;
-                if (completedQuestsList) completedQuestsList.appendChild(li);
-            }
-        }
-
-        for (const questId in questsData) {
-            const isCompleted = character.quests.completed && character.quests.completed[questId];
-            const isActive = character.quests.current && character.quests.current.questId === questId;
-
-            if (!isCompleted && !isActive) {
-                const questData = questsData[questId];
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <h4>${questData.title}</h4>
-                    <p>${questData.description}</p>
-                    <button class="accept-quest-btn" data-quest-id="${questId}">Accepter</button>
-                `;
-                if (unstartedQuestsList) unstartedQuestsList.appendChild(li);
-            }
-        }
-    }
+    renderQuestDisplay(character);
 
     if (equipmentDisplay && character.equipment) {
         equipmentDisplay.innerHTML = `
@@ -176,24 +193,10 @@ function showCharacterExistsView(character) {
     renderExistingCharacterOnCreationPage(character);
 }
 
-// Nouvelle fonction pour mettre à jour le journal de bord
+// Fonction pour mettre à jour le journal de bord
 function renderJournal(character) {
     if (!character) return;
-
-    if (currentQuestTitle) {
-        if (character.quests && character.quests.current) {
-            const currentQuestData = questsData[character.quests.current.questId];
-            if (currentQuestData) {
-                currentQuestTitle.textContent = currentQuestData.title;
-                currentQuestDescription.textContent = currentQuestData.description;
-                currentQuestProgress.textContent = `Progression : ${character.quests.current.currentProgress || 0} / ${currentQuestData.objective.required}`;
-            }
-        } else {
-            currentQuestTitle.textContent = "Aucune quête active.";
-            currentQuestDescription.textContent = "";
-            currentQuestProgress.textContent = "";
-        }
-    }
+    updateJournalDisplay(character); // Appel à la fonction de mise à jour du journal de bord
     
     if (hpValue && character.stats) {
         hpValue.textContent = `${character.stats.hp} / ${character.stats.maxHp}`;
@@ -207,6 +210,8 @@ function renderJournal(character) {
 }
 
 async function loadCharacterData(user) {
+    // Cette fonction est maintenant obsolète car nous utilisons onSnapshot
+    // Cependant, nous la conservons pour les cas d'utilisation uniques
     const characterRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
     try {
         const docSnap = await getDoc(characterRef);
@@ -218,15 +223,12 @@ async function loadCharacterData(user) {
                 characterSection.classList.remove('hidden');
             } else if (window.location.pathname.includes('character.html')) {
                 showCharacterExistsView(characterData);
-            } else if (window.location.pathname.includes('world_map.html')) {
-                renderJournal(characterData);
             }
         } else {
             showNoCharacterView();
         }
     } catch (error) {
         console.error("Erreur lors du chargement du personnage:", error);
-        showNoCharacterView();
         showNotification("Erreur lors du chargement des données. Veuillez réessayer.", "error");
     }
 }
@@ -262,7 +264,16 @@ async function acceptQuestAndSave(questId, user) {
 
             showNotification(`Quête "${questDefinition.title}" acceptée !`, "success");
 
-            loadCharacterData(user);
+            // Si le joueur est sur la page de gestion, on met à jour l'affichage
+            if (window.location.pathname.includes('gestion_personnage.html')) {
+                renderCharacter(characterData);
+            }
+
+            // Si le joueur est sur la nouvelle page de quêtes, on la met à jour
+            if (window.location.pathname.includes('quests.html')) {
+                renderQuestsPage();
+            }
+
         } else {
             showNotification("Erreur: Personnage non trouvé.", "error");
         }
@@ -295,7 +306,15 @@ async function completeQuestObjective(objectiveAction, payload = null) {
             if (characterData) {
                 await setDoc(characterRef, characterData);
                 showNotification("Objectif de quête mis à jour !", "success");
-                renderJournal(characterData);
+                
+                // Si le joueur est sur la page de la carte du monde, on met à jour le journal de bord
+                if (window.location.pathname.includes('world_map.html')) {
+                    renderJournal(characterData);
+                }
+                // Si le joueur est sur la nouvelle page de quêtes, on la met à jour
+                if (window.location.pathname.includes('quests.html')) {
+                    renderQuestsPage();
+                }
             }
         }
     } catch (error) {
@@ -496,6 +515,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         renderCharacter(characterData);
                         if (noCharacterSection) noCharacterSection.classList.add('hidden');
                         characterSection.classList.remove('hidden');
+                    } else if (window.location.pathname.includes('quests.html')) {
+                        // NOUVEAU: Appelle la fonction de rendu de la nouvelle page de quêtes
+                        renderQuestsPage();
                     } else if (window.location.pathname.includes('character.html')) {
                         showCharacterExistsView(characterData);
                     }
@@ -506,6 +528,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (window.location.pathname.includes('world_map.html')) {
                          window.location.href = "character.html";
                     }
+                    if (window.location.pathname.includes('quests.html')) {
+                         window.location.href = "character.html";
+                    }
                     showNoCharacterView();
                 }
             }, (error) => {
@@ -514,7 +539,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } else {
             currentUser = null; // Réinitialise l'utilisateur
-            window.location.href = "login.html";
+            // Redirige vers la page de connexion si l'utilisateur est déconnecté sur une page protégée
+            if (window.location.pathname.includes('world_map.html') || window.location.pathname.includes('gestion_personnage.html') || window.location.pathname.includes('quests.html')) {
+                 window.location.href = "login.html";
+            }
         }
     });
 });

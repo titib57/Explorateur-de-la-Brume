@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Livre des Quêtes</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/quests.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="world_map.html">Carte du Monde</a>
+            <a href="gestion_personnage.html">Personnage</a>
+            <a href="quests.html" class="active">Livre des Quêtes</a>
+            <a href="#" id="logout-link">Déconnexion</a>
+        </nav>
+    </header>
+
+    <main class="book-container">
+        <h1>Le Récit de votre Aventure</h1>
+        <div id="quest-book-pages">
+            <div id="loading-message" class="loading-message">Chargement de votre histoire...</div>
+        </div>
+    </main>
+
+    <script type="module" src="js/core/firebase_game_logic.js"></script>
+    <script type="module" src="js/core/state.js"></script>
+    <script type="module" src="js/modules/questsPageManager.js"></script>
+    </body>
+</html>
