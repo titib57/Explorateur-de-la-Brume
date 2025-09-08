@@ -2,7 +2,7 @@
 // Ce module gère la mise à jour de l'interface utilisateur (UI).
 
 import { player, currentMonster } from "../core/state.js";
-import { questsData } from '../questsData.js'; // Importez les données de quêtes
+import { questsData } from '../questsData.js';
 // Fonctions manquantes, à importer une fois les fichiers correspondants disponibles.
 // import { getAbilityById } from "./skills.js";
 // import { useItem } from "./inventory.js";
@@ -25,7 +25,7 @@ export function updateBattleUI() {
     document.getElementById('player-mana-bar').style.width = `${(player.mana / player.maxMana) * 100}%`;
     document.getElementById('player-weapon-display').textContent = player.equipment.weapon ? player.equipment.weapon.name : 'Aucune';
     document.getElementById('player-armor-display').textContent = player.equipment.armor ? player.equipment.armor.name : 'Aucune';
-    
+
     // Mise à jour de l'UI du monstre
     if (currentMonster) {
         document.getElementById('monster-name').textContent = currentMonster.name;
@@ -37,7 +37,6 @@ export function updateBattleUI() {
     }
 }
 
----
 /**
  * Met à jour l'interface de la page des statistiques.
  * @param {object} tempPlayer L'objet joueur temporaire avec les stats modifiables.
@@ -54,7 +53,7 @@ export function updateStatsUI(tempPlayer) {
     document.getElementById('intelligence-display').textContent = stats.intelligence;
     document.getElementById('speed-display').textContent = stats.speed;
     document.getElementById('dexterity-display').textContent = stats.dexterity;
-    
+
     // Mise à jour des stats dérivées
     document.getElementById('max-hp-display').textContent = tempPlayer.maxHp;
     document.getElementById('max-mana-display').textContent = tempPlayer.maxMana;
@@ -62,7 +61,6 @@ export function updateStatsUI(tempPlayer) {
     document.getElementById('defense-display').textContent = tempPlayer.defense;
 }
 
----
 /**
  * Met à jour l'interface de la page d'accueil ou de la page de profil du joueur.
  * Cette fonction est ajoutée pour afficher les statistiques du joueur global.
@@ -84,13 +82,12 @@ export function updatePlayerProfileUI() {
     document.getElementById('player-intelligence').textContent = player.stats.intelligence;
     document.getElementById('player-speed').textContent = player.stats.speed;
     document.getElementById('player-dexterity').textContent = player.stats.dexterity;
-    
+
     // Mise à jour des stats dérivées
     document.getElementById('player-attack').textContent = player.attackDamage;
     document.getElementById('player-defense').textContent = player.defense;
 }
 
----
 /**
  * Met à jour l'interface des quêtes du joueur.
  * @param {object} player L'objet joueur.
@@ -133,7 +130,6 @@ export function updateQuestsUI(player) {
     }
 }
 
----
 /**
  * Met à jour l'interface de la carte du monde avec les informations du joueur.
  * @param {object} player L'objet joueur.
@@ -146,7 +142,7 @@ export function updateWorldMapUI(player) {
     if (playerGoldElement) {
         playerGoldElement.textContent = player.gold;
     }
-    
+
     const playerLevelElement = document.getElementById('world-map-player-level');
     if (playerLevelElement) {
         playerLevelElement.textContent = player.level;
@@ -156,24 +152,23 @@ export function updateWorldMapUI(player) {
     if (playerXpElement) {
         playerXpElement.textContent = player.xp;
     }
-    
+
     const playerHpElement = document.getElementById('world-map-player-hp');
     if (playerHpElement) {
         playerHpElement.textContent = `${player.hp}/${player.maxHp}`;
     }
-    
+
     const playerManaElement = document.getElementById('world-map-player-mana');
     if (playerManaElement) {
         playerManaElement.textContent = `${player.mana}/${player.maxMana}`;
     }
-    
+
     const playerWeaponElement = document.getElementById('world-map-player-weapon');
     if (playerWeaponElement && player.equipment.weapon) {
         playerWeaponElement.textContent = player.equipment.weapon.name;
     }
 }
 
----
 /**
  * Met à jour l'interface du journal de bord du joueur.
  * @param {object} player L'objet joueur.
