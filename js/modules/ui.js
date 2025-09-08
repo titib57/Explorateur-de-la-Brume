@@ -124,3 +124,42 @@ export function updateQuestsUI(player) {
         questsContainer.appendChild(completedQuestsElement);
     }
 }
+
+/**
+ * Met à jour l'interface de la carte du monde avec les informations du joueur.
+ * @param {object} player L'objet joueur.
+ */
+export function updateWorldMapUI(player) {
+    if (!player) return;
+
+    // Mettre à jour les éléments de l'UI de la carte du monde
+    const playerGoldElement = document.getElementById('world-map-player-gold');
+    if (playerGoldElement) {
+        playerGoldElement.textContent = player.gold;
+    }
+    
+    const playerLevelElement = document.getElementById('world-map-player-level');
+    if (playerLevelElement) {
+        playerLevelElement.textContent = player.level;
+    }
+
+    const playerXpElement = document.getElementById('world-map-player-xp');
+    if (playerXpElement) {
+        playerXpElement.textContent = player.xp;
+    }
+    
+    const playerHpElement = document.getElementById('world-map-player-hp');
+    if (playerHpElement) {
+        playerHpElement.textContent = `${player.hp}/${player.maxHp}`;
+    }
+    
+    const playerManaElement = document.getElementById('world-map-player-mana');
+    if (playerManaElement) {
+        playerManaElement.textContent = `${player.mana}/${player.maxMana}`;
+    }
+    
+    const playerWeaponElement = document.getElementById('world-map-player-weapon');
+    if (playerWeaponElement && player.equipment.weapon) {
+        playerWeaponElement.textContent = player.equipment.weapon.name;
+    }
+}
