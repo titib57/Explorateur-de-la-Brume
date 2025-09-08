@@ -136,8 +136,7 @@ const completeQuest = async (characterData) => {
 
     console.log(`Quête terminée : '${questDefinition.title}' ! 🏆`);
 
-    await giveRewards(characterData, questDefinition.rewards);
-
+await giveRewards(characterId, rewards, questDefinition.rewards);
     characterData.quests.completed[currentQuest.questId] = { ...currentQuest, status: 'completed' };
     
     const { nextQuestId } = questDefinition;
