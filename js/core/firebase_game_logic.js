@@ -10,7 +10,7 @@ import { auth, db } from "./firebase_config.js";
 import { showNotification } from './notifications.js';
 import { questsData } from './questsData.js';
 import { updateQuestProgress } from '../modules/quests.js';
-import { renderQuestsPage } from '../modules/questsPageManager.js';
+import { renderQuestsPage } from './questsPageManager.js';
 import { updateJournalDisplay } from '../modules/ui.js'; // Assurez-vous d'avoir cette fonction
 
 // Variable pour stocker l'utilisateur connecté
