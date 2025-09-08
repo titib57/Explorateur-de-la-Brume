@@ -1,7 +1,7 @@
 /**
-* @fileoverview Module de gestion de la logique des quêtes du jeu.
-* Gère l'acceptation, la mise à jour de la progression et la complétion des quêtes.
-*/
+ * @fileoverview Module de gestion de la logique des quêtes du jeu.
+ * Gère l'acceptation, la mise à jour de la progression et la complétion des quêtes.
+ */
 
 // Importations des données et des modules nécessaires
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
@@ -85,7 +85,7 @@ function renderCharacter(character) {
         
         if (activeQuestsList) activeQuestsList.innerHTML = '';
         if (unstartedQuestsList) unstartedQuestsList.innerHTML = '';
-        if (completedQuestsList) completedQuestsList.innerHTML = '';
+        if (completedQuestsList) completedQuestedList.innerHTML = '';
 
         // Si la quête actuelle existe, on l'affiche
         if (character.quests.current) {
@@ -288,10 +288,10 @@ async function acceptQuestAndSave(questId, user) {
 }
 
 /**
-* Gère la complétion d'un objectif de quête de manière générique.
-* @param {string} objectiveAction - Le type d'action de l'objectif (par ex. 'define_shelter', 'gather').
-* @param {any} [payload] - Données supplémentaires nécessaires à la mise à jour (par ex. l'ID de l'objet collecté).
-*/
+ * Gère la complétion d'un objectif de quête de manière générique.
+ * @param {string} objectiveAction - Le type d'action de l'objectif (par ex. 'define_shelter', 'gather').
+ * @param {any} [payload] - Données supplémentaires nécessaires à la mise à jour (par ex. l'ID de l'objet collecté).
+ */
 async function completeQuestObjective(objectiveAction, payload = null) {
     const user = auth.currentUser;
     if (!user) {
@@ -488,19 +488,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
-// ... (vos écouteurs d'événements à la fin du fichier, comme celui pour le bouton de validation de l'abri)
+// ... (vos écouteurs d'événements à la fin du fichier)
 const validateShelterBtn = getElement('set-safe-place-btn');
 if (validateShelterBtn) {
     validateShelterBtn.addEventListener('click', () => {
-        // --- LIGNE CORRIGÉE ---
-        // Simule la récupération de la position de l'abri.
-        // Remplacez cette ligne par la logique de votre jeu pour obtenir les coordonnées de la carte.
-        const shelterLocation = { lat: 48.97, lng: 6.15 }; 
-        completeQuestObjective("define_shelter", shelterLocation);
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const shelterLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    completeQuestObjective("define_shelter", shelterLocation);
+                },
+                (error) => {
+                    console.error("Erreur de géolocalisation:", error);
+                    showNotification("Impossible d'obtenir votre position. Veuillez autoriser la géolocalisation.", "error");
+                }
+            );
+        } else {
+            showNotification("La géolocalisation n'est pas supportée par votre navigateur.", "error");
+        }
     });
 }
-
+    
     // Gestion de l'état d'authentification
     onAuthStateChanged(auth, (user) => {
         if (user) {
