@@ -1,30 +1,17 @@
-﻿// Fichier : js/core/state.js
-// Ce module gère l'état global du jeu, y compris l'objet joueur, le donjon, les monstres et l'abris.
+// Fichier : js/core/state.js
+// Ce module gère l'état global du jeu et l'objet joueur.
 
 import { itemsData } from './gameData.js';
-import { showNotification } from './notifications.js';
 import { questsData } from './questsData.js';
-import { auth, db } from './firebase_config.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { doc, setDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js"; // Ajout de getDoc
-import { upgradeShelter } from '../modules/shelterManager.js';
-import { startNextWaveTimer } from '../modules/waveManager.js';
-import { updateWorldMapUI } from '../modules/ui.js';
-
 
 // Objets d'état globaux
 export let player = null;
 export let currentDungeon = null;
 export let currentMonster = null;
-export let userId = null;
-
-// Ajoutez une variable pour indiquer si le jeu est initialisé
-let gameInitialized = false;
 
 // Classe de base pour un personnage
-class Character {
-    // AJOUT DE safePlaceLocation et journal au constructeur
-    constructor(name, playerClass, level, xp, gold, stats, quests, inventory, equipment, abilities, hp, maxHp, mana, maxMana, age, height, weight, safePlaceLocation, journal) {
+export class Character {
+    constructor(name, playerClass, level, xp, gold, stats, quests, inventory, equipment, abilities, hp, maxHp, mana, maxMana, safePlaceLocation, journal) {
         this.name = name;
         this.playerClass = playerClass;
         this.level = level || 1;
@@ -32,8 +19,7 @@ class Character {
         this.xpToNextLevel = this.level * 100;
         this.gold = gold || 3;
         this.stats = stats || { strength: 1, intelligence: 1, speed: 1, dexterity: 1 };
-        // Quêtes gérées par un objet pour un suivi plus simple
-        this.quests = quests || {};
+        this.quests = quests || { current: null, completed: {} };
         this.inventory = inventory || {};
         this.equipment = equipment || {};
         this.abilities = abilities || [];
@@ -41,140 +27,70 @@ class Character {
         this.maxHp = maxHp || 0;
         this.mana = mana || 0;
         this.maxMana = maxMana || 0;
-        this.age = age || null;
-        this.height = height || null;
-        this.weight = weight || null;
         this.statPoints = 0;
         this.safePlaceLocation = safePlaceLocation || null;
-        this.journal = journal || []; // NOUVELLE LIGNE : Initialise le journal
+        this.journal = journal || [];
     }
 
-    /**
-     * Ajoute de l'expérience au joueur et gère les montées de niveau.
-     * @param {number} amount La quantité d'XP à ajouter.
-     */
+    // Méthodes pour manipuler l'état du personnage
     addXp(amount) {
         this.xp += amount;
-        if (this.xp >= this.xpToNextLevel) {
-            this.levelUp();
-        }
-        // NOUVEAU : Ajoute une entrée au journal pour l'XP
-        this.addToJournal(`Vous gagnez ${amount} XP.`);
     }
 
-    /**
-     * Gère la montée de niveau du personnage.
-     */
     levelUp() {
         this.level++;
         this.xp -= this.xpToNextLevel;
         this.xpToNextLevel = this.level * 100;
         this.statPoints += 3;
-        recalculateDerivedStats(this);
-        showNotification(`Montée de niveau ! Vous êtes maintenant niveau ${this.level} !`, 'success');
-        showNotification(`Vous avez reçu 3 points de statistique.`, 'info');
-        // NOUVEAU : Ajoute une entrée au journal pour la montée de niveau
-        this.addToJournal(`Vous avez atteint le niveau ${this.level}.`);
     }
 
-    /**
-     * Ajoute un objet à l'inventaire du joueur.
-     * @param {object} item L'objet à ajouter.
-     */
     addItem(item) {
         if (!this.inventory[item.id]) {
             this.inventory[item.id] = { ...item, quantity: 1 };
         } else {
             this.inventory[item.id].quantity++;
         }
-        showNotification(`${item.name} a été ajouté à votre inventaire.`, 'info');
-        // NOUVEAU : Ajoute une entrée au journal pour l'objet
-        this.addToJournal(`Vous avez trouvé un(e) ${item.name}.`);
     }
 
-    /**
-     * Démarre une nouvelle quête.
-     * @param {string} questId L'ID de la quête à démarrer.
-     */
     startQuest(questId) {
         const quest = questsData[questId];
         if (quest) {
-            this.quests = {
-                current: { questId: questId, currentProgress: 0 },
-                completed: this.quests.completed || {}
-            };
-            showNotification(`Nouvelle quête : "${quest.title}"`, 'quest');
-            // NOUVEAU : Ajoute une entrée au journal pour la quête
-            this.addToJournal(`Nouvelle quête commencée : "${quest.title}".`);
-            savePlayer(this);
+            this.quests.current = { questId: questId, currentProgress: 0 };
         }
     }
 
-    /**
-     * Met à jour la progression d'une quête.
-     * @param {string} questId L'ID de la quête.
-     * @param {number} amount Le montant de la progression à ajouter.
-     */
     updateQuestProgress(questId, amount) {
         if (this.quests.current && this.quests.current.questId === questId) {
             this.quests.current.currentProgress += amount;
-            const questDetails = questsData[questId];
-            if (this.quests.current.currentProgress >= questDetails.objective.required) {
-                this.completeQuest(questId);
-            } else {
-                this.addToJournal(`Progression de quête : ${this.quests.current.currentProgress}/${questDetails.objective.required}`);
-            }
-            savePlayer(this);
         }
     }
 
-    /**
-     * Termine une quête et donne les récompenses.
-     * @param {string} questId L'ID de la quête à terminer.
-     */
     completeQuest(questId) {
         const quest = questsData[questId];
         if (quest && this.quests.current && this.quests.current.questId === questId) {
-            // Déplace la quête vers le journal des quêtes terminées
             this.quests.completed[questId] = {
                 completionDate: Date.now()
             };
             this.quests.current = null;
-
-            applyRewards(quest.rewards);
-            showNotification(`Quête terminée : "${quest.title}"`, 'quest_completed');
-            // NOUVEAU : Ajoute une entrée au journal pour la quête terminée
-            this.addToJournal(`Quête terminée : "${quest.title}".`);
-            if (quest.nextQuest) {
-                this.startQuest(quest.nextQuest);
-            }
-            savePlayer(this);
         }
     }
-
-    /**
-     * NOUVEAU : Ajoute une entrée au journal du joueur.
-     * @param {string} message Le message à ajouter.
-     */
+    
     addToJournal(message) {
         this.journal.unshift({
             timestamp: Date.now(),
             message: message
         });
-        // Garder un nombre raisonnable d'entrées
         if (this.journal.length > 50) {
             this.journal.pop();
         }
     }
 }
 
-// MODIFICATION: Nouvelle fonction pour créer un objet de données de base
-export function createCharacterData(name, playerClass, age, height, weight) {
-    const validPlayerClass = playerClass || "Adventurer";
-
+// Fonction pour initialiser les données d'un nouveau personnage
+export function createCharacterData(name, playerClass) {
     return {
         name: name,
-        playerClass: validPlayerClass,
+        playerClass: playerClass || "Adventurer",
         level: 1,
         xp: 0,
         xpToNextLevel: 100,
@@ -191,162 +107,13 @@ export function createCharacterData(name, playerClass, age, height, weight) {
         maxHp: 0,
         mana: 0,
         maxMana: 0,
-        age: age || null,
-        height: height || null,
-        weight: weight || null,
         statPoints: 5,
         safePlaceLocation: null,
-        journal: [] // NOUVEAU : Ajoute la propriété journal
+        journal: []
     };
 }
 
-/**
- * Crée un nouvel objet personnage.
- * @param {string} name Le nom du personnage.
- * @param {string} playerClass La classe du personnage.
- * @param {number} age L'âge du personnage.
- * @param {number} height La taille du personnage.
- * @param {number} weight Le poids du personnage.
- * @returns {Character} Le nouvel objet personnage.
- */
-export function createCharacter(name, playerClass, age, height, weight) {
-    const initialData = createCharacterData(name, playerClass, age, height, weight);
-    const newPlayer = new Character(
-        initialData.name, initialData.playerClass, initialData.level, initialData.xp, initialData.gold,
-        initialData.stats, initialData.quests, initialData.inventory, initialData.equipment,
-        initialData.abilities, initialData.hp, initialData.maxHp, initialData.mana, initialData.maxMana,
-        initialData.age, initialData.height, initialData.weight, initialData.safePlaceLocation, initialData.journal
-    );
-    newPlayer.statPoints = initialData.statPoints;
-    recalculateDerivedStats(newPlayer);
-    player = newPlayer;
-
-    player.addToJournal(`Bienvenue, ${player.name} ! L'aventure commence.`);
-
-    newPlayer.addItem(itemsData["lame_stase"]);
-    newPlayer.addItem(itemsData["veste_survivant"]);
-    newPlayer.addItem(itemsData["fragment_ataraxie"]);
-    newPlayer.addItem(itemsData["mnemonique"]);
-
-    // Ajoute la première quête ici, en utilisant la nouvelle méthode startQuest
-    player.startQuest("initial_adventure_quest");
-
-    return player;
-}
-
-export function giveXP(xpAmount) {
-    if (!player) return;
-    // Mise à jour de la logique pour utiliser la méthode du joueur
-    player.addXp(xpAmount);
-}
-
-/**
- * Charge l'objet joueur depuis Firestore.
- * @returns {Promise<object|null>} L'objet joueur ou null si non trouvé.
- */
-export async function loadCharacter(user) {
-    if (!user || !user.uid) {
-        console.log("Aucun utilisateur n'est connecté. Impossible de charger un personnage.");
-        return null;
-    }
-
-    try {
-        const charRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
-        const characterSnap = await getDoc(charRef);
-
-        if (characterSnap.exists()) {
-            const savedPlayer = characterSnap.data();
-            const char = new Character(
-                savedPlayer.name, savedPlayer.playerClass, savedPlayer.level, savedPlayer.xp, savedPlayer.gold,
-                savedPlayer.stats, savedPlayer.quests, savedPlayer.inventory, savedPlayer.equipment,
-                savedPlayer.abilities, savedPlayer.hp, savedPlayer.maxHp, savedPlayer.mana, savedPlayer.maxMana,
-                savedPlayer.age, savedPlayer.height, savedPlayer.weight, savedPlayer.safePlaceLocation, savedPlayer.journal // Ajout du journal
-            );
-            char.statPoints = savedPlayer.statPoints;
-            char.xpToNextLevel = savedPlayer.xpToNextLevel;
-            recalculateDerivedStats(char);
-            player = char;
-            console.log("Personnage chargé depuis Firestore !");
-            return player;
-        } else {
-            console.log("Aucun document de personnage trouvé pour l'utilisateur.");
-            return null;
-        }
-    } catch (error) {
-        console.error("Erreur lors du chargement du personnage depuis Firestore : ", error);
-        return null;
-    }
-}
-
-// Fonction pour sauvegarder les données du joueur.
-// Cette fonction appelle la fonction existante `saveCharacterData`.
-export async function savePlayer(playerData) {
-    await saveCharacterData(playerData);
-}
-
-/**
- * Sauvegarde les données du personnage dans Firestore.
- * @param {object} playerData Les données du personnage à sauvegarder.
- */
-export async function saveCharacterData(playerData) {
-    if (!userId) {
-        console.error("Erreur : Utilisateur non authentifié.");
-        return;
-    }
-
-    // MODIFICATION: Création d'un objet de données propre pour la sauvegarde
-    const dataToSave = {
-        name: playerData.name || 'Unknown',
-        playerClass: playerData.playerClass || 'Adventurer', // Protection contre undefined
-        level: playerData.level || 1,
-        xp: playerData.xp || 0,
-        xpToNextLevel: playerData.xpToNextLevel || 100,
-        gold: playerData.gold || 0,
-        stats: playerData.stats || {},
-        quests: playerData.quests || {},
-        inventory: playerData.inventory || {},
-        equipment: playerData.equipment || {},
-        abilities: playerData.abilities || [],
-        hp: playerData.hp || 0,
-        maxHp: playerData.maxHp || 0,
-        mana: playerData.mana || 0,
-        maxMana: playerData.maxMana || 0,
-        age: playerData.age || null,
-        height: playerData.height || null,
-        weight: playerData.weight || null,
-        statPoints: playerData.statPoints || 0,
-        safePlaceLocation: playerData.safePlaceLocation || null,
-        journal: playerData.journal || [] // NOUVEAU : Sauvegarde le journal
-    };
-
-    try {
-        const charRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
-        // MODIFICATION: Sauvegarde du nouvel objet de données validé
-        await setDoc(charRef, dataToSave, { merge: true });
-        console.log("Personnage sauvegardé sur Firestore !");
-    } catch (error) {
-        console.error("Erreur lors de la sauvegarde du personnage sur Firestore : ", error);
-    }
-}
-
-/**
- * Supprime le document du personnage de Firestore.
- */
-export async function deleteCharacterData(user) {
-    if (!userId) return;
-    try {
-        const charRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
-        await deleteDoc(charRef);
-        console.log("Personnage supprimé sur Firestore !");
-    } catch (error) {
-        console.error("Erreur lors de la suppression du personnage sur Firestore : ", error);
-    }
-}
-
-/**
- * Recalcule les statistiques dérivées du joueur (PV, Mana, Dégâts, Défense).
- * @param {object} p L'objet joueur.
- */
+// Recalcule les statistiques dérivées du joueur
 export function recalculateDerivedStats(p) {
     const newMaxHp = 100 + (p.stats.strength * 10);
     const newMaxMana = 50 + (p.stats.intelligence * 10);
@@ -367,17 +134,8 @@ export function recalculateDerivedStats(p) {
     const weaponData = p.equipment.weapon ? itemsData[p.equipment.weapon.id] : null;
     const armorData = p.equipment.armor ? itemsData[p.equipment.armor.id] : null;
 
-    if (weaponData) {
-        p.attackDamage = (p.stats.strength * 0.8) + (weaponData.attackDamage || 0);
-    } else {
-        p.attackDamage = (p.stats.strength * 0.8);
-    }
-
-    if (armorData) {
-        p.defense = (p.stats.strength * 0.5) + (armorData.defense || 0);
-    } else {
-        p.defense = (p.stats.strength * 0.5);
-    }
+    p.attackDamage = (p.stats.strength * 0.8) + (weaponData ? weaponData.attackDamage || 0 : 0);
+    p.defense = (p.stats.strength * 0.5) + (armorData ? armorData.defense || 0 : 0);
 
     p.hp = Math.min(p.hp, p.maxHp);
     p.mana = Math.min(p.mana, p.maxMana);
@@ -385,164 +143,25 @@ export function recalculateDerivedStats(p) {
     return p;
 }
 
-/**
- * Met à jour l'affichage des statistiques du joueur.
- */
-export function updateStatsDisplay() {
-    if (!player) return;
-    const hpElement = document.getElementById('player-hp');
-    const manaElement = document.getElementById('player-mana');
-    const goldElement = document.getElementById('player-gold');
-
-    if (hpElement) hpElement.textContent = `${player.hp}/${player.maxHp}`;
-    if (manaElement) manaElement.textContent = `${player.mana}/${player.maxMana}`;
-    if (goldElement) goldElement.textContent = player.gold;
-}
-
-/**
- * Réinitialise le donjon en cours.
- */
+// Fonctions pour gérer le donjon
 export function resetDungeon() {
     localStorage.removeItem('currentDungeon');
     currentDungeon = null;
 }
 
-/**
- * Applique les récompenses au joueur.
- * @param {object} rewards L'objet des récompenses (xp, gold, item).
- */
-export function applyRewards(rewards) {
-    if (!player) return;
-    if (rewards.xp) {
-        giveXP(rewards.xp);
-    }
-    if (rewards.gold) {
-        player.gold += rewards.gold;
-        showNotification(`Vous avez trouvé ${rewards.gold} pièces d'or.`, 'info');
-        // NOUVEAU : Ajoute une entrée au journal pour l'or
-        player.addToJournal(`Vous avez trouvé ${rewards.gold} pièces d'or.`);
-    }
-    if (rewards.items) {
-        rewards.items.forEach(item => {
-            const itemDetails = itemsData[item.itemId];
-            if (itemDetails) {
-                player.addItem({ ...itemDetails, quantity: item.quantity });
-            }
-        });
-    }
-    savePlayer(player);
-}
-
-/**
- * Donne une récompense de quête au joueur.
- * @param {object} reward L'objet des récompenses de quête.
- */
-export function giveQuestReward(reward) {
-    if (!player) return;
-    applyRewards(reward);
-    savePlayer(player);
-}
-
-/**
- * Initialise l'état initial du donjon.
- * @param {object} dungeon Le donjon à initialiser.
- */
-export function initDungeon(dungeon) {
-    currentDungeon = dungeon;
-    saveDungeon(currentDungeon);
-}
-
-/**
- * Sauvegarde l'état du donjon dans le localStorage.
- * @param {object} dungeon L'objet donjon à sauvegarder.
- */
 export function saveDungeon(dungeon) {
     localStorage.setItem('currentDungeon', JSON.stringify(dungeon));
 }
 
-
-// =========================================================================
-// NOUVELLE LOGIQUE D'INITIALISATION DU JEU
-// =========================================================================
-/**
- * Initialise les composants du jeu après le chargement du personnage.
- * Cette fonction est le point d'entrée unique pour démarrer le jeu.
- */
-function initGame() {
-    if (gameInitialized) return;
-    gameInitialized = true;
-
-    console.log("Jeu initialisé pour le joueur :", player.name);
-
-    // Démarrez le système de vagues uniquement ici
-    startNextWaveTimer();
-
-    // Ajoutez d'autres initialisations ici si nécessaire
-    // par exemple: initMap(), initBattleSystem(), etc.
-
-    // Gère l'événement de clic du bouton d'amélioration ici,
-    // car il dépend de l'objet 'player' qui doit être chargé.
-    const upgradeShelterBtn = document.getElementById('upgradeShelterBtn');
-    if (upgradeShelterBtn) {
-        upgradeShelterBtn.addEventListener('click', async () => {
-            if (!player) {
-                showNotification("Le personnage n'est pas encore chargé.", "warning");
-                return;
-            }
-            const success = await upgradeShelter('murs');
-            if (success) {
-                console.log("Amélioration réussie !");
-            } else {
-                console.log("Échec de l'amélioration.");
-            }
-        });
-    }
+// Fonctions pour définir l'état
+export function setPlayer(newPlayer) {
+    player = newPlayer;
 }
 
-// Le seul point d'entrée pour la gestion de l'état global
-document.addEventListener('DOMContentLoaded', () => {
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            userId = user.uid;
+export function setCurrentMonster(newMonster) {
+    currentMonster = newMonster;
+}
 
-            // Écouteur en temps réel pour le document du personnage
-            const characterRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
-
-            // onSnapshot est la meilleure pratique pour les données en temps réel
-            onSnapshot(characterRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const savedPlayer = docSnap.data();
-                    player = new Character(
-                        savedPlayer.name, savedPlayer.playerClass, savedPlayer.level, savedPlayer.xp, savedPlayer.gold,
-                        savedPlayer.stats, savedPlayer.quests, savedPlayer.inventory, savedPlayer.equipment,
-                        savedPlayer.abilities, savedPlayer.hp, savedPlayer.maxHp, savedPlayer.mana, savedPlayer.maxMana,
-                        savedPlayer.age, savedPlayer.height, savedPlayer.weight, savedPlayer.safePlaceLocation, savedPlayer.journal
-                    );
-                    player.statPoints = savedPlayer.statPoints;
-                    player.xpToNextLevel = savedPlayer.xpToNextLevel;
-                    recalculateDerivedStats(player);
-
-                    // Une fois que le joueur est chargé, on initialise le jeu
-                    if (!gameInitialized) {
-                        initGame();
-                    }
-                    // Met à jour l'interface si nécessaire
-                    updateWorldMapUI(player);
-                } else {
-                    console.log("Aucun document de personnage trouvé.");
-                    player = null;
-                    if (window.location.pathname.includes('world_map.html') || window.location.pathname.includes('gestion_personnage.html')) {
-                        window.location.href = "character.html";
-                    }
-                }
-            }, (error) => {
-                console.error("Erreur de synchronisation en temps réel:", error);
-                showNotification("Erreur de synchronisation des données.", 'error');
-            });
-        } else {
-            userId = null;
-            player = null;
-            window.location.href = "login.html";
-        }
-    });
-});
+export function setDungeon(dungeon) {
+    currentDungeon = dungeon;
+}
