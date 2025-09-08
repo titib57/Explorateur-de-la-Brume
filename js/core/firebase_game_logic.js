@@ -85,7 +85,7 @@ function renderCharacter(character) {
         
         if (activeQuestsList) activeQuestsList.innerHTML = '';
         if (unstartedQuestsList) unstartedQuestsList.innerHTML = '';
-        if (completedQuestsList) completedQuestedList.innerHTML = '';
+        if (completedQuestsList) completedQuestsList.innerHTML = '';
 
         // Si la quête actuelle existe, on l'affiche
         if (character.quests.current) {
