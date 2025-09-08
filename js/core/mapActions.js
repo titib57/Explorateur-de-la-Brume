@@ -6,7 +6,7 @@ import { showNotification } from "./notifications.js";
 import { saveCharacterData } from "./authManager.js";
 import { updateQuestProgress } from "./gameEngine.js";
 import { getSelectedDungeon, getPlayerMarkerPosition, isPlayerInDungeonRange } from "../modules/map.js";
-import { generateDungeon } from "../data/dungeons.js";
+import { createDungeonData } from "./mapActions.js";
 
 /**
  * Gère le clic sur le bouton "Définir le lieu sûr".
