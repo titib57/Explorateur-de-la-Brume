@@ -14,41 +14,57 @@
             <nav>
                 <a id="world-map-link" href="world_map.html">Carte du monde</a>
                 <a href="gestion_personnage.html">Personnage</a>
-                            <a href="quests.html">Livre des Quêtes</a>
+                <a href="quests.html">Livre des Quêtes</a>
                 <a href="#" id="logout-link" class="button">Se déconnecter</a>
             </nav>
         </div>
     </header>
 
     <main class="game-container">
+        <nav id="section-nav">
+            <a href="#character-section" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span class="nav-text">Personnage</span>
+            </a>
+            <a href="#stats-section" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">Statistiques</span>
+            </a>
+            <a href="#quest-section" class="nav-item">
+                <span class="nav-icon">📜</span>
+                <span class="nav-text">Quêtes</span>
+            </a>
+            <a href="#inventory-section" class="nav-item">
+                <span class="nav-icon">🎒</span>
+                <span class="nav-text">Inventaire</span>
+            </a>
+            <a href="#equipement-section" class="nav-item">
+                <span class="nav-icon">⚔️</span>
+                <span class="nav-text">Équipement</span>
+            </a>
+        </nav>
         <section class="grid-pele-mele">
+            <section id="no-character-section" class="hidden">
+                <h2>Préparez-vous à l'aventure</h2>
+                <p>Vous n'avez pas encore de personnage. Créez-en un pour commencer à jouer !</p>
+                <button>
+                    <a href="character.html" class="button">Créer mon premier personnage</a>
+                </button>
+            </section>
+            
             <section id="character-section" class="hidden">
+                <p id="loading-message">Chargement des données...</p>
                 <h2>Mon personnage</h2>
-                <div id="character-display">
-                    <p id="loading-message">Chargement des données...</p>
-                </div>
+                <div id="character-display"></div>
                 <div class="flex">
                     <button id="play-btn" class="hidden">
                         Commencer l'aventure
                     </button>
                     <br>
-                    <button id="deleteBtn" class="hidden">
+                    <button id="delete-btn" class="hidden">
                         Supprimer le personnage
                     </button>
                 </div>
-            </section>
-
-            <section id="shelter-info" class="hidden">
-                <h2>Votre Abri</h2>
-                <p>Niveau : <span id="shelter-level">0</span></p>
-                <p>Défense : <span id="shelter-defense">0</span></p>
-                <button id="upgradeShelterBtn" class="btn-primary">Améliorer l'abri</button>
-            </section>
-
-            <section id="wave-info" class="hidden">
-                <h2>Vagues de monstres</h2>
-                <p>Vague actuelle : <span id="current-wave">0</span></p>
-                <p>Prochaine vague dans : <span id="wave-timer"></span></p>
             </section>
 
             <section id="stats-section" class="hidden">
@@ -62,7 +78,6 @@
                     <div id="quest-log">
                         <h3>Quêtes en cours</h3>
                         <ul id="active-quests-list" class="quest-list"></ul>
-                    
                         <h3>Quêtes terminées</h3>
                         <ul id="completed-quests-list" class="quest-list"></ul>
                     </div>
@@ -75,18 +90,11 @@
             </section>
 
             <section id="equipement-section" class="hidden">
-                <h2>Equipement</h2>
+                <h2>Équipement</h2>
                 <div id="equipement-display"></div>
             </section>
 
-            <section id="no-character-section" class="hidden">
-                <h2>Préparez-vous à l'aventure</h2>
-                <p>Vous n'avez pas encore de personnage. Créez-en un pour commencer à jouer !</p>
-                <button>
-                    <a href="character.html" class="button">Créer mon premier personnage</a>
-                </button>
             </section>
-        </section>
         <div id="notification-container" class="notification-container"></div>
         <div id="progress-bar" class="progress-bar hidden"></div>
     </main>
@@ -112,6 +120,6 @@
     <script type="module" src="./js/data/puzzleData.js"></script>
     <script type="module" src="./js/data/quests.js"></script>
     <script type="module" src="./js/core/firebase_config.js"></script>
-    <script type="module" src="./js/core/gestion_personnage.js"></script>
+    <script type="module" src="./js/gestionPersonnageEntry.js"></script>
 </body>
 </html>
