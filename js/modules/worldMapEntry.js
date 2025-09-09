@@ -1,10 +1,10 @@
 // Fichier : js/worldMapEntry.js
 // Ce module est le point d'entrée pour la page de la carte du monde.
 
-import { initMap } from "./modules/map.js";
-import { updateUIBasedOnPage, updateJournalDisplay } from "./modules/ui.js";
-import { updateDungeonDetailsUI, updateActionButtonsUI, handleMapUIEvents } from "./modules/worldMapUI.js";
-import { player } from "./core/state.js";
+import { initMap } from "./map.js";
+import { updateUIBasedOnPage, updateJournalDisplay } from "./ui.js";
+import { updateDungeonDetailsUI, updateActionButtonsUI, handleMapUIEvents } from "./worldMapUI.js";
+import { player } from "../core/state.js";
 
 // Fonction d'initialisation de la page de la carte
 document.addEventListener('DOMContentLoaded', () => {
