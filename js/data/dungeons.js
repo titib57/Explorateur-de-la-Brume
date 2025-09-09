@@ -5,8 +5,8 @@ export const dungeonTypes = {
     name: "Anciennes Ruines",
     description: "Les vestiges d'une civilisation perdue. Attention aux pièges et aux gardiens oubliés.",
     difficulty: 3,
-    monsterPool: ["skeleton", "ghost", "golem"],
-    bossPool: ["ancient_guardian"],
+    monstersData: ["skeleton", "ghost", "golem"],
+    bossesData: ["ancient_guardian"],
     rewards: { gold: 500, items: ["ancient_relic", "rare_scroll"] },
     
     // NOUVELLES PROPRIÉTÉS POUR LA NARRATION
@@ -23,8 +23,8 @@ export const dungeonTypes = {
     name: "Caverne Souterraine",
     description: "Un réseau de grottes sombres, habitées par des créatures des profondeurs.",
     difficulty: 2,
-    monsterPool: ["goblin", "bat", "giant_spider"],
-    bossPool: ["cave_troll"],
+    monstersData: ["goblin", "bat", "giant_spider"],
+    bossesData: ["cave_troll"],
     rewards: { gold: 250, items: ["raw_gem", "poison_vial"] },
     
     // NOUVELLES PROPRIÉTÉS POUR LA NARRATION
@@ -41,8 +41,8 @@ export const dungeonTypes = {
     name: "Bois Sacré",
     description: "Un bosquet enchanteur, mais il est protégé par des esprits de la forêt.",
     difficulty: 4,
-    monsterPool: ["dryad", "treant", "fae"],
-    bossPool: ["forest_spirit"],
+    monstersData: ["dryad", "treant", "fae"],
+    bossesData: ["forest_spirit"],
     rewards: { gold: 750, items: ["enchanted_wood", "magical_herb"] },
     
     // NOUVELLES PROPRIÉTÉS POUR LA NARRATION
@@ -59,8 +59,8 @@ export const dungeonTypes = {
     name: "Donjon Oublié",
     description: "Un donjon générique, mystérieux et dangereux.",
     difficulty: 1,
-    monsterPool: ["slime", "rat", "giant_worm"],
-    bossPool: ["giant_rat"],
+    monstersData: ["slime", "rat", "giant_worm"],
+    bossesData: ["giant_rat"],
     rewards: { gold: 100, items: ["common_potion", "iron_sword"] },
     
     // NOUVELLES PROPRIÉTÉS POUR LA NARRATION

@@ -2,13 +2,10 @@
 
 import { player } from "../core/state.js";
 import { showNotification } from "../core/notifications.js";
-import {
-  initializeDungeonNarrator,
-  advanceDungeonStage,
-  getCurrentDungeonState,
-  handleChoice
-} from "../core/dungeonNarrator.js";
-import { monstersData, puzzlesData } from "../core/gameData.js";
+import { initializeDungeonNarrator, advanceDungeonStage, getCurrentDungeonState, handleChoice } from "../core/dungeonNarrator.js";
+import { puzzlesData } from "../core/gameData.js";
+import { monstersData, bossesData } from "../data/monsters.js";
+
 import { createDungeonData } from "../core/dungeonGenerator.js";
 import { getSelectedDungeon } from "./map.js";
 import { handleLogout } from "../core/authManager.js";
