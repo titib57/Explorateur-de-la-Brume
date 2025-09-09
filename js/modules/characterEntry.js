@@ -2,7 +2,7 @@
 // Ce script agit comme le point d'entrée pour la page de création de personnage.
 
 import { createNewCharacter, startAuthListener, deleteCharacter } from '../core/authManager.js';
-import { showCreationUI } from './modules/ui.js';
+import { showCreationUI } from './ui.js';
 
 // Récupère un élément du DOM par son ID.
 const getElement = id => document.getElementById(id);
