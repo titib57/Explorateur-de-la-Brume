@@ -5,7 +5,7 @@
  * Les propriétés du donjon sont mises à l'échelle en fonction du niveau du joueur.
  */
 
-import { dungeonTypes } from '../data/dungeon.js';
+import { dungeonTypes } from '../data/dungeons.js';
 import { monstersData, bossesData } from './gameData.js';
 import { calculateDistance } from '../utils/geoUtils.js';
 
