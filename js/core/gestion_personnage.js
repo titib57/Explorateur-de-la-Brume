@@ -1,9 +1,9 @@
 // Fichier : js/gestion_personnage.js
 // Ce fichier est le point d'entrée pour la page de gestion du personnage.
 
-import { startAuthListener, deleteCharacter, handleSignOut } from './core/authManager.js';
-import { updateUIBasedOnPage } from './modules/ui.js';
-import { player } from './core/state.js';
+import { startAuthListener, deleteCharacter, handleSignOut } from './authManager.js';
+import { updateUIBasedOnPage } from '../modules/ui.js';
+import { player } from './state.js';
 
 // Récupération des éléments du DOM
 const getElement = id => document.getElementById(id);
