@@ -3,7 +3,7 @@
 
 import { player, recalculateDerivedStats } from './state.js';
 import { questsData } from './questsData.js';
-import { itemsData } from './gameData.js';
+import { itemsData } from '../data/items.js';
 import { showNotification } from './notifications.js';
 import { saveCharacterData } from './authManager.js';
 import { updateUIBasedOnPage } from '../modules/ui.js';
