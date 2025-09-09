@@ -3,35 +3,10 @@
 
 import { player } from "../core/state.js";
 import { questsData } from '../core/questsData.js';
-import { acceptQuest } from '../core/gameEngine.js';
-import { createNewCharacter, deleteCharacter, handleSignOut } from '../core/authManager.js';
 import { showNotification } from "../core/notifications.js";
 
 // Récupération des éléments du DOM
 const getElement = id => document.getElementById(id);
-
-const noCharacterSection = getElement('no-character-section');
-const characterSection = getElement('character-section');
-const characterDisplay = getElement('character-display');
-const loadingMessage = getElement('loading-message');
-const playBtn = getElement('play-btn');
-const deleteBtn = getElement('delete-btn');
-const updateBtn = getElement('update-btn');
-const statsDisplay = getElement('stats-display');
-const questsDisplay = getElement('quests-display');
-const inventoryDisplay = getElement('inventory-display');
-const equipmentDisplay = getElement('equipment-display');
-const characterInfoDisplay = getElement('character-info-display');
-const characterForm = getElement('character-form');
-const characterExistsSection = getElement('character-exists-section');
-const existingCharacterDisplay = getElement('existing-character-display');
-const deleteBtnOnCharacterPage = getElement('delete-btn-creation-page');
-const logoutLink = getElement('logout-link');
-
-// Variables pour le journal de bord
-const hpValue = getElement('hp-value');
-const goldValue = getElement('gold-value');
-const levelValue = getElement('level-value');
 
 // =========================================================================
 // FONCTIONS DE GESTION DE L'AFFICHAGE
@@ -63,7 +38,6 @@ export function renderQuestDisplay(character) {
         li.textContent = "Aucune quête active pour le moment.";
         if (activeQuestsList) activeQuestsList.appendChild(li);
     }
-    // ... (le reste de la fonction est inchangé)
     for (const questId in questsData) {
         const isCompleted = character.quests.completed && character.quests.completed[questId];
         const isActive = character.quests.current && character.quests.current.questId === questId;
@@ -83,48 +57,93 @@ export function renderQuestDisplay(character) {
  */
 export function renderCharacter(character) {
     if (!character) return;
-    if (characterDisplay) {
-        characterDisplay.innerHTML = `<h3>${character.name}</h3><p>Niveau : ${character.level}</p><p>Points de vie : ${character.hp}/${character.maxHp}</p><p>Points de magie : ${character.mana}/${character.maxMana}</p><p>Or : ${character.gold}</p>`;
-    }
-    if (statsDisplay && character.stats) {
-        statsDisplay.innerHTML = `<p>Force : ${character.stats.strength}</p><p>Intelligence : ${character.stats.intelligence}</p><p>Vitesse : ${character.stats.speed}</p><p>Dextérité : ${character.stats.dexterity}</p>`;
-    }
-    renderQuestDisplay(character);
-    if (equipmentDisplay && character.equipment) {
-        equipmentDisplay.innerHTML = `<p>Arme : ${character.equipment.weapon ? character.equipment.weapon.name : 'Aucune'}</p><p>Armure : ${character.equipment.armor ? character.equipment.armor.name : 'Aucune'}</p>`;
-    }
-    const sectionsToDisplay = ['character-section', 'stats-section', 'quest-section', 'inventory-section', 'equipement-section'];
-    sectionsToDisplay.forEach(id => {
-        const section = getElement(id);
-        if (section) section.classList.remove('hidden');
-    });
-    if (loadingMessage) loadingMessage.classList.add('hidden');
-    if (playBtn) playBtn.classList.remove('hidden');
-    if (deleteBtn) deleteBtn.classList.remove('hidden');
-    if (updateBtn) updateBtn.classList.remove('hidden');
+    const loadingMessageContainer = getElement('loading-message-container');
+    const mainContent = getElement('main-content');
+    
+    if (loadingMessageContainer) loadingMessageContainer.classList.add('hidden');
+    if (mainContent) mainContent.classList.remove('hidden');
+
+    // Mettre à jour les informations du personnage
+    const playerName = getElement('player-name');
+    if (playerName) playerName.textContent = character.name;
+    const playerClass = getElement('player-class');
+    if (playerClass) playerClass.textContent = character.playerClass;
+    const playerLevel = getElement('player-level');
+    if (playerLevel) playerLevel.textContent = character.level;
+    const playerGold = getElement('player-gold');
+    if (playerGold) playerGold.textContent = character.gold;
+    const playerStatPoints = getElement('player-stat-points');
+    if (playerStatPoints) playerStatPoints.textContent = character.statPoints;
+
+    const hpBar = getElement('hp-bar');
+    if (hpBar) hpBar.style.width = `${(character.hp / character.maxHp) * 100}%`;
+    const manaBar = getElement('mana-bar');
+    if (manaBar) manaBar.style.width = `${(character.mana / character.maxMana) * 100}%`;
+
+    const currentHp = getElement('current-hp');
+    if (currentHp) currentHp.textContent = character.hp;
+    const maxHp = getElement('max-hp');
+    if (maxHp) maxHp.textContent = character.maxHp;
+
+    const currentMana = getElement('current-mana');
+    if (currentMana) currentMana.textContent = character.mana;
+    const maxMana = getElement('max-mana');
+    if (maxMana) maxMana.textContent = character.maxMana;
+
+    const characterExistsSection = getElement('character-exists-section');
+    const noCharacterSection = getElement('no-character-section');
+    
+    if (characterExistsSection) characterExistsSection.classList.remove('hidden');
+    if (noCharacterSection) noCharacterSection.classList.add('hidden');
 }
 
-// ... (fonctions inchangées) ...
-export function renderExistingCharacterOnCreationPage(character) {
-    if (!existingCharacterDisplay) return;
-    existingCharacterDisplay.innerHTML = `<div class="character-card"><h3>${character.name}</h3><p>Niveau : ${character.level}</p><p>Points de vie : ${character.hp}</p><p>Points de magie : ${character.mana}</p></div>`;
-    if (loadingMessage) loadingMessage.classList.add('hidden');
+/**
+ * Affiche l'interface de création de personnage.
+ */
+export function showCreationUI() {
+    const loadingMessageContainer = getElement('loading-message-container');
+    const noCharacterSection = getElement('no-character-section');
+
+    if (loadingMessageContainer) loadingMessageContainer.classList.add('hidden');
+    if (noCharacterSection) noCharacterSection.classList.remove('hidden');
 }
 
+/**
+ * Affiche le message de "pas de personnage".
+ */
 export function showNoCharacterView() {
-    if (characterSection) characterSection.classList.add('hidden');
+    const loadingMessageContainer = getElement('loading-message-container');
+    const noCharacterSection = getElement('no-character-section');
+    const characterExistsSection = getElement('character-exists-section');
+
+    if (loadingMessageContainer) loadingMessageContainer.classList.add('hidden');
     if (noCharacterSection) noCharacterSection.classList.remove('hidden');
     if (characterExistsSection) characterExistsSection.classList.add('hidden');
-    if (characterForm) characterForm.classList.remove('hidden');
 }
 
+/**
+ * Affiche l'interface pour un personnage existant (sur la page de création).
+ * @param {object} character Les données du personnage existant.
+ */
 export function showCharacterExistsView(character) {
+    const loadingMessageContainer = getElement('loading-message-container');
+    const noCharacterSection = getElement('no-character-section');
+    const characterExistsSection = getElement('character-exists-section');
+
+    if (loadingMessageContainer) loadingMessageContainer.classList.add('hidden');
     if (noCharacterSection) noCharacterSection.classList.add('hidden');
-    if (characterForm) characterForm.classList.add('hidden');
     if (characterExistsSection) characterExistsSection.classList.remove('hidden');
-    renderExistingCharacterOnCreationPage(character);
+
+    const existingCharacterDisplay = getElement('existing-character-display');
+    if (existingCharacterDisplay) {
+        existingCharacterDisplay.innerHTML = `<div class="character-card"><h3>${character.name}</h3><p>Niveau : ${character.level}</p><p>Points de vie : ${character.hp}</p><p>Points de magie : ${character.mana}</p></div>`;
+    }
 }
 
+/**
+ * Met à jour le journal de bord.
+ * @param {object} character Les données du personnage.
+ */
 export function updateJournalDisplay(character) {
     if (!character) return;
     const journalContainer = getElement('journal-container');
@@ -140,11 +159,12 @@ export function updateJournalDisplay(character) {
             journalContainer.appendChild(entryElement);
         });
     }
-    if (hpValue) hpValue.textContent = `${character.hp} / ${character.maxHp}`;
-    if (goldValue) goldValue.textContent = character.gold;
-    if (levelValue) levelValue.textContent = character.level;
 }
 
+/**
+ * Met à jour l'affichage de la page des quêtes.
+ * @param {object} character Les données du personnage.
+ */
 export function renderQuestsPage(character) {
     const questsPageContainer = getElement('quests-page-container');
     if (!questsPageContainer) return;
@@ -152,25 +172,31 @@ export function renderQuestsPage(character) {
     renderQuestDisplay(character);
 }
 
-// LIGNES SUPPRIMÉES : Toutes les fonctions spécifiques à la carte
-
 // =========================================================================
-// FONCTION CENTRALE DE MISE À JOUR (mise à jour)
+// FONCTION CENTRALE DE MISE À JOUR
 // =========================================================================
 
+/**
+ * Fonction centrale pour mettre à jour l'UI en fonction de la page et de l'état du personnage.
+ * @param {object} character Les données du personnage.
+ */
 export function updateUIBasedOnPage(character) {
     const currentPage = window.location.pathname.split('/').pop();
     switch (currentPage) {
         case 'gestion_personnage.html':
             if (character) renderCharacter(character);
-            else window.location.href = "character.html";
+            else {
+                // Si l'utilisateur est sur la page de gestion mais sans personnage,
+                // on le redirige vers la page de création.
+                window.location.href = "character.html";
+            }
             break;
         case 'quests.html':
             if (character) renderQuestsPage(character);
             break;
         case 'character.html':
             if (character) showCharacterExistsView(character);
-            else showNoCharacterView();
+            else showCreationUI();
             break;
         default:
             console.warn("Mise à jour de l'UI non définie pour cette page.");
@@ -178,40 +204,15 @@ export function updateUIBasedOnPage(character) {
 }
 
 // =========================================================================
-// GESTION DES ÉVÉNEMENTS
+// Exports publics
 // =========================================================================
 
-document.addEventListener('DOMContentLoaded', () => {
-    if (characterForm) {
-        characterForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('char-name').value.trim();
-            const charClass = document.getElementById('char-class').value;
-            createNewCharacter(name, charClass);
-        });
-    }
-    if (deleteBtnOnCharacterPage) {
-        deleteBtnOnCharacterPage.addEventListener('click', deleteCharacter);
-    }
-    if (deleteBtn) {
-        deleteBtn.addEventListener('click', deleteCharacter);
-    }
-    if (logoutLink) {
-        logoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            handleSignOut();
-        });
-    }
-    if (updateBtn) {
-        updateBtn.addEventListener('click', () => { window.location.href = "character.html"; });
-    }
-    document.addEventListener('click', (event) => {
-        if (event.target.classList.contains('accept-quest-btn')) {
-            const questId = event.target.dataset.questId;
-            acceptQuest(questId);
-        }
-    });
-
-    // LIGNE SUPPRIMÉE : La gestion des événements de la carte est maintenant dans son propre module.
-    // handleMapUIEvents();
-});
+export {
+    renderCharacter,
+    showNoCharacterView,
+    showCharacterExistsView,
+    showCreationUI,
+    updateJournalDisplay,
+    renderQuestsPage,
+    updateUIBasedOnPage
+};
