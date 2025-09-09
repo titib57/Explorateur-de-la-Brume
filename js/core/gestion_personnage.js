@@ -1,10 +1,9 @@
 // Fichier : js/gestion_personnage.js
 // Ce script agit comme le point d'entrée pour la page de gestion du personnage.
 
-import { startAuthListener, deleteCharacter, handleSignOut } from './core/authManager.js';
-import { player } from './core/state.js';
-import { updateUIBasedOnPage, renderCharacter, renderQuestsPage } from './modules/ui.js';
-import { updateStatsDisplay, updateInventoryDisplay, updateEquipmentDisplay } from './game/display.js';
+import { startAuthListener, deleteCharacter, handleSignOut } from './authManager.js';
+import { player } from './state.js';
+import { updateUIBasedOnPage, renderCharacter, renderQuestsPage, updateStatsDisplay, updateInventoryDisplay, updateEquipmentDisplay } from '../modules/ui.js';
 
 /**
  * Récupère un élément du DOM par son ID.

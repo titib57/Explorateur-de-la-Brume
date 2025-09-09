@@ -19,18 +19,22 @@ const getElement = id => document.getElementById(id);
 export function renderQuestDisplay(character) {
     if (!character) return;
     const activeQuestsList = getElement('active-quests-list');
-    const unstartedQuestsList = getElement('unstarted-quests-list');
     const completedQuestsList = getElement('completed-quests-list');
 
+    // Nettoyer les listes avant de les remplir
     if (activeQuestsList) activeQuestsList.innerHTML = '';
-    if (unstartedQuestsList) unstartedQuestsList.innerHTML = '';
     if (completedQuestsList) completedQuestsList.innerHTML = '';
 
+    // Rendre la quête active
     if (character.quests.current) {
         const questData = questsData[character.quests.current.questId];
         if (questData) {
             const li = document.createElement('li');
-            li.innerHTML = `<h4>${questData.title}</h4><p>${questData.description}</p><p>Progression : ${character.quests.current.currentProgress || 0} / ${questData.objective.required}</p>`;
+            li.innerHTML = `
+                <h4>${questData.title}</h4>
+                <p>${questData.description}</p>
+                <p>Progression : ${character.quests.current.currentProgress || 0} / ${questData.objective.required}</p>
+            `;
             if (activeQuestsList) activeQuestsList.appendChild(li);
         }
     } else {
@@ -38,15 +42,16 @@ export function renderQuestDisplay(character) {
         li.textContent = "Aucune quête active pour le moment.";
         if (activeQuestsList) activeQuestsList.appendChild(li);
     }
-    for (const questId in questsData) {
-        const isCompleted = character.quests.completed && character.quests.completed[questId];
-        const isActive = character.quests.current && character.quests.current.questId === questId;
-
-        if (!isCompleted && !isActive) {
+    
+    // Rendre les quêtes terminées
+    if (character.quests.completed) {
+        for (const questId in character.quests.completed) {
             const questData = questsData[questId];
-            const li = document.createElement('li');
-            li.innerHTML = `<h4>${questData.title}</h4><p>${questData.description}</p><button class="accept-quest-btn" data-quest-id="${questId}">Accepter</button>`;
-            if (unstartedQuestsList) unstartedQuestsList.appendChild(li);
+            if (questData) {
+                const li = document.createElement('li');
+                li.innerHTML = `<h4>${questData.title}</h4><p>${questData.description}</p><p>✅ Terminée</p>`;
+                if (completedQuestsList) completedQuestsList.appendChild(li);
+            }
         }
     }
 }
@@ -90,11 +95,11 @@ export function renderCharacter(character) {
     const maxMana = getElement('max-mana');
     if (maxMana) maxMana.textContent = character.maxMana;
 
-    const characterExistsSection = getElement('character-exists-section');
-    const noCharacterSection = getElement('no-character-section');
-    
-    if (characterExistsSection) characterExistsSection.classList.remove('hidden');
-    if (noCharacterSection) noCharacterSection.classList.add('hidden');
+    // Afficher les boutons de jeu et de suppression
+    const playBtn = getElement('play-btn');
+    const deleteBtn = getElement('delete-btn');
+    if (playBtn) playBtn.classList.remove('hidden');
+    if (deleteBtn) deleteBtn.classList.remove('hidden');
 }
 
 /**
@@ -182,6 +187,82 @@ export function renderQuestsPage(character) {
 }
 
 // =========================================================================
+// NOUVELLES FONCTIONS DE RENDU
+// =========================================================================
+
+/**
+ * Met à jour l'affichage des statistiques détaillées du personnage.
+ * @param {object} character Les données du personnage.
+ */
+export function updateStatsDisplay(character) {
+    if (!character || !character.stats) return;
+    const statsDisplay = getElement('stats-display');
+    if (!statsDisplay) return;
+
+    statsDisplay.innerHTML = `
+        <div class="stat-item">
+            <span class="stat-label">Force:</span>
+            <span class="stat-value">${character.stats.strength}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Dextérité:</span>
+            <span class="stat-value">${character.stats.dexterity}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Intelligence:</span>
+            <span class="stat-value">${character.stats.intelligence}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Vitalité:</span>
+            <span class="stat-value">${character.stats.vitality}</span>
+        </div>
+    `;
+}
+
+/**
+ * Met à jour l'affichage de l'inventaire du personnage.
+ * @param {object} character Les données du personnage.
+ */
+export function updateInventoryDisplay(character) {
+    if (!character || !character.inventory) return;
+    const inventoryGrid = getElement('inventory-items-grid');
+    if (!inventoryGrid) return;
+
+    inventoryGrid.innerHTML = ''; // Effacer l'inventaire actuel
+
+    character.inventory.forEach(item => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'item-slot';
+        itemElement.innerHTML = `
+            <img src="${item.icon}" alt="${item.name}">
+            <span class="item-name">${item.name}</span>
+            <span class="item-quantity">${item.quantity}</span>
+        `;
+        // Ajouter un écouteur d'événement pour l'équiper (logique à implémenter)
+        itemElement.addEventListener('click', () => {
+            console.log(`Vous avez cliqué sur l'objet: ${item.name}`);
+        });
+        inventoryGrid.appendChild(itemElement);
+    });
+}
+
+/**
+ * Met à jour l'affichage de l'équipement du personnage.
+ * @param {object} character Les données du personnage.
+ */
+export function updateEquipmentDisplay(character) {
+    if (!character || !character.equipment) return;
+    const equipmentDisplay = getElement('equipement-display');
+    if (!equipmentDisplay) return;
+
+    equipmentDisplay.innerHTML = `
+        <div class="equipment-slot">Arme: ${character.equipment.weapon ? character.equipment.weapon.name : 'Aucun'}</div>
+        <div class="equipment-slot">Armure: ${character.equipment.armor ? character.equipment.armor.name : 'Aucun'}</div>
+        <div class="equipment-slot">Casque: ${character.equipment.helmet ? character.equipment.helmet.name : 'Aucun'}</div>
+    `;
+}
+
+// =========================================================================
 // FONCTION CENTRALE DE MISE À JOUR
 // =========================================================================
 
@@ -195,8 +276,6 @@ export function updateUIBasedOnPage(character) {
         case 'gestion_personnage.html':
             if (character) renderCharacter(character);
             else {
-                // Si l'utilisateur est sur la page de gestion mais sans personnage,
-                // on le redirige vers la page de création.
                 window.location.href = "character.html";
             }
             break;
