@@ -2,108 +2,107 @@
 <html lang="fr">
 <head>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion de Personnages</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion de Personnage</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header class="game-header">
-        <div class="container">
-            <h1>Gestion du Personnage</h1>
-            <nav>
-                <a id="world-map-link" href="world_map.html">Carte du monde</a>
-                <a href="gestion_personnage.html">Personnage</a>
-                <a href="quests.html">Livre des Quêtes</a>
-                <a href="#" id="logout-link" class="button">Se déconnecter</a>
-            </nav>
-        </div>
-    </header>
+    <header class="game-header">
+        <div class="container">
+            <h1>Gestion du Personnage</h1>
+            <nav>
+                <a id="world-map-link" href="world_map.html">Carte du monde</a>
+                <a href="gestion_personnage.html">Personnage</a>
+                <a href="quests.html">Livre des Quêtes</a>
+                <a href="#" id="logout-link" class="button">Se déconnecter</a>
+            </nav>
+        </div>
+    </header>
 
-    <main class="game-container">
-                <section id="loading-message-container">
-            <p>Vérification de votre connexion et de vos données...</p>
-        </section>
+    <main class="game-container">
+        <section id="loading-message-container">
+            <p>Vérification de votre connexion et de vos données...</p>
+        </section>
 
-                <div id="main-content" class="hidden">
-                        <nav id="section-nav">
-                <a href="#character-section" class="nav-item">
-                    <span class="nav-icon">👤</span>
-                    <span class="nav-text">Personnage</span>
-                </a>
-                <a href="#stats-section" class="nav-item">
-                    <span class="nav-icon">📊</span>
-                    <span class="nav-text">Statistiques</span>
-                </a>
-                <a href="#quest-section" class="nav-item">
-                    <span class="nav-icon">📜</span>
-                    <span class="nav-text">Quêtes</span>
-                </a>
-                <a href="#inventory-section" class="nav-item">
-                    <span class="nav-icon">🎒</span>
-                    <span class="nav-text">Inventaire</span>
-                </a>
-                <a href="#equipement-section" class="nav-item">
-                    <span class="nav-icon">⚔️</span>
-                    <span class="nav-text">Équipement</span>
-                </a>
-            </nav>
-            
-            <section id="no-character-section" class="hidden">
-                <h2>Préparez-vous à l'aventure</h2>
-                <p>Vous n'avez pas encore de personnage. Créez-en un pour commencer à jouer !</p>
-                <button>
-                    <a href="character.html" class="button">Créer mon premier personnage</a>
-                </button>
-            </section>
-            
-            <section id="character-section" class="hidden">
-                <h2>Mon personnage</h2>
-                <div id="character-display"></div>
-                <div class="flex">
-                    <button id="play-btn" class="hidden">Commencer l'aventure</button>
-                    <br>
-                    <button id="delete-btn" class="hidden">Supprimer le personnage</button>
-                </div>
-            </section>
-            
-            <section id="stats-section" class="hidden">
-                <h2>Statistiques</h2>
-                <div id="stats-display"></div>
-            </section>
+        <div id="main-content" class="hidden">
+            <nav id="section-nav">
+                <a href="#character-section" class="nav-item active-nav-item">
+                    <span class="nav-icon">👤</span>
+                    <span class="nav-text">Personnage</span>
+                </a>
+                <a href="#stats-section" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Statistiques</span>
+                </a>
+                <a href="#quest-section" class="nav-item">
+                    <span class="nav-icon">📜</span>
+                    <span class="nav-text">Quêtes</span>
+                </a>
+                <a href="#inventory-section" class="nav-item">
+                    <span class="nav-icon">🎒</span>
+                    <span class="nav-text">Inventaire</span>
+                </a>
+                <a href="#equipement-section" class="nav-item">
+                    <span class="nav-icon">⚔️</span>
+                    <span class="nav-text">Équipement</span>
+                </a>
+            </nav>
+            
+            <section id="no-character-section" class="hidden">
+                <h2>Préparez-vous à l'aventure</h2>
+                <p>Vous n'avez pas encore de personnage. Créez-en un pour commencer à jouer !</p>
+                <button>
+                    <a href="character.html" class="button">Créer mon premier personnage</a>
+                </button>
+            </section>
+            
+            <section id="character-section">
+                <h2>Mon Personnage</h2>
+                <div id="character-display"></div>
+                <div class="flex">
+                    <button id="play-btn">Commencer l'aventure</button>
+                    <button id="delete-btn">Supprimer le personnage</button>
+                </div>
+            </section>
+            
+            <section id="stats-section" class="hidden">
+                <h2>Statistiques</h2>
+                <div id="stats-display"></div>
+            </section>
 
-            <section id="quest-section" class="hidden">
-                <h2>Quêtes</h2>
-                <div id="quests-display">
-                    <div id="quest-log">
-                        <h3>Quêtes en cours</h3>
-                        <ul id="active-quests-list" class="quest-list"></ul>
-                        <h3>Quêtes terminées</h3>
-                        <ul id="completed-quests-list" class="quest-list"></ul>
-                    </div>
-                </div>
-            </section>
+            <section id="quest-section" class="hidden">
+                <h2>Quêtes</h2>
+                <div id="quests-display">
+                    <div id="quest-log">
+                        <h3>Quêtes en cours</h3>
+                        <ul id="active-quests-list" class="quest-list"></ul>
+                        <h3>Quêtes terminées</h3>
+                        <ul id="completed-quests-list" class="quest-list"></ul>
+                    </div>
+                </div>
+            </section>
 
-            <section id="inventory-section" class="hidden">
-                <h2>Inventaire</h2>
-                <div id="inventory-items-grid" class="item-grid"></div>
-            </section>
+            <section id="inventory-section" class="hidden">
+                <h2>Inventaire</h2>
+                <div id="inventory-items-grid" class="item-grid"></div>
+            </section>
 
-            <section id="equipement-section" class="hidden">
-                <h2>Équipement</h2>
-                <div id="equipement-display"></div>
-            </section>
-        </div>
-    </main>
+            <section id="equipement-section" class="hidden">
+                <h2>Équipement</h2>
+                <div id="equipement-display"></div>
+            </section>
+        </div>
+    </main>
 
-    <div id="notification-container" class="notification-container"></div>
-    <div id="progress-bar" class="progress-bar hidden"></div>
+    <div id="notification-container" class="notification-container"></div>
+    <div id="progress-bar" class="progress-bar hidden"></div>
 
-    <footer class="game-footer">
-        <p>© 2025 Explorateur de la Brume. Tous droits réservés. Titib.</p>
-    </footer>
+    <footer class="game-footer">
+        <p>© 2025 Explorateur de la Brume. Tous droits réservés. Titib.</p>
+    </footer>
 
-        <script type="module" src="./js/core/gestion_personnage.js"></script>
+    <script type="module" src="./js/core/gestion_personnage.js"></script>
 </body>
 </html>
