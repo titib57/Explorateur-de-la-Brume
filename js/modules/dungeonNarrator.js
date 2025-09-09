@@ -5,9 +5,9 @@
  * incluant les descriptions, les combats, les énigmes et les choix.
  */
 
-import { player } from "./state.js"; // Pour les PV du joueur, etc.
-import { showNotification } from "./notifications.js"; // Pour les retours visuels
-import { monstersData, puzzlesData } from './gameData.js'; // Assurez-vous d'avoir des `puzzlesData`
+import { player } from "../core/state.js"; // Pour les PV du joueur, etc.
+import { showNotification } from "../core/notifications.js"; // Pour les retours visuels
+import { monstersData, puzzlesData } from '../core/gameData.js'; // Assurez-vous d'avoir des `puzzlesData`
 import { saveCharacterData } from "../core/authManager.js"; 
 
 /**
