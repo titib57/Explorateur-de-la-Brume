@@ -6,6 +6,7 @@ import { questsData } from '../core/questsData.js';
 import { player } from '../core/state.js';
 import { updateUIBasedOnPage } from './ui.js';
 import { updateQuestProgress } from '../core/gameEngine.js';
+import { handleStartBattleClick } from '../core/mapActions.js'; // Import de la fonction de mapActions.js
 
 // Définition des icônes personnalisées
 const playerIcon = L.icon({
@@ -27,6 +28,12 @@ let playerMarker;
 let selectedDungeon = null;
 let dungeonMarkers;
 let lastKnownPosition = null;
+
+// Gère le clic sur le bouton "Entrer dans le donjon"
+const startBattleButton = document.getElementById('start-battle-button');
+if (startBattleButton) {
+    startBattleButton.addEventListener('click', handleStartBattleClick);
+}
 
 /**
  * Initialise la carte et la géolocalisation.
@@ -80,18 +87,9 @@ export function recenterMap() {
     }
 }
 
-/**
- * Démarre une bataille si un donjon est sélectionné et à portée.
- */
-export function startDungeonBattle() {
-    if (selectedDungeon) {
-        // Logique de démarrage de la bataille.
-        // On utilisera une redirection pour cet exemple.
-        window.location.href = 'battle.html';
-    } else {
-        showNotification("Veuillez sélectionner un donjon pour y entrer.", 'warning');
-    }
-}
+// NOTE: La fonction startDungeonBattle() n'est plus nécessaire ici.
+// La logique a été déplacée vers mapActions.js.
+// C'est maintenant le bouton "start-battle-button" qui appelle directement mapActions.js
 
 /**
  * Met à jour la position du joueur sur la carte.
@@ -161,6 +159,7 @@ function loadDungeons(playerData, playerLatLng) {
             name: 'Donjon du Tutoriel',
             location: playerData.safePlaceLocation,
             isTutorial: true,
+            dungeonType: 'underground_cave', // Ajout du type de donjon
         };
         const tutorialMarker = L.marker(tutorialDungeon.location, { icon: dungeonIcon }).addTo(dungeonMarkers);
         tutorialMarker.bindTooltip(tutorialDungeon.name, { permanent: true, direction: "top" });
