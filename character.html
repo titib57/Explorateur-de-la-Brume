@@ -1,69 +1,72 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Créer un personnage - Explorateur de la Brume</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un personnage - Explorateur de la Brume</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <header class="game-header">
-        <h1>Explorateur de la Brume</h1>
-        <p class="text-xs text-gray-400">ID utilisateur : <span id="user-id-display"></span></p>
-    </header>
+    <header class="game-header">
+        <h1>Explorateur de la Brume</h1>
+        <p class="text-xs text-gray-400">ID utilisateur : <span id="user-id-display"></span></p>
+    </header>
 
-    <main class="game-container">
-        <div id="character-exists-section" class="hidden game-card">
-            <h2>Vous avez déjà un personnage</h2>
-            <div id="existing-character-display">
-                <p id="loading-message">Chargement de votre personnage...</p>
-            </div>
-            <p>Pour en créer un nouveau, vous devez d'abord le supprimer.</p>
-            <button id="delete-btn-creation-page">Supprimer le personnage</button> 
-            <a href="gestion_personnage.html" class="button">Retour à la gestion</a>
-        </div>
+    <main class="game-container">
+                <div id="loading-message-container">
+            <p>Vérification de votre connexion...</p>
+        </div>
 
-        <div id="no-character-section" class="hidden game-card">
-            <h2 id="form-title">Création de personnage</h2>
-            <form id="character-form">
-                <fieldset>
-                    <legend>Informations de base</legend>
-                    <div class="form-group">
-                        <label for="char-name">Pseudo :</label>
-                        <input type="text" id="char-name" required placeholder="Saisissez un nom">
-                    </div>
-                    <div class="form-group">
-                        <label for="char-age">Âge :</label>
-                        <input type="number" id="char-age" min="15" max="100" value="20">
-                    </div>
-                    <div class="form-group">
-                        <label for="char-height">Taille (cm) :</label>
-                        <input type="number" id="char-height" min="150" max="220" value="175">
-                    </div>
-                    <div class="form-group">
-                        <label for="char-weight">Poids (kg) :</label>
-                        <input type="number" id="char-weight" min="50" max="150" value="70">
-                    </div>
-                </fieldset>
-                
-                <div class="form-group">
-                    <label for="char-class">Classe :</label>
-                    <select id="char-class">
-                        <option value="explorateur">Explorateur</option>
-                    </select>
-                </div>
-                <button type="submit">Créer</button>
-            </form>
-        </div>
-    </main>
+                <div id="character-exists-section" class="hidden game-card">
+            <h2>Vous avez déjà un personnage</h2>
+            <div id="existing-character-display">
+                <p>Chargement de votre personnage...</p>
+            </div>
+            <p>Pour en créer un nouveau, vous devez d'abord le supprimer.</p>
+            <button id="delete-btn-creation-page">Supprimer le personnage</button> 
+            <a href="gestion_personnage.html" class="button">Retour à la gestion</a>
+        </div>
 
-    <div id="notification-container"></div>
-    <footer class="game-footer">
-        <p>© 2025 Explorateur de la Brume. Tous droits réservés. Titib.</p>
-    </footer>
-    
-    <script type="module" src="./js/core/authManager.js"></script>
-    <script type="module" src="./js/modules/ui.js"></script>
+        <div id="no-character-section" class="hidden game-card">
+            <h2 id="form-title">Création de personnage</h2>
+            <form id="character-form">
+                <fieldset>
+                    <legend>Informations de base</legend>
+                    <div class="form-group">
+                        <label for="char-name">Pseudo :</label>
+                        <input type="text" id="char-name" required placeholder="Saisissez un nom">
+                    </div>
+                    <div class="form-group">
+                        <label for="char-age">Âge :</label>
+                        <input type="number" id="char-age" min="15" max="100" value="20">
+                    </div>
+                    <div class="form-group">
+                        <label for="char-height">Taille (cm) :</label>
+                        <input type="number" id="char-height" min="150" max="220" value="175">
+                    </div>
+                    <div class="form-group">
+                        <label for="char-weight">Poids (kg) :</label>
+                        <input type="number" id="char-weight" min="50" max="150" value="70">
+                    </div>
+                </fieldset>
+                
+                <div class="form-group">
+                    <label for="char-class">Classe :</label>
+                    <select id="char-class">
+                        <option value="explorateur">Explorateur</option>
+                    </select>
+                </div>
+                <button type="submit">Créer</button>
+            </form>
+        </div>
+    </main>
+
+    <div id="notification-container"></div>
+    <footer class="game-footer">
+        <p>© 2025 Explorateur de la Brume. Tous droits réservés. Titib.</p>
+    </footer>
+    
+        <script type="module" src="./js/characterEntry.js"></script>
 </body>
 </html>

@@ -1,22 +1,18 @@
-// Fichier : js/core/authManager.js
+// Fichier: js/core/authManager.js
 
 import { auth, db } from './firebase_config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { Character, setPlayer, recalculateDerivedStats, createCharacterData } from './state.js';
 import { showNotification } from './notifications.js';
-import { updateUIBasedOnPage } from '../modules/ui.js';
+import { updateUIBasedOnPage, showCreationUI, showNoCharacterView } from '../modules/ui.js';
 
 export let userId = null;
 
-// Référence à la collection de personnages
 function getCharacterRef(userUID) {
     return doc(db, "artifacts", "default-app-id", "users", userUID, "characters", userUID);
 }
 
-/**
- * Gère la déconnexion de l'utilisateur.
- */
 export async function handleSignOut() {
     try {
         await signOut(auth);
@@ -27,17 +23,14 @@ export async function handleSignOut() {
     }
 }
 
-/**
- * Sauvegarde les données du personnage dans Firestore.
- * @param {object} playerData Les données du personnage à sauvegarder.
- */
 export async function saveCharacterData(playerData) {
     if (!userId) {
-        console.error("Erreur : Utilisateur non authentifié.");
+        console.error("Erreur : Utilisateur non authentifié. L'opération de sauvegarde a été annulée.");
         showNotification("Erreur : Utilisateur non authentifié.", "error");
         return;
     }
     const dataToSave = {
+        // ... (votre code pour `dataToSave` reste le même) ...
         name: playerData.name || 'Unknown',
         playerClass: playerData.playerClass || 'Adventurer',
         level: playerData.level || 1,
@@ -67,11 +60,6 @@ export async function saveCharacterData(playerData) {
     }
 }
 
-/**
- * Gère la création d'un nouveau personnage.
- * @param {string} name Le nom du personnage.
- * @param {string} charClass La classe du personnage.
- */
 export async function createNewCharacter(name, charClass) {
     const user = auth.currentUser;
     if (!user) {
@@ -82,15 +70,14 @@ export async function createNewCharacter(name, charClass) {
     try {
         await saveCharacterData(newCharacterData);
         showNotification("Personnage créé avec succès !", "success");
+        // Redirection après la création réussie
+        window.location.href = "gestion_personnage.html";
     } catch (error) {
         console.error("Erreur lors de la création du personnage :", error);
         showNotification("Erreur lors de la création. Veuillez réessayer.", "error");
     }
 }
 
-/**
- * Gère la suppression du personnage actuel.
- */
 export async function deleteCharacter() {
     if (!userId) {
         showNotification("Vous devez être connecté pour supprimer un personnage.", "error");
@@ -100,6 +87,7 @@ export async function deleteCharacter() {
     try {
         await deleteDoc(characterRef);
         showNotification("Personnage supprimé avec succès !", "info");
+        window.location.href = "character.html"; // Rediriger vers la page de création
     } catch (error) {
         console.error("Erreur lors de la suppression du personnage :", error);
         showNotification("Erreur lors de la suppression. Veuillez réessayer.", "error");
@@ -108,44 +96,55 @@ export async function deleteCharacter() {
 
 /**
  * Démarre l'écoute de l'état d'authentification et des données du joueur.
+ * @param {string} pageName Le nom de la page actuelle ('character' ou 'gestion_personnage').
  */
-export function startAuthListener() {
-    onAuthStateChanged(auth, (user) => {
+export function startAuthListener(pageName) {
+    onAuthStateChanged(auth, async (user) => {
         userId = user ? user.uid : null;
         
         if (!user) {
-            // L'utilisateur n'est pas connecté. On le redirige vers la page de connexion
-            // si la page actuelle est une page protégée.
-            const protectedPages = ['world_map.html', 'gestion_personnage.html', 'quests.html'];
+            // L'utilisateur n'est pas connecté.
+            const protectedPages = ['world_map.html', 'gestion_personnage.html', 'quests.html', 'character.html'];
             const currentPage = window.location.pathname.split('/').pop();
             if (protectedPages.includes(currentPage)) {
                 window.location.href = "login.html";
             }
-            // Mettre à jour l'interface pour un état déconnecté
-            updateUIBasedOnPage(null);
+            updateUIBasedOnPage(null); // Gère l'UI si l'utilisateur est déconnecté
         } else {
-            // L'utilisateur est connecté. On écoute les données du personnage.
-            const characterRef = getCharacterRef(userId);
-            onSnapshot(characterRef, (docSnap) => {
-                const characterData = docSnap.exists() ? docSnap.data() : null;
-                const char = characterData ? new Character(
-                    characterData.name, characterData.playerClass, characterData.level, characterData.xp, characterData.gold,
-                    characterData.stats, characterData.quests, characterData.inventory, characterData.equipment,
-                    characterData.abilities, characterData.hp, characterData.maxHp, characterData.mana, characterData.maxMana,
-                    characterData.safePlaceLocation, characterData.journal
-                ) : null;
-                if (char) {
-                    char.statPoints = characterData.statPoints;
-                    recalculateDerivedStats(char);
+            // L'utilisateur est connecté.
+            if (pageName === 'character') {
+                // Sur la page de création, on vérifie si un personnage existe déjà.
+                const characterRef = getCharacterRef(userId);
+                const docSnap = await getDoc(characterRef);
+                if (docSnap.exists()) {
+                    window.location.href = "gestion_personnage.html";
+                } else {
+                    showCreationUI(); // Affiche le formulaire de création
                 }
-                setPlayer(char);
-                updateUIBasedOnPage(char);
-            }, (error) => {
-                console.error("Erreur de synchronisation en temps réel:", error);
-                showNotification("Erreur de synchronisation des données.", 'error');
-                setPlayer(null);
-                updateUIBasedOnPage(null);
-            });
+            } else if (pageName === 'gestion_personnage') {
+                // Sur la page de gestion, on écoute les données du personnage.
+                const characterRef = getCharacterRef(userId);
+                onSnapshot(characterRef, (docSnap) => {
+                    const characterData = docSnap.exists() ? docSnap.data() : null;
+                    const char = characterData ? new Character(
+                        characterData.name, characterData.playerClass, characterData.level, characterData.xp, characterData.gold,
+                        characterData.stats, characterData.quests, characterData.inventory, characterData.equipment,
+                        characterData.abilities, characterData.hp, characterData.maxHp, characterData.mana, characterData.maxMana,
+                        characterData.safePlaceLocation, characterData.journal
+                    ) : null;
+                    if (char) {
+                        char.statPoints = characterData.statPoints;
+                        recalculateDerivedStats(char);
+                    }
+                    setPlayer(char);
+                    updateUIBasedOnPage(char); // Met à jour l'UI avec ou sans personnage
+                }, (error) => {
+                    console.error("Erreur de synchronisation en temps réel:", error);
+                    showNotification("Erreur de synchronisation des données.", 'error');
+                    setPlayer(null);
+                    updateUIBasedOnPage(null);
+                });
+            }
         }
     });
 }
