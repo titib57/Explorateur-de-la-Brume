@@ -210,18 +210,4 @@ export function updateUIBasedOnPage(character) {
         default:
             console.warn("Mise à jour de l'UI non définie pour cette page.");
     }
-}
-
-// =========================================================================
-// Exports publics
-// =========================================================================
-
-export {
-    renderCharacter,
-    showNoCharacterView,
-    showCharacterExistsView,
-    showCreationUI,
-    updateJournalDisplay,
-    renderQuestsPage,
-    // La fonction updateUIBasedOnPage est déjà exportée ci-dessus, donc on la retire d'ici.
 };
