@@ -5,7 +5,7 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { Character, setPlayer, recalculateDerivedStats, createCharacterData } from './state.js';
 import { showNotification } from './notifications.js';
-import { updateUIBasedOnPage, showCreationUI, showNoCharacterView } from '../modules/ui.js';
+import { updateUIBasedOnPage, showCreationUI, showCharacterExistsView } from '../modules/ui.js';
 
 export let userId = null;
 
@@ -30,7 +30,6 @@ export async function saveCharacterData(playerData) {
         return;
     }
     const dataToSave = {
-        // ... (votre code pour `dataToSave` reste le même) ...
         name: playerData.name || 'Unknown',
         playerClass: playerData.playerClass || 'Adventurer',
         level: playerData.level || 1,
@@ -109,20 +108,17 @@ export function startAuthListener(pageName) {
             if (protectedPages.includes(currentPage)) {
                 window.location.href = "login.html";
             }
-            updateUIBasedOnPage(null); // Gère l'UI si l'utilisateur est déconnecté
         } else {
             // L'utilisateur est connecté.
             if (pageName === 'character') {
-                // Sur la page de création, on vérifie si un personnage existe déjà.
                 const characterRef = getCharacterRef(userId);
                 const docSnap = await getDoc(characterRef);
                 if (docSnap.exists()) {
                     window.location.href = "gestion_personnage.html";
                 } else {
-                    showCreationUI(); // Affiche le formulaire de création
+                    showCreationUI();
                 }
             } else if (pageName === 'gestion_personnage') {
-                // Sur la page de gestion, on écoute les données du personnage.
                 const characterRef = getCharacterRef(userId);
                 onSnapshot(characterRef, (docSnap) => {
                     const characterData = docSnap.exists() ? docSnap.data() : null;
@@ -132,17 +128,16 @@ export function startAuthListener(pageName) {
                         characterData.abilities, characterData.hp, characterData.maxHp, characterData.mana, characterData.maxMana,
                         characterData.safePlaceLocation, characterData.journal
                     ) : null;
-                    if (char) {
-                        char.statPoints = characterData.statPoints;
-                        recalculateDerivedStats(char);
-                    }
+
                     setPlayer(char);
-                    updateUIBasedOnPage(char); // Met à jour l'UI avec ou sans personnage
+                    if (char) {
+                        updateUIBasedOnPage(char); // L'UI est mise à jour une fois le personnage chargé
+                    } else {
+                        window.location.href = "character.html"; // Redirection si le personnage a été supprimé
+                    }
                 }, (error) => {
                     console.error("Erreur de synchronisation en temps réel:", error);
                     showNotification("Erreur de synchronisation des données.", 'error');
-                    setPlayer(null);
-                    updateUIBasedOnPage(null);
                 });
             }
         }

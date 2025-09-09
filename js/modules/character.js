@@ -7,29 +7,42 @@ import { classBases } from '../data/characters.js';
 
 export class Character {
     constructor(data) {
+        // Initialisation de toutes les propriétés du personnage.
         this.name = data.name;
         this.playerClass = data.playerClass;
+        this.age = data.age || 20;
+        this.height = data.height || 175;
+        this.weight = data.weight || 70;
         this.level = data.level || 1;
         this.xp = data.xp || 0;
-        this.xpToNextLevel = this.level * 100;
+        this.xpToNextLevel = data.xpToNextLevel || this.level * 100;
         this.gold = data.gold || 100;
         this.stats = data.stats || { strength: 1, intelligence: 1, speed: 1, dexterity: 1 };
         this.quests = data.quests || { current: null, completed: {} };
         this.inventory = data.inventory || {};
         this.equipment = data.equipment || {};
         this.abilities = data.abilities || [];
-        this.hp = data.hp || 0;
-        this.maxHp = data.maxHp || 0;
-        this.mana = data.mana || 0;
-        this.maxMana = data.maxMana || 0;
+        // Points de vie et de mana
+        this.maxHp = data.maxHp || 100 + (this.stats.strength * 10);
+        this.hp = data.hp || this.maxHp;
+        this.maxMana = data.maxMana || 50 + (this.stats.intelligence * 10);
+        this.mana = data.mana || this.maxMana;
+        
         this.statPoints = data.statPoints || 5;
         this.safePlaceLocation = data.safePlaceLocation || null;
         this.journal = data.journal || [];
-        this.age = data.age;
-        this.height = data.height;
-        this.weight = data.weight;
+        this.createdAt = data.createdAt || new Date().toISOString();
+        this.lastPlayed = data.lastPlayed || new Date().toISOString();
+
+        // Statistiques de combat calculées (mises à jour dans une méthode dédiée)
+        this.attackDamage = 0;
+        this.defense = 0;
+        
+        // Appeler la méthode de recalcul pour initialiser les stats dérivées
+        this.recalculateDerivedStats();
     }
 
+    // Méthodes inchangées
     addXp(amount) {
         this.xp += amount;
     }
@@ -39,6 +52,7 @@ export class Character {
         this.xp -= this.xpToNextLevel;
         this.xpToNextLevel = this.level * 100;
         this.statPoints += 3;
+        this.recalculateDerivedStats();
     }
 
     addItem(item) {
@@ -71,7 +85,7 @@ export class Character {
             this.quests.current = null;
         }
     }
-    
+
     addToJournal(message) {
         this.journal.unshift({
             timestamp: Date.now(),
@@ -83,9 +97,11 @@ export class Character {
     }
 
     recalculateDerivedStats() {
+        // Recalcul des points de vie et de mana maximum
         const newMaxHp = 100 + (this.stats.strength * 10);
         const newMaxMana = 50 + (this.stats.intelligence * 10);
 
+        // Ajustement des points de vie/mana actuels
         if (this.maxHp > 0) {
             this.hp = Math.floor(this.hp * (newMaxHp / this.maxHp));
         } else {
@@ -105,6 +121,7 @@ export class Character {
         this.attackDamage = (this.stats.strength * 0.8) + (weaponData ? weaponData.attackDamage || 0 : 0);
         this.defense = (this.stats.strength * 0.5) + (armorData ? armorData.defense || 0 : 0);
 
+        // S'assurer que les valeurs actuelles ne dépassent pas les maximums
         this.hp = Math.min(this.hp, this.maxHp);
         this.mana = Math.min(this.mana, this.maxMana);
     }
@@ -112,18 +129,22 @@ export class Character {
 
 /**
  * Crée un nouvel objet de données de personnage avec des statistiques de base.
- * @param {object} formData Les données du formulaire de création de personnage.
+ * @param {string} name Le nom du personnage.
+ * @param {string} charClass La classe du personnage.
+ * @param {number} age L'âge du personnage.
+ * @param {number} height La taille du personnage en cm.
+ * @param {number} weight Le poids du personnage en kg.
  * @returns {object} Un nouvel objet de données de personnage.
  */
-export function createNewCharacterData(formData) {
-    const baseStats = classBases[formData.class] ? classBases[formData.class].stats : { strength: 1, intelligence: 1, speed: 1, dexterity: 1 };
+export function createCharacterData(name, charClass, age, height, weight) {
+    const baseStats = classBases[charClass] ? classBases[charClass].stats : { strength: 1, intelligence: 1, speed: 1, dexterity: 1 };
     
-    return {
-        name: formData.name,
-        age: parseInt(formData.age),
-        height: parseInt(formData.height),
-        weight: parseInt(formData.weight),
-        playerClass: formData.class || "Adventurer",
+    const initialCharacter = {
+        name,
+        playerClass: charClass,
+        age,
+        height,
+        weight,
         level: 1,
         xp: 0,
         xpToNextLevel: 100,
@@ -136,14 +157,20 @@ export function createNewCharacterData(formData) {
         inventory: {},
         equipment: {},
         abilities: [],
-        hp: 0,
-        maxHp: 0,
-        mana: 0,
-        maxMana: 0,
         statPoints: 5,
         safePlaceLocation: null,
         journal: [],
         createdAt: new Date().toISOString(),
         lastPlayed: new Date().toISOString()
     };
+
+    // Calcul des HP et MP initiaux
+    const initialMaxHp = 100 + (initialCharacter.stats.strength * 10);
+    const initialMaxMana = 50 + (initialCharacter.stats.intelligence * 10);
+    initialCharacter.maxHp = initialMaxHp;
+    initialCharacter.hp = initialMaxHp; // Les HP sont à max au départ
+    initialCharacter.maxMana = initialMaxMana;
+    initialCharacter.mana = initialMaxMana; // Le mana est à max au départ
+
+    return initialCharacter;
 }
