@@ -3,7 +3,7 @@
 import { auth, db } from './firebase_config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import { Character, setPlayer, recalculateDerivedStats, createCharacterData } from './state.js';
+import { Character, setPlayer, createCharacterData } from './state.js';
 import { showNotification } from './notifications.js';
 import { updateUIBasedOnPage, showCreationUI, showCharacterExistsView } from '../modules/ui.js';
 
@@ -100,17 +100,17 @@ export async function deleteCharacter() {
 export function startAuthListener(pageName) {
     onAuthStateChanged(auth, async (user) => {
         userId = user ? user.uid : null;
-        
+        const currentPage = window.location.pathname.split('/').pop();
+
         if (!user) {
             // L'utilisateur n'est pas connecté.
             const protectedPages = ['world_map.html', 'gestion_personnage.html', 'quests.html', 'character.html'];
-            const currentPage = window.location.pathname.split('/').pop();
             if (protectedPages.includes(currentPage)) {
                 window.location.href = "login.html";
             }
         } else {
             // L'utilisateur est connecté.
-            if (pageName === 'character') {
+            if (pageName === 'character' && currentPage === 'character.html') {
                 const characterRef = getCharacterRef(userId);
                 const docSnap = await getDoc(characterRef);
                 if (docSnap.exists()) {
@@ -118,7 +118,7 @@ export function startAuthListener(pageName) {
                 } else {
                     showCreationUI();
                 }
-            } else if (pageName === 'gestion_personnage') {
+            } else if (pageName === 'gestion_personnage' && currentPage === 'gestion_personnage.html') {
                 const characterRef = getCharacterRef(userId);
                 onSnapshot(characterRef, (docSnap) => {
                     const characterData = docSnap.exists() ? docSnap.data() : null;
@@ -128,12 +128,11 @@ export function startAuthListener(pageName) {
                         characterData.abilities, characterData.hp, characterData.maxHp, characterData.mana, characterData.maxMana,
                         characterData.safePlaceLocation, characterData.journal
                     ) : null;
-
                     setPlayer(char);
                     if (char) {
-                        updateUIBasedOnPage(char); // L'UI est mise à jour une fois le personnage chargé
+                        updateUIBasedOnPage(char);
                     } else {
-                        window.location.href = "character.html"; // Redirection si le personnage a été supprimé
+                        window.location.href = "character.html";
                     }
                 }, (error) => {
                     console.error("Erreur de synchronisation en temps réel:", error);
