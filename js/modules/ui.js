@@ -214,5 +214,4 @@ export {
     showCreationUI,
     updateJournalDisplay,
     renderQuestsPage,
-    updateUIBasedOnPage
 };
