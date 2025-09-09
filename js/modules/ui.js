@@ -103,9 +103,12 @@ export function renderCharacter(character) {
 export function showCreationUI() {
     const loadingMessageContainer = getElement('loading-message-container');
     const noCharacterSection = getElement('no-character-section');
+    const characterExistsSection = getElement('character-exists-section');
 
     if (loadingMessageContainer) loadingMessageContainer.classList.add('hidden');
     if (noCharacterSection) noCharacterSection.classList.remove('hidden');
+    // S'assurer que la section "personnage existant" est bien cachée
+    if (characterExistsSection) characterExistsSection.classList.add('hidden');
 }
 
 /**
@@ -123,20 +126,26 @@ export function showNoCharacterView() {
 
 /**
  * Affiche l'interface pour un personnage existant (sur la page de création).
+ * La section "Créer un personnage" est cachée, et la section "Personnage existant" est affichée.
  * @param {object} character Les données du personnage existant.
  */
 export function showCharacterExistsView(character) {
     const loadingMessageContainer = getElement('loading-message-container');
     const noCharacterSection = getElement('no-character-section');
     const characterExistsSection = getElement('character-exists-section');
+    const existingCharacterDisplay = getElement('existing-character-display');
 
     if (loadingMessageContainer) loadingMessageContainer.classList.add('hidden');
     if (noCharacterSection) noCharacterSection.classList.add('hidden');
     if (characterExistsSection) characterExistsSection.classList.remove('hidden');
 
-    const existingCharacterDisplay = getElement('existing-character-display');
-    if (existingCharacterDisplay) {
-        existingCharacterDisplay.innerHTML = `<div class="character-card"><h3>${character.name}</h3><p>Niveau : ${character.level}</p><p>Points de vie : ${character.hp}</p><p>Points de magie : ${character.mana}</p></div>`;
+    if (existingCharacterDisplay && character) {
+        existingCharacterDisplay.innerHTML = `<div class="character-card">
+            <h3>${character.name}</h3>
+            <p>Niveau : ${character.level}</p>
+            <p>Points de vie : ${character.hp}</p>
+            <p>Points de magie : ${character.mana}</p>
+        </div>`;
     }
 }
 
@@ -202,3 +211,17 @@ export function updateUIBasedOnPage(character) {
             console.warn("Mise à jour de l'UI non définie pour cette page.");
     }
 }
+
+// =========================================================================
+// Exports publics
+// =========================================================================
+
+export {
+    renderCharacter,
+    showNoCharacterView,
+    showCharacterExistsView,
+    showCreationUI,
+    updateJournalDisplay,
+    renderQuestsPage,
+    // La fonction updateUIBasedOnPage est déjà exportée ci-dessus, donc on la retire d'ici.
+};
