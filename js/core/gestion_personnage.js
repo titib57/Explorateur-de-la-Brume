@@ -1,4 +1,4 @@
-// Fichier : js/gestionPersonnageEntry.js
+// Fichier : js/gestion_personnage.js
 // Ce script agit comme le point d'entrée pour la page de gestion du personnage.
 
 import { startAuthListener, deleteCharacter, handleSignOut } from './authManager.js';
