@@ -1,82 +1,91 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Combat-Explorateur de la Brume</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donjon - Explorateur de la Brume</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <header class="game-header">
-        <h1>Explorateur de la Brume</h1>
-        <nav>
-            <a id="world-map-link" href="world_map.html">Carte du monde</a>
-            <a href="gestion_personnage.html">Personnage</a>
-            <a href="#" id="logout-link" class="button">Se déconnecter</a>
-        </nav>
-    </header>
+    <header class="game-header">
+        <h1>Explorateur de la Brume</h1>
+        <nav>
+            <a id="world-map-link" href="world_map.html">Carte du monde</a>
+            <a href="gestion_personnage.html">Personnage</a>
+            <a href="#" id="logout-link" class="button">Se déconnecter</a>
+        </nav>
+    </header>
 
-    <main class="game-container">
-        <h2>Combat</h2>
-        <div id="battle-interface">
-            <div id="player-stats">
-                <h3 id="player-name"></h3>
-                <p>PV: <span id="player-hp"></span> / <span id="player-max-hp"></span></p>
-                <div class="progress-bar-container">
-                    <div id="player-hp-bar" class="progress-bar hp-bar"></div>
-                </div>
-                <p>Mana: <span id="player-mana"></span> / <span id="player-max-mana"></span></p>
-                <div class="progress-bar-container">
-                    <div id="player-mana-bar" class="progress-bar mana-bar"></div>
-                </div>
-                <p>Arme: <span id="player-weapon-display"></span></p>
-                <p>Armure: <span id="player-armor-display"></span></p>
-            </div>
+    <main class="game-container">
+        <h2 id="dungeon-name"></h2>
 
-            <div id="monster-stats">
-                <h3 id="monster-name"></h3>
-                <p>PV: <span id="monster-hp"></span> / <span id="monster-max-hp"></span></p>
-                <div class="progress-bar-container">
-                    <div id="monster-hp-bar" class="progress-bar hp-bar"></div>
-                </div>
-                <img id="monster-icon" src="" alt="Icone de monstre">
-            </div>
-            
-            <div id="battle-log" class="combat-log">
-                <h3>Journal de combat</h3>
-                <div id="combat-log"></div>
-            </div>
+                <div id="dungeon-narrative-interface">
+            <div id="narrative-text" class="narrative-box">
+                            </div>
+            
+            <div id="action-buttons">
+                            </div>
+        </div>
 
-            <div id="player-actions">
-                <div id="action-tabs">
-                    <button class="tab-button active" onclick="showActions('attack-tab')">Attaquer</button>
-                    <button class="tab-button" onclick="showActions('abilities-tab')">Compétences</button>
-                    <button class="tab-button" onclick="showActions('inventory-tab')">Inventaire</button>
-                </div>
-                
-                <div id="attack-tab" class="action-tab active">
-                    <button id="normal-attack-button" class="btn-primary">Attaque normale</button>
-                    <button id="flee-button" class="btn-flee">Fuir</button>
-                </div>
-                
-                <div id="abilities-tab" class="action-tab" style="display: none;">
-                    <div id="abilities-list"></div>
-                </div>
+                <div id="battle-interface" style="display: none;">
+            <div id="player-stats">
+                <h3 id="player-name"></h3>
+                <p>PV: <span id="player-hp"></span> / <span id="player-max-hp"></span></p>
+                <div class="progress-bar-container">
+                    <div id="player-hp-bar" class="progress-bar hp-bar"></div>
+                </div>
+                <p>Mana: <span id="player-mana"></span> / <span id="player-max-mana"></span></p>
+                <div class="progress-bar-container">
+                    <div id="player-mana-bar" class="progress-bar mana-bar"></div>
+                </div>
+                <p>Arme: <span id="player-weapon-display"></span></p>
+                <p>Armure: <span id="player-armor-display"></span></p>
+            </div>
 
-                <div id="inventory-tab" class="action-tab" style="display: none;">
-                    <div id="consumables-list"></div>
-                </div>
-            </div>
-        </div>
-    </main>
+            <div id="monster-stats">
+                <h3 id="monster-name"></h3>
+                <p>PV: <span id="monster-hp"></span> / <span id="monster-max-hp"></span></p>
+                <div class="progress-bar-container">
+                    <div id="monster-hp-bar" class="progress-bar hp-bar"></div>
+                </div>
+                <img id="monster-icon" src="" alt="Icone de monstre">
+            </div>
+            
+            <div id="battle-log" class="combat-log">
+                <h3>Journal de combat</h3>
+                <div id="combat-log"></div>
+            </div>
 
-    <footer class="game-footer">
-        <p>© 2025 Explorateur de la Brume. Tous droits réservés.</p>
-    </footer>
+            <div id="player-actions">
+                <div id="action-tabs">
+                    <button class="tab-button active" onclick="showActions('attack-tab')">Attaquer</button>
+                    <button class="tab-button" onclick="showActions('abilities-tab')">Compétences</button>
+                    <button class="tab-button" onclick="showActions('inventory-tab')">Inventaire</button>
+                </div>
+                
+                <div id="attack-tab" class="action-tab active">
+                    <button id="normal-attack-button" class="btn-primary">Attaque normale</button>
+                    <button id="flee-button" class="btn-flee">Fuir</button>
+                </div>
+                
+                <div id="abilities-tab" class="action-tab" style="display: none;">
+                    <div id="abilities-list"></div>
+                </div>
 
-    <div id="notification-container"></div>
-    <script type="module" src="./js/modules/battle.js"></script>
+                <div id="inventory-tab" class="action-tab" style="display: none;">
+                    <div id="consumables-list"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="game-footer">
+        <p>© 2025 Explorateur de la Brume. Tous droits réservés.</p>
+    </footer>
+
+    <div id="notification-container"></div>
+        <script type="module" src="./js/modules/dungeonController.js"></script>
 </body>
 </html>

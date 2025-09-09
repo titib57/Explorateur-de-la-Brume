@@ -6,7 +6,8 @@ import { showNotification } from "./notifications.js";
 import { saveCharacterData } from "./authManager.js";
 import { updateQuestProgress } from "./gameEngine.js";
 import { getSelectedDungeon, getPlayerMarkerPosition, isPlayerInDungeonRange } from "../modules/map.js";
-import { createDungeonData } from "./dungeonGenerator.js"
+import { createDungeonData } from "./dungeonGenerator.js";
+import { initializeDungeonNarrator } from "./dungeonNarrator.js"; // Import du nouveau module de narration
 
 /**
  * Gère le clic sur le bouton "Définir le lieu sûr".
@@ -47,10 +48,10 @@ export async function handleSetSafePlaceClick() {
  * Gère le clic sur le bouton "Entrer dans le donjon".
  */
 export function handleStartBattleClick() {
-    const selectedDungeon = getSelectedDungeon();
+    const selectedDungeonPOI = getSelectedDungeon();
     const playerPosition = getPlayerMarkerPosition();
 
-    if (!selectedDungeon) {
+    if (!selectedDungeonPOI) {
         showNotification("Veuillez sélectionner un donjon pour y entrer.", 'warning');
         return;
     }
@@ -60,7 +61,18 @@ export function handleStartBattleClick() {
         return;
     }
 
-    // La logique de génération et de redirection est déplacée ici.
-    generateDungeon(selectedDungeon.isTutorial ? 'tutoriel' : { lat: selectedDungeon.location.lat, lng: selectedDungeon.location.lng });
+    // 1. On crée les données complètes du donjon en utilisant le POI sélectionné.
+    // Il faut s'assurer que `player.level` est bien accessible (par exemple, depuis un objet d'état global).
+    const dungeonData = createDungeonData(selectedDungeonPOI, player.level);
+
+    if (!dungeonData) {
+        showNotification("Erreur lors de la préparation du donjon.", 'error');
+        return;
+    }
+
+    // 2. On initialise l'expérience narrative du donjon avec les données créées.
+    initializeDungeonNarrator(dungeonData);
+
+    // 3. On redirige le joueur vers la page d'exploration/combat.
     window.location.href = 'battle.html';
 }
