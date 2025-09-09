@@ -1,15 +1,31 @@
 // Fichier : js/core/authManager.js
-// Ce module gère l'authentification et la synchronisation des données avec Firestore.
 
 import { auth, db } from './firebase_config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { Character, setPlayer, recalculateDerivedStats, createCharacterData } from './state.js';
 import { showNotification } from './notifications.js';
-import { initGame } from './gameEngine.js';
-import { updateUIBasedOnPage, showNoCharacterView, showCharacterExistsView } from '../modules/ui.js';
+import { updateUIBasedOnPage } from '../modules/ui.js';
 
 export let userId = null;
+
+// Référence à la collection de personnages
+function getCharacterRef(userUID) {
+    return doc(db, "artifacts", "default-app-id", "users", userUID, "characters", userUID);
+}
+
+/**
+ * Gère la déconnexion de l'utilisateur.
+ */
+export async function handleSignOut() {
+    try {
+        await signOut(auth);
+        window.location.href = "login.html";
+    } catch (error) {
+        console.error("Erreur de déconnexion :", error);
+        showNotification("Erreur de déconnexion. Veuillez réessayer.", 'error');
+    }
+}
 
 /**
  * Sauvegarde les données du personnage dans Firestore.
@@ -18,6 +34,7 @@ export let userId = null;
 export async function saveCharacterData(playerData) {
     if (!userId) {
         console.error("Erreur : Utilisateur non authentifié.");
+        showNotification("Erreur : Utilisateur non authentifié.", "error");
         return;
     }
     const dataToSave = {
@@ -40,44 +57,13 @@ export async function saveCharacterData(playerData) {
         journal: playerData.journal || []
     };
     try {
-        const charRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
+        const charRef = getCharacterRef(userId);
         await setDoc(charRef, dataToSave, { merge: true });
         console.log("Personnage sauvegardé sur Firestore !");
+        showNotification("Sauvegarde réussie !", 'success');
     } catch (error) {
         console.error("Erreur lors de la sauvegarde du personnage sur Firestore : ", error);
         showNotification("Erreur lors de la sauvegarde.", 'error');
-    }
-}
-
-/**
- * Charge l'objet joueur depuis Firestore.
- * @returns {Promise<object|null>} L'objet joueur ou null si non trouvé.
- */
-export async function loadCharacter(user) {
-    if (!user || !user.uid) return null;
-    try {
-        const charRef = doc(db, "artifacts", "default-app-id", "users", user.uid, "characters", user.uid);
-        const characterSnap = await getDoc(charRef);
-        if (characterSnap.exists()) {
-            const savedPlayer = characterSnap.data();
-            const char = new Character(
-                savedPlayer.name, savedPlayer.playerClass, savedPlayer.level, savedPlayer.xp, savedPlayer.gold,
-                savedPlayer.stats, savedPlayer.quests, savedPlayer.inventory, savedPlayer.equipment,
-                savedPlayer.abilities, savedPlayer.hp, savedPlayer.maxHp, savedPlayer.mana, savedPlayer.maxMana,
-                savedPlayer.safePlaceLocation, savedPlayer.journal
-            );
-            char.statPoints = savedPlayer.statPoints;
-            recalculateDerivedStats(char);
-            setPlayer(char);
-            console.log("Personnage chargé depuis Firestore !");
-            return char;
-        } else {
-            console.log("Aucun document de personnage trouvé pour l'utilisateur.");
-            return null;
-        }
-    } catch (error) {
-        console.error("Erreur lors du chargement du personnage depuis Firestore : ", error);
-        return null;
     }
 }
 
@@ -87,7 +73,8 @@ export async function loadCharacter(user) {
  * @param {string} charClass La classe du personnage.
  */
 export async function createNewCharacter(name, charClass) {
-    if (!userId) {
+    const user = auth.currentUser;
+    if (!user) {
         showNotification("Veuillez vous connecter pour créer un personnage.", "error");
         return;
     }
@@ -95,7 +82,6 @@ export async function createNewCharacter(name, charClass) {
     try {
         await saveCharacterData(newCharacterData);
         showNotification("Personnage créé avec succès !", "success");
-        setTimeout(() => { window.location.href = "gestion_personnage.html"; }, 1500);
     } catch (error) {
         console.error("Erreur lors de la création du personnage :", error);
         showNotification("Erreur lors de la création. Veuillez réessayer.", "error");
@@ -110,11 +96,10 @@ export async function deleteCharacter() {
         showNotification("Vous devez être connecté pour supprimer un personnage.", "error");
         return;
     }
-    const characterRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
+    const characterRef = getCharacterRef(userId);
     try {
         await deleteDoc(characterRef);
         showNotification("Personnage supprimé avec succès !", "info");
-        setTimeout(() => { window.location.href = "character.html"; }, 1500);
     } catch (error) {
         console.error("Erreur lors de la suppression du personnage :", error);
         showNotification("Erreur lors de la suppression. Veuillez réessayer.", "error");
@@ -126,52 +111,41 @@ export async function deleteCharacter() {
  */
 export function startAuthListener() {
     onAuthStateChanged(auth, (user) => {
-        if (user) {
-            userId = user.uid;
-            const characterRef = doc(db, "artifacts", "default-app-id", "users", userId, "characters", userId);
-
-            onSnapshot(characterRef, (docSnap) => {
-                const characterData = docSnap.exists() ? docSnap.data() : null;
-                if (characterData) {
-                    const char = new Character(
-                        characterData.name, characterData.playerClass, characterData.level, characterData.xp, characterData.gold,
-                        characterData.stats, characterData.quests, characterData.inventory, characterData.equipment,
-                        characterData.abilities, characterData.hp, characterData.maxHp, characterData.mana, characterData.maxMana,
-                        characterData.safePlaceLocation, characterData.journal
-                    );
-                    char.statPoints = characterData.statPoints;
-                    recalculateDerivedStats(char);
-                    setPlayer(char);
-                    updateUIBasedOnPage(char); // Appel centralisé pour la mise à jour de l'UI
-                } else {
-                    setPlayer(null);
-                    updateUIBasedOnPage(null); // Gère l'affichage "pas de personnage"
-                }
-            }, (error) => {
-                console.error("Erreur de synchronisation en temps réel:", error);
-                showNotification("Erreur de synchronisation des données.", 'error');
-            });
-        } else {
-            userId = null;
-            setPlayer(null);
-            updateUIBasedOnPage(null);
+        userId = user ? user.uid : null;
+        
+        if (!user) {
+            // L'utilisateur n'est pas connecté. On le redirige vers la page de connexion
+            // si la page actuelle est une page protégée.
             const protectedPages = ['world_map.html', 'gestion_personnage.html', 'quests.html'];
             const currentPage = window.location.pathname.split('/').pop();
             if (protectedPages.includes(currentPage)) {
                 window.location.href = "login.html";
             }
+            // Mettre à jour l'interface pour un état déconnecté
+            updateUIBasedOnPage(null);
+        } else {
+            // L'utilisateur est connecté. On écoute les données du personnage.
+            const characterRef = getCharacterRef(userId);
+            onSnapshot(characterRef, (docSnap) => {
+                const characterData = docSnap.exists() ? docSnap.data() : null;
+                const char = characterData ? new Character(
+                    characterData.name, characterData.playerClass, characterData.level, characterData.xp, characterData.gold,
+                    characterData.stats, characterData.quests, characterData.inventory, characterData.equipment,
+                    characterData.abilities, characterData.hp, characterData.maxHp, characterData.mana, characterData.maxMana,
+                    characterData.safePlaceLocation, characterData.journal
+                ) : null;
+                if (char) {
+                    char.statPoints = characterData.statPoints;
+                    recalculateDerivedStats(char);
+                }
+                setPlayer(char);
+                updateUIBasedOnPage(char);
+            }, (error) => {
+                console.error("Erreur de synchronisation en temps réel:", error);
+                showNotification("Erreur de synchronisation des données.", 'error');
+                setPlayer(null);
+                updateUIBasedOnPage(null);
+            });
         }
-    });
-}
-
-/**
- * Gère la déconnexion de l'utilisateur.
- */
-export function handleSignOut() {
-    signOut(auth).then(() => {
-        window.location.href = "login.html";
-    }).catch((error) => {
-        console.error("Erreur de déconnexion :", error);
-        showNotification("Erreur de déconnexion. Veuillez réessayer.", 'error');
     });
 }
