@@ -1,7 +1,7 @@
 // Fichier : js/core/state.js
 // Ce module gère l'état global du jeu et l'objet joueur.
 
-import { itemsData } from './gameData.js';
+import { itemsData } from '../data/items.js';
 import { questsData } from './questsData.js';
 
 // Objets d'état globaux

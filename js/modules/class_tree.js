@@ -1,7 +1,8 @@
 ﻿// Fichier : js/modules/class_tree.js
 
 import { player, savePlayer, loadCharacter } from '../core/state.js';
-import { classBases, abilitiesData } from '../core/gameData.js';
+import { abilitiesData } from '../data/abilities.js';
+import { classBases } from '../data/characters.js';
 import { showNotification } from '../core/notifications.js';
 import { recalculateDerivedStats } from './character.js';
 

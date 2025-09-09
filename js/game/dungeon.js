@@ -5,7 +5,7 @@
 import { questsData } from '../data/questsData.js';
 import { dungeonTypes, pointsOfInterest } from '../data/gameData.js';
 import { showNotification } from '../core/notifications.js';
-import { createDungeonData } from './dungeonGenerator.js';
+import { createDungeonData } from '../core/dungeonGenerator.js';
 import { calculateDistance } from '../utils/geoUtils.js';
 
 // Importations de l'état central

@@ -2,7 +2,7 @@
 
 // Imports nécessaires pour le fonctionnement des transactions et de l'interface utilisateur
 import { player, updateStatsDisplay, recalculateDerivedStats } from '../core/state.js';
-import { itemsData } from '../core/gameData.js';
+import { itemsData } from '../data/items.js';
 import { showNotification } from '../core/notifications.js';
 
 // Imports Firebase

@@ -2,7 +2,8 @@
 // Définit la classe Character et ses méthodes.
 
 import { questsData } from '../core/questsData.js';
-import { itemsData, classBases } from '../core/gameData.js';
+import { itemsData } from '../data/items.js';
+import { classBases } from '../data/characters.js';
 
 export class Character {
     constructor(data) {

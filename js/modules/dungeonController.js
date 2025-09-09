@@ -3,7 +3,7 @@
 import { player } from "../core/state.js";
 import { showNotification } from "../core/notifications.js";
 import { initializeDungeonNarrator, advanceDungeonStage, getCurrentDungeonState, handleChoice } from "../core/dungeonNarrator.js";
-import { puzzlesData } from "../core/gameData.js";
+import { puzzlesData } from "../data/puzzleData.js";
 import { monstersData, bossesData } from "../data/monsters.js";
 
 import { createDungeonData } from "../core/dungeonGenerator.js";

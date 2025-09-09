@@ -7,7 +7,8 @@
 
 import { player } from "../core/state.js"; // Pour les PV du joueur, etc.
 import { showNotification } from "../core/notifications.js"; // Pour les retours visuels
-import { monstersData, puzzlesData } from '../core/gameData.js'; // Assurez-vous d'avoir des `puzzlesData`
+import { puzzlesData } from '../data/puzzleData.js'; // Assurez-vous d'avoir des `puzzlesData`
+import { monstersData } from '../data/monsters.js'; // Assurez-vous d'avoir des `puzzlesData`
 import { saveCharacterData } from "../core/authManager.js"; 
 
 /**
