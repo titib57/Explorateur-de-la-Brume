@@ -6,7 +6,8 @@ import { questsData } from '../core/questsData.js';
 import { player } from '../core/state.js';
 import { updateUIBasedOnPage } from './ui.js';
 import { updateQuestProgress } from '../core/gameEngine.js';
-import { handleStartBattleClick } from '../core/mapActions.js'; // Import de la fonction de mapActions.js
+// L'import de mapActions.js n'est plus nécessaire ici
+// car le listener d'événement sera déplacé ailleurs.
 
 // Définition des icônes personnalisées
 const playerIcon = L.icon({
@@ -29,11 +30,11 @@ let selectedDungeon = null;
 let dungeonMarkers;
 let lastKnownPosition = null;
 
-// Gère le clic sur le bouton "Entrer dans le donjon"
-const startBattleButton = document.getElementById('start-battle-button');
-if (startBattleButton) {
-    startBattleButton.addEventListener('click', handleStartBattleClick);
-}
+// LIGNE SUPPRIMÉE : Le listener est déplacé vers le point d'entrée de la page (worldMapEntry.js).
+// const startBattleButton = document.getElementById('start-battle-button');
+// if (startBattleButton) {
+//     startBattleButton.addEventListener('click', handleStartBattleClick);
+// }
 
 /**
  * Initialise la carte et la géolocalisation.
@@ -86,10 +87,6 @@ export function recenterMap() {
         showNotification("Votre position n'est pas encore connue.", "warning");
     }
 }
-
-// NOTE: La fonction startDungeonBattle() n'est plus nécessaire ici.
-// La logique a été déplacée vers mapActions.js.
-// C'est maintenant le bouton "start-battle-button" qui appelle directement mapActions.js
 
 /**
  * Met à jour la position du joueur sur la carte.
@@ -149,8 +146,7 @@ function loadDungeons(playerData, playerLatLng) {
     }
     
     // Le reste du code de chargement des donjons (API Overpass)
-    // Cette partie est très volumineuse, je l'ai donc omise pour la clarté.
-    // Elle sera exactement la même que dans votre ancien fichier.
+    // ...
 
     // Affiche le donjon du tutoriel si le lieu sûr est défini
     if (playerData.safePlaceLocation) {
@@ -159,7 +155,7 @@ function loadDungeons(playerData, playerLatLng) {
             name: 'Donjon du Tutoriel',
             location: playerData.safePlaceLocation,
             isTutorial: true,
-            dungeonType: 'underground_cave', // Ajout du type de donjon
+            dungeonType: 'underground_cave',
         };
         const tutorialMarker = L.marker(tutorialDungeon.location, { icon: dungeonIcon }).addTo(dungeonMarkers);
         tutorialMarker.bindTooltip(tutorialDungeon.name, { permanent: true, direction: "top" });
