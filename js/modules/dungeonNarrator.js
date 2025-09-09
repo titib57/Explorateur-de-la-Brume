@@ -8,6 +8,7 @@
 import { player } from "./state.js"; // Pour les PV du joueur, etc.
 import { showNotification } from "./notifications.js"; // Pour les retours visuels
 import { monstersData, puzzlesData } from './gameData.js'; // Assurez-vous d'avoir des `puzzlesData`
+import { saveCharacterData } from "../core/authManager.js"; 
 
 /**
  * Représente l'état actuel de l'exploration du donjon.

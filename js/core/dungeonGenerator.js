@@ -1,6 +1,6 @@
 // Fichier : js/core/dungeonGenerator.js (Mise à jour)
 
-import { dungeonTypes } from '../data/dungeon.js';
+import { dungeonTypes } from '../data/dungeons.js';
 import { monstersData, bossesData } from './gameData.js';
 import { calculateDistance } from '../utils/geoUtils.js';
 

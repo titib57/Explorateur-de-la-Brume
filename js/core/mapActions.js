@@ -7,7 +7,7 @@ import { saveCharacterData } from "./authManager.js";
 import { updateQuestProgress } from "./gameEngine.js";
 import { getSelectedDungeon, getPlayerMarkerPosition, isPlayerInDungeonRange } from "../modules/map.js";
 import { createDungeonData } from "./dungeonGenerator.js";
-import { initializeDungeonNarrator } from "./dungeonNarrator.js"; // Import du nouveau module de narration
+import { initializeDungeonNarrator } from "../modules/dungeonNarrator.js"; // Import du nouveau module de narration
 
 /**
  * Gère le clic sur le bouton "Définir le lieu sûr".
